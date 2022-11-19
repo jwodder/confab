@@ -42,7 +42,7 @@ async fn process(socket: TcpStream, addr: SocketAddr) {
         match r {
             Ok(line) => {
                 if let Err(e) = frame.send(format!("You sent: {line:?}")).await {
-                    eprintln!("[{addr}] Error sending message: {e:?}");
+                    eprintln!("[{addr}] Error sending message: {e}");
                     break;
                 }
                 if line == "quit" {
