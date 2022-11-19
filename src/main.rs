@@ -3,8 +3,8 @@ use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use rustyline_async::{Readline, ReadlineError};
 use std::io::Write;
-use tokio_util::codec::{Framed, LinesCodec};
 use tokio::net::TcpStream;
+use tokio_util::codec::{Framed, LinesCodec};
 
 #[derive(Parser)]
 struct Arguments {
@@ -15,12 +15,12 @@ struct Arguments {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
-    println!("Connecting ...");
+    println!("* Connecting ...");
     let conn = TcpStream::connect((args.host, args.port))
         .await
         .context("Error connecting to server")?;
     println!(
-        "Connected to {}",
+        "* Connected to {}",
         conn.peer_addr().context("Error getting peer address")?
     );
     let mut frame = Framed::new(conn, LinesCodec::new_with_max_length(65535));
@@ -45,20 +45,14 @@ async fn main() -> anyhow::Result<()> {
                     writeln!(stdout, "> {line}")?;
                     rl.add_history_entry(line);
                 }
-                Err(ReadlineError::Eof) => {
-                    //writeln!(stdout, "<EOF>")?;
-                    break;
-                }
-                Err(ReadlineError::Interrupted) => {
-                    //writeln!(stdout, "<Ctrl-C>")?;
-                    break;
-                }
+                Err(ReadlineError::Eof) | Err(ReadlineError::Interrupted) => break,
                 Err(e) => {
-                    writeln!(stdout, "Readline error: {e}")?;
+                    writeln!(stdout, "! Readline error: {e}")?;
                     break;
                 }
             }
         }
     }
+    println!("* Disconnected");
     Ok(())
 }
