@@ -74,6 +74,7 @@ async fn main() -> anyhow::Result<()> {
             }
         }
     }
-    println!("* Disconnected");
+    writeln!(stdout, "* Disconnected")?;
+    rl.flush()?;
     Ok(())
 }

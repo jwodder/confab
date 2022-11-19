@@ -92,9 +92,9 @@ checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
 
 [[package]]
 name = "crossterm"
-version = "0.24.0"
+version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab9f7409c70a38a56216480fba371ee460207dd8926ccf5b4160591759559170"
+checksum = "e64e6c0fbe2c17357405f7c758c1ef960fce08bdfb2c03d88d2a18d7e09c4b67"
 dependencies = [
  "bitflags",
  "crossterm_winapi",
@@ -571,9 +571,9 @@ dependencies = [
 
 [[package]]
 name = "rustyline-async"
-version = "0.2.6"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dabaf71f2f376f4bca6f5c19359b8b0c2e65ee8042c367bcec92d379fdd20d58"
+checksum = "00e1a02d2c727fac4c73a019de82183d990af0e13d6bed2e3a6f37a525ff591d"
 dependencies = [
  "crossterm",
  "futures",
