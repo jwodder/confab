@@ -1,0 +1,8 @@
+[package]
+name = "netlion"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rustyline-async = "0.2.6"
+tokio = { version = "1.22.0", features = ["rt", "rt-multi-thread", "macros", "net"] }
