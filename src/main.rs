@@ -35,11 +35,12 @@ async fn main() -> anyhow::Result<()> {
         let cx = tokio_native_tls::TlsConnector::from(
             native_tls::TlsConnector::new().context("Error creating TLS connector")?,
         );
-        Box::pin(
-            cx.connect(&args.host, conn)
-                .await
-                .context("Error establishing TLS connection")?,
-        )
+        let conn = cx
+            .connect(&args.host, conn)
+            .await
+            .context("Error establishing TLS connection")?;
+        println!("* TLS established");
+        Box::pin(conn)
     } else {
         Box::pin(conn)
     };
