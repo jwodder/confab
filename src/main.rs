@@ -35,7 +35,7 @@ async fn main() -> anyhow::Result<()> {
                     break;
                 }
                 None => {
-                    writeln!(stdout, "Remote disconnected")?;
+                    writeln!(stdout, "* Remote disconnected")?;
                     break;
                 }
             },
