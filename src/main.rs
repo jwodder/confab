@@ -51,26 +51,17 @@ async fn main() -> anyhow::Result<()> {
         tokio::select! {
             r = frame.next() => match r {
                 Some(Ok(msg)) => writeln!(stdout, "< {msg}")?,
-                Some(Err(e)) => {
-                    writeln!(stdout, "! {e}")?;
-                    break;
-                }
-                None => {
-                    writeln!(stdout, "* Remote disconnected")?;
-                    break;
-                }
+                Some(Err(e)) => return Err(e).context("Error reading from connection"),
+                None => break,
             },
-            cmd = rl.readline() => match cmd {
+            input = rl.readline() => match input {
                 Ok(line) => {
                     frame.send(&line).await.context("Error sending message")?;
                     writeln!(stdout, "> {line}")?;
                     rl.add_history_entry(line);
                 }
-                Err(ReadlineError::Eof) | Err(ReadlineError::Interrupted) => break,
-                Err(e) => {
-                    writeln!(stdout, "! Readline error: {e}")?;
-                    break;
-                }
+                Err(ReadlineError::Eof) | Err(ReadlineError::Interrupted) | Err(ReadlineError::Closed) => break,
+                Err(e) => return Err(e).context("Readline error"),
             }
         }
     }
