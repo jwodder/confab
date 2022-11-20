@@ -1,4 +1,6 @@
-use std::fmt::{Display, Result, Write};
+use std::borrow::Cow;
+use std::fmt::{self, Display, Write};
+use std::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct JsonStrMap {
@@ -38,7 +40,7 @@ impl Default for JsonStrMap {
     }
 }
 
-fn write_json_str<W: Write>(s: &str, writer: &mut W) -> Result {
+fn write_json_str<W: Write>(s: &str, writer: &mut W) -> fmt::Result {
     writer.write_char('"')?;
     for c in s.chars() {
         match c {
@@ -60,6 +62,78 @@ fn write_json_str<W: Write>(s: &str, writer: &mut W) -> Result {
     }
     writer.write_char('"')?;
     Ok(())
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub(crate) enum CharEncoding {
+    Utf8,
+    Utf8Latin1,
+    Latin1,
+}
+
+impl CharEncoding {
+    //pub(crate) fn is_utf8(&self) -> bool {
+    //    matches!(self, CharEncoding::Utf8 | CharEncoding::Utf8Latin1)
+    //}
+
+    pub(crate) fn encode<'a>(&'a self, s: &'a str) -> Cow<'a, [u8]> {
+        match self {
+            CharEncoding::Utf8 | CharEncoding::Utf8Latin1 => Cow::from(s.as_bytes()),
+            CharEncoding::Latin1 => Cow::from(
+                s.chars()
+                    .map(|c| u8::try_from(c).unwrap_or(0x3F))
+                    .collect::<Vec<_>>(),
+            ),
+        }
+    }
+
+    pub(crate) fn decode(&self, bs: Vec<u8>) -> String {
+        match self {
+            CharEncoding::Utf8 => String::from_utf8_lossy(&bs).into_owned(),
+            CharEncoding::Utf8Latin1 => match String::from_utf8(bs) {
+                Ok(s) => s,
+                Err(e) => decode_latin1(e.into_bytes()),
+            },
+            CharEncoding::Latin1 => decode_latin1(bs),
+        }
+    }
+}
+
+fn decode_latin1(bs: Vec<u8>) -> String {
+    bs.into_iter().map(char::from).collect()
+}
+
+impl FromStr for CharEncoding {
+    type Err = CharEncodingLookupError;
+
+    fn from_str(s: &str) -> Result<CharEncoding, CharEncodingLookupError> {
+        if s.eq_ignore_ascii_case("utf8") {
+            Ok(CharEncoding::Utf8)
+        } else if s.eq_ignore_ascii_case("utf8-latin1") {
+            Ok(CharEncoding::Utf8Latin1)
+        } else if s.eq_ignore_ascii_case("latin1") {
+            Ok(CharEncoding::Latin1)
+        } else {
+            Err(CharEncodingLookupError)
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct CharEncodingLookupError;
+
+impl Display for CharEncodingLookupError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid character encoding name")
+    }
+}
+
+impl std::error::Error for CharEncodingLookupError {}
+
+pub(crate) fn chomp(s: &str) -> &str {
+    let s = s.strip_suffix('\n').unwrap_or(s);
+    let s = s.strip_suffix('\r').unwrap_or(s);
+    s
 }
 
 #[cfg(test)]

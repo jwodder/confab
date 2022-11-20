@@ -1,4 +1,4 @@
-use crate::json::JsonStrMap;
+use crate::util::{chomp, JsonStrMap};
 use chrono::{DateTime, Local};
 use std::borrow::Cow;
 use std::net::SocketAddr;
@@ -110,8 +110,8 @@ impl Event {
             Event::ConnectFinish { peer, .. } => Cow::from(format!("Connected to {peer}")),
             Event::TlsStart { .. } => Cow::from("Initializing TLS ..."),
             Event::TlsFinish { .. } => Cow::from("TLS established"),
-            Event::Recv { data, .. } => Cow::from(data),
-            Event::Send { data, .. } => Cow::from(data),
+            Event::Recv { data, .. } => Cow::from(chomp(data)),
+            Event::Send { data, .. } => Cow::from(chomp(data)),
             Event::Disconnect { .. } => Cow::from("Disconnected"),
         }
     }
