@@ -176,4 +176,50 @@ mod test {
             .finish();
         assert_eq!(s, r#"{"key": "value", "apple": "banana"}"#);
     }
+
+    #[rstest]
+    #[case("foo", "foo")]
+    #[case("foo\n", "foo")]
+    #[case("foo\r", "foo")]
+    #[case("foo\r\n", "foo")]
+    #[case("foo\n\r", "foo\n")]
+    #[case("foo\n\n", "foo\n")]
+    #[case("foo\nbar", "foo\nbar")]
+    #[case("\nbar", "\nbar")]
+    fn test_chomp(#[case] s1: &str, #[case] s2: &str) {
+        assert_eq!(chomp(s1), s2);
+    }
+
+    #[test]
+    fn test_encode_latin1() {
+        let s = "Snowémon: ☃!";
+        assert_eq!(CharEncoding::Latin1.encode(s), &b"Snow\xE9mon: ?!"[..]);
+    }
+
+    #[test]
+    fn test_decode_latin1() {
+        let bs = b"Snow\xE9mon: \xE2\x98\x83!".to_vec();
+        assert_eq!(CharEncoding::Latin1.decode(bs), "Snowémon: â\u{98}\u{83}!");
+    }
+
+    #[test]
+    fn test_decode_utf8() {
+        let bs = b"Snow\xC3\xA9mon: \xE2\x98!".to_vec();
+        assert_eq!(CharEncoding::Utf8.decode(bs), "Snowémon: \u{fffd}!");
+    }
+
+    #[test]
+    fn test_decode_utf8latin1_good() {
+        let bs = b"Snow\xC3\xA9mon: \xE2\x98\x83!".to_vec();
+        assert_eq!(CharEncoding::Utf8Latin1.decode(bs), "Snowémon: ☃!");
+    }
+
+    #[test]
+    fn test_decode_utf8latin1_fallback() {
+        let bs = b"Snow\xC3\xA9mon: \xE2\x98!".to_vec();
+        assert_eq!(
+            CharEncoding::Utf8Latin1.decode(bs),
+            "Snow\u{c3}\u{a9}mon: \u{e2}\u{98}!"
+        );
+    }
 }
