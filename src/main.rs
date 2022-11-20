@@ -14,6 +14,7 @@ use tokio::net::TcpStream;
 use tokio_util::codec::{Framed, LinesCodec};
 
 #[derive(Parser)]
+#[clap(version)]
 struct Arguments {
     #[clap(short = 'T', long)]
     transcript: Option<PathBuf>,
