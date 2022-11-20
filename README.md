@@ -1,0 +1,91 @@
+[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![CI Status](https://github.com/jwodder/confab/actions/workflows/test.yml/badge.svg)](https://github.com/jwodder/confab/actions/workflows/test.yml)
+[![codecov.io](https://codecov.io/gh/jwodder/confab/branch/master/graph/badge.svg)](https://codecov.io/gh/jwodder/confab)
+[![MIT License](https://img.shields.io/github/license/jwodder/confab.svg)](https://opensource.org/licenses/MIT)
+
+`confab` is an asynchronous line-oriented interactive TCP client with TLS
+support.  Use it to connect to a TCP server, and you'll be able to send
+messages line by line while lines received from the remote server are printed
+above the prompt.
+
+Usage
+=====
+
+    confab [<options>] <host> <port>
+
+Open a TCP connection to the given host and port.  Lines entered by the user at
+the confab prompt are sent to the remote server and echoed locally with a "`>`"
+prefix, while lines received from the remote server are printed out above the
+prompt with a "`<`" prefix.  Communication stops when the remote server closes
+the connection or when the user presses Ctrl-D or Ctrl-C.
+
+`confab` relies on
+[`rustyline-async`](https://github.com/zyansheep/rustyline-async) for its
+readline-like capabilities; see there for the supported control sequences.
+
+Options
+-------
+
+- `--crlf` — Append CR LF (`"\r\n"`) to each line sent to the remote server
+  instead of just LF (`"\n"`)
+
+- `-E <encoding>`, `--encoding <encoding>` — Set the text encoding for the
+  connection.  The available options are:
+
+    - `utf8` — Use UTF-8.  If a line received from the remote server contains
+      an invalid UTF-8 sequence, the sequence is replaced with U+FFFD
+      REPLACEMENT CHARACTER (`�`).
+
+    - `utf8-latin1` — Use UTF-8.  If a line received from the remote server
+      contains an invalid UTF-8 sequence, the entire line is instead decoded as
+      Latin-1.  (Useful for IRC!)
+
+    - `latin1` — Use Latin-1 (a.k.a. ISO-8859-1).  If a line sent to the remote
+      server contains non-Latin-1 characters, they are replaced with question
+      marks (`?`).
+
+- `-T <file>`, `--transcript <file>` — Append a transcript of events to the
+  given file.  See [Transcript Format](#transcript-format) below for more
+  information.
+
+- `--tls` — Connect using SSL/TLS
+
+
+Transcript Format
+=================
+
+The session transcripts produced by the `-T` option take the form of JSON Lines
+(a.k.a. newline-delimited JSON), that is, a series of lines with one JSON
+object per line.  Each JSON object represents an event such as a line sent, a
+line received, or the start or end of the connection.
+
+Each object contains, at minimum, a `"timestamp"` field containing a timestamp
+for the event in the form `"YYYY-MM-DDTHH:MM:SS.ssssss+HH:MM"` and an `"event"`
+field identifying the type of event.  The possible values for the `"event"`
+field, along with any accompanying further fields, are as follows:
+
+- `"connection-start"` — Emitted just before starting to connect to the remote
+  server.  The event object also contains `"host"` and `"port"` fields listing
+  the remote host & port specified on the command line.
+
+- `"connection-complete"` — Emitted after connecting successfully (but before
+  negotiating TLS, if applicable).  The event object also contains a
+  `"peer_ip"` field listing the remote IP address that the connection was made
+  to.
+
+- `"tls-start"` — Emitted before starting the TLS handshake.  The event object
+  has no additional fields.
+
+- `"tls-complete"` — Emitted after completing the TLS handshake.  The event
+  object has no additional fields.
+
+- `"recv"` — Emitted whenever a line is received from the remote server.  The
+  event object also contains a `"data"` field giving the line received,
+  including trailing newline (if any).
+
+- `"send"` — Emitted whenever a line is send to the remote server.  The event
+  object also contains a `"data"` field giving the line sent, including
+  trailing newline (if any).
+
+- `"disconnect"` — Emitted when the connection is closed normally.  The event
+  object has no additional fields.

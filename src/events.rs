@@ -126,8 +126,7 @@ impl Event {
                 .finish(),
             Event::ConnectFinish { peer, .. } => json
                 .field("event", "connection-complete")
-                .field("host", &peer.ip())
-                .raw_field("port", &peer.port().to_string())
+                .field("peer_ip", &peer.ip())
                 .finish(),
             Event::TlsStart { .. } => json.field("event", "tls-start").finish(),
             Event::TlsFinish { .. } => json.field("event", "tls-complete").finish(),
