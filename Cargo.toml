@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.66"
+chrono = "0.4.23"
 clap = { version = "4.0.26", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
 futures = "0.3.25"
 native-tls = "0.2.11"
@@ -14,3 +15,4 @@ tokio-native-tls = "0.3.0"
 tokio-util = { version = "0.7.4", features = ["codec"] }
 
 [dev-dependencies]
+rstest = { version = "0.15.0", default-features = false }
