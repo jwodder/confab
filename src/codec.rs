@@ -48,7 +48,7 @@ use tokio_util::codec::{Decoder, Encoder};
 
 /// A simple [`Decoder`] and [`Encoder`] implementation that splits up data into lines.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub(crate) struct NetlionCodec {
+pub(crate) struct ConfabCodec {
     // Stored index of the next index to examine for a `\n` character.
     // This is used to optimize searching.
     // For example, if `decode` was called with `abc`, it would hold `3`,
@@ -65,44 +65,44 @@ pub(crate) struct NetlionCodec {
     encoding: CharEncoding,
 }
 
-impl NetlionCodec {
-    /// Returns a `NetlionCodec` for splitting up data into lines.
+impl ConfabCodec {
+    /// Returns a `ConfabCodec` for splitting up data into lines.
     ///
     /// # Note
     ///
-    /// The returned `NetlionCodec` will not have an upper bound on the length
+    /// The returned `ConfabCodec` will not have an upper bound on the length
     /// of a buffered line. See the documentation for [`new_with_max_length`]
     /// for information on why this could be a potential security risk.
-    pub(crate) fn new() -> NetlionCodec {
-        NetlionCodec {
+    pub(crate) fn new() -> ConfabCodec {
+        ConfabCodec {
             next_index: 0,
             max_length: usize::MAX,
             encoding: CharEncoding::Utf8,
         }
     }
 
-    /// Returns a `NetlionCodec` with a maximum line length limit.
+    /// Returns a `ConfabCodec` with a maximum line length limit.
     ///
     /// # Note
     ///
-    /// Setting a length limit is highly recommended for any `NetlionCodec` which
+    /// Setting a length limit is highly recommended for any `ConfabCodec` which
     /// will be exposed to untrusted input. Otherwise, the size of the buffer
     /// that holds the line currently being read is unbounded. An attacker could
     /// exploit this unbounded buffer by sending an unbounded amount of input
     /// without any `\n` characters, causing unbounded memory consumption.
     pub(crate) fn new_with_max_length(max_length: usize) -> Self {
-        NetlionCodec {
+        ConfabCodec {
             max_length,
-            ..NetlionCodec::new()
+            ..ConfabCodec::new()
         }
     }
 
-    pub(crate) fn encoding(self, encoding: CharEncoding) -> NetlionCodec {
-        NetlionCodec { encoding, ..self }
+    pub(crate) fn encoding(self, encoding: CharEncoding) -> ConfabCodec {
+        ConfabCodec { encoding, ..self }
     }
 }
 
-impl Decoder for NetlionCodec {
+impl Decoder for ConfabCodec {
     type Item = String;
     type Error = io::Error;
 
@@ -160,7 +160,7 @@ impl Decoder for NetlionCodec {
     }
 }
 
-impl<T> Encoder<T> for NetlionCodec
+impl<T> Encoder<T> for ConfabCodec
 where
     T: AsRef<str>,
 {
@@ -175,7 +175,7 @@ where
     }
 }
 
-impl Default for NetlionCodec {
+impl Default for ConfabCodec {
     fn default() -> Self {
         Self::new()
     }
@@ -234,7 +234,7 @@ mod test {
 
     #[test]
     fn test_decode_end_before_limit() {
-        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut codec = ConfabCodec::new_with_max_length(32);
         let mut buf = BytesMut::from("This is test text.\nAnd so is this.\n");
         assert_eq!(
             codec.decode(&mut buf).unwrap().unwrap(),
@@ -245,7 +245,7 @@ mod test {
 
     #[test]
     fn test_decode_end_at_limit() {
-        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut codec = ConfabCodec::new_with_max_length(32);
         let mut buf = BytesMut::from("123456789.abcdefghi.123456789.a\nbcdef");
         assert_eq!(
             codec.decode(&mut buf).unwrap().unwrap(),
@@ -256,7 +256,7 @@ mod test {
 
     #[test]
     fn test_decode_end_right_after_limit() {
-        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut codec = ConfabCodec::new_with_max_length(32);
         let mut buf = BytesMut::from("123456789.abcdefghi.123456789.ab\ncdef");
         assert_eq!(
             codec.decode(&mut buf).unwrap().unwrap(),
@@ -267,7 +267,7 @@ mod test {
 
     #[test]
     fn test_decode_end_after_limit() {
-        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut codec = ConfabCodec::new_with_max_length(32);
         let mut buf = BytesMut::from("123456789.abcdefghi.123456789.abcdef\n");
         assert_eq!(
             codec.decode(&mut buf).unwrap().unwrap(),
@@ -278,7 +278,7 @@ mod test {
 
     #[test]
     fn test_decode_max_length_no_end() {
-        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut codec = ConfabCodec::new_with_max_length(32);
         let mut buf = BytesMut::from("123456789.abcdefghi.123456789.ab");
         assert_eq!(
             codec.decode(&mut buf).unwrap().unwrap(),
@@ -289,7 +289,7 @@ mod test {
 
     #[test]
     fn test_decode_max_length_plus_1_no_end() {
-        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut codec = ConfabCodec::new_with_max_length(32);
         let mut buf = BytesMut::from("123456789.abcdefghi.123456789.abc");
         assert_eq!(
             codec.decode(&mut buf).unwrap().unwrap(),
@@ -300,7 +300,7 @@ mod test {
 
     #[test]
     fn test_decode_max_length_minus_1_no_end() {
-        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut codec = ConfabCodec::new_with_max_length(32);
         let mut buf = BytesMut::from("123456789.abcdefghi.123456789.a");
         assert_eq!(codec.decode(&mut buf).unwrap(), None);
         assert_eq!(buf, "123456789.abcdefghi.123456789.a");
@@ -309,7 +309,7 @@ mod test {
 
     #[test]
     fn test_decode_over_max_length_straddling_utf8() {
-        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut codec = ConfabCodec::new_with_max_length(32);
         let mut buf = BytesMut::from(&b"123456789.abcdefghi.123456789.\xE2\x98\x83"[..]);
         assert_eq!(
             codec.decode(&mut buf).unwrap().unwrap(),
@@ -320,7 +320,7 @@ mod test {
 
     #[test]
     fn test_decode_over_max_length_straddling_utf8_in_latin1() {
-        let mut codec = NetlionCodec::new_with_max_length(32).encoding(CharEncoding::Latin1);
+        let mut codec = ConfabCodec::new_with_max_length(32).encoding(CharEncoding::Latin1);
         let mut buf = BytesMut::from(&b"123456789.abcdefghi.123456789.\xE2\x98\x83"[..]);
         assert_eq!(
             codec.decode(&mut buf).unwrap().unwrap(),

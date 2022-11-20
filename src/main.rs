@@ -1,7 +1,7 @@
 mod codec;
 mod events;
 mod util;
-use crate::codec::NetlionCodec;
+use crate::codec::ConfabCodec;
 use crate::events::Event;
 use crate::util::CharEncoding;
 use anyhow::Context;
@@ -39,7 +39,7 @@ struct Arguments {
 impl Arguments {
     fn open(self) -> anyhow::Result<Runner> {
         let (rl, stdout) =
-            Readline::new("netlion> ".into()).context("Error constructing Readline object")?;
+            Readline::new("confab> ".into()).context("Error constructing Readline object")?;
         let transcript = match self.transcript {
             Some(path) => Some(
                 OpenOptions::new()
@@ -85,8 +85,8 @@ impl Runner {
         Ok(())
     }
 
-    fn codec(&self) -> NetlionCodec {
-        NetlionCodec::new_with_max_length(65535).encoding(self.encoding)
+    fn codec(&self) -> ConfabCodec {
+        ConfabCodec::new_with_max_length(65535).encoding(self.encoding)
     }
 
     async fn run(&mut self) -> anyhow::Result<()> {

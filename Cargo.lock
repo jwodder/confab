@@ -115,6 +115,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "confab"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "chrono",
+ "clap",
+ "futures",
+ "native-tls",
+ "rstest",
+ "rustyline-async",
+ "tokio",
+ "tokio-native-tls",
+ "tokio-util",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -477,23 +494,6 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
-]
-
-[[package]]
-name = "netlion"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bytes",
- "chrono",
- "clap",
- "futures",
- "native-tls",
- "rstest",
- "rustyline-async",
- "tokio",
- "tokio-native-tls",
- "tokio-util",
 ]
 
 [[package]]
