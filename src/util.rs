@@ -72,9 +72,9 @@ pub(crate) enum CharEncoding {
 }
 
 impl CharEncoding {
-    //pub(crate) fn is_utf8(&self) -> bool {
-    //    matches!(self, CharEncoding::Utf8 | CharEncoding::Utf8Latin1)
-    //}
+    pub(crate) fn is_utf8(&self) -> bool {
+        matches!(self, CharEncoding::Utf8 | CharEncoding::Utf8Latin1)
+    }
 
     pub(crate) fn encode<'a>(&'a self, s: &'a str) -> Cow<'a, [u8]> {
         match self {

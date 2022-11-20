@@ -9,6 +9,7 @@
 //! - The Decoder does not strip line endings from returned values.
 //! - The caller must append the line ending before passing the value to the
 //!   Encoder.
+//! - Decoder: max_length now includes the terminating newline.
 //! - Conversion between bytes & strings is handled by CharEncoding.
 //!
 //! [1]: https://github.com/tokio-rs/tokio/blob/a03e0420249d1740668f608a5a16f1fa614be2c7/tokio-util/src/codec/lines_codec.rs
@@ -108,7 +109,7 @@ impl Decoder for NetlionCodec {
     fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<String>, io::Error> {
         // Determine how far into the buffer we'll search for a newline. If
         // there's no max_length set, we'll read to the end of the buffer.
-        let read_to = cmp::min(self.max_length.saturating_add(1), buf.len());
+        let read_to = cmp::min(self.max_length, buf.len());
         let newline_offset = buf[self.next_index..read_to]
             .iter()
             .position(|b| *b == b'\n');
@@ -121,10 +122,14 @@ impl Decoder for NetlionCodec {
                 let line = self.encoding.decode(line.into());
                 Ok(Some(line))
             }
-            None if buf.len() > self.max_length => {
-                // TODO: Strip off trailing UTF-8 fragment!
+            None if buf.len() >= self.max_length => {
                 self.next_index = 0;
-                let line = buf.split_to(self.max_length);
+                let i = if self.encoding.is_utf8() {
+                    find_final_char_boundary(&buf[..self.max_length])
+                } else {
+                    self.max_length
+                };
+                let line = buf.split_to(i);
                 let line = self.encoding.decode(line.into());
                 Ok(Some(line))
             }
@@ -173,5 +178,154 @@ where
 impl Default for NetlionCodec {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// If `buf` ends in an incomplete UTF-8 sequence (that is, a sequence that is
+/// not a valid UTF-8 sequence but which could become one by appending
+/// continuation bytes, ignoring the problem of overlong encodings), return the
+/// index of the start of that sequence; otherwise, return the length of `buf`.
+fn find_final_char_boundary(buf: &[u8]) -> usize {
+    for (i, b) in buf.iter().enumerate().rev() {
+        // Number of continuation bytes previously iterated over so far:
+        let seen = buf.len() - i - 1;
+        if (0x80..0xC0).contains(b) && seen < 3 {
+            continue;
+        } else if (0xC0..0xE0).contains(b) && seen < 1
+            || (0xE0..0xF0).contains(b) && seen < 2
+            || (0xF0..0xF8).contains(b) && seen < 3
+        {
+            return i;
+        } else {
+            return buf.len();
+        }
+    }
+    buf.len()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rstest::rstest;
+
+    #[rstest]
+    #[case(b"", 0)]
+    #[case(b"foo", 3)]
+    #[case(b"foo\xE2\x98\x83", 6)]
+    #[case(b"foo\xE2\x98", 3)]
+    #[case(b"foo\xE2", 3)]
+    #[case(b"foo\x98\x83", 5)]
+    #[case(b"\x98\x83", 2)]
+    #[case(b"\x80\x98\x83", 3)]
+    #[case(b"\x80\x80\x98\x83", 4)]
+    #[case(b"foo\xC0\x80", 5)]
+    #[case(b"foo\xC0\x80\x80", 6)]
+    #[case(b"foo\xC0", 3)]
+    #[case(b"foo\xF0\x80\x80", 3)]
+    #[case(b"foo\x80\x80\x80", 6)]
+    #[case(b"foo\x80\x80\x80\x80", 7)]
+    #[case(b"foo\xFF", 4)]
+    #[case(b"foo\xFC", 4)]
+    #[case(b"foo\xFC\x80\x80\x80", 7)]
+    #[case(b"foo\xFC\x80\x80\x80\x80\x80", 9)]
+    fn test_find_final_char_boundary(#[case] buf: &[u8], #[case] i: usize) {
+        assert_eq!(find_final_char_boundary(buf), i);
+    }
+
+    #[test]
+    fn test_decode_end_before_limit() {
+        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut buf = BytesMut::from("This is test text.\nAnd so is this.\n");
+        assert_eq!(
+            codec.decode(&mut buf).unwrap().unwrap(),
+            "This is test text.\n"
+        );
+        assert_eq!(buf, "And so is this.\n");
+    }
+
+    #[test]
+    fn test_decode_end_at_limit() {
+        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut buf = BytesMut::from("123456789.abcdefghi.123456789.a\nbcdef");
+        assert_eq!(
+            codec.decode(&mut buf).unwrap().unwrap(),
+            "123456789.abcdefghi.123456789.a\n"
+        );
+        assert_eq!(buf, "bcdef");
+    }
+
+    #[test]
+    fn test_decode_end_right_after_limit() {
+        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut buf = BytesMut::from("123456789.abcdefghi.123456789.ab\ncdef");
+        assert_eq!(
+            codec.decode(&mut buf).unwrap().unwrap(),
+            "123456789.abcdefghi.123456789.ab"
+        );
+        assert_eq!(buf, "\ncdef");
+    }
+
+    #[test]
+    fn test_decode_end_after_limit() {
+        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut buf = BytesMut::from("123456789.abcdefghi.123456789.abcdef\n");
+        assert_eq!(
+            codec.decode(&mut buf).unwrap().unwrap(),
+            "123456789.abcdefghi.123456789.ab"
+        );
+        assert_eq!(buf, "cdef\n");
+    }
+
+    #[test]
+    fn test_decode_max_length_no_end() {
+        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut buf = BytesMut::from("123456789.abcdefghi.123456789.ab");
+        assert_eq!(
+            codec.decode(&mut buf).unwrap().unwrap(),
+            "123456789.abcdefghi.123456789.ab"
+        );
+        assert_eq!(buf, "");
+    }
+
+    #[test]
+    fn test_decode_max_length_plus_1_no_end() {
+        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut buf = BytesMut::from("123456789.abcdefghi.123456789.abc");
+        assert_eq!(
+            codec.decode(&mut buf).unwrap().unwrap(),
+            "123456789.abcdefghi.123456789.ab"
+        );
+        assert_eq!(buf, "c");
+    }
+
+    #[test]
+    fn test_decode_max_length_minus_1_no_end() {
+        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut buf = BytesMut::from("123456789.abcdefghi.123456789.a");
+        assert_eq!(codec.decode(&mut buf).unwrap(), None);
+        assert_eq!(buf, "123456789.abcdefghi.123456789.a");
+        assert_eq!(codec.next_index, 31);
+    }
+
+    #[test]
+    fn test_decode_over_max_length_straddling_utf8() {
+        let mut codec = NetlionCodec::new_with_max_length(32);
+        let mut buf = BytesMut::from(&b"123456789.abcdefghi.123456789.\xE2\x98\x83"[..]);
+        assert_eq!(
+            codec.decode(&mut buf).unwrap().unwrap(),
+            "123456789.abcdefghi.123456789."
+        );
+        assert_eq!(buf, &b"\xE2\x98\x83"[..]);
+    }
+
+    #[test]
+    fn test_decode_over_max_length_straddling_utf8_in_latin1() {
+        let mut codec = NetlionCodec::new_with_max_length(32).encoding(CharEncoding::Latin1);
+        let mut buf = BytesMut::from(&b"123456789.abcdefghi.123456789.\xE2\x98\x83"[..]);
+        assert_eq!(
+            codec.decode(&mut buf).unwrap().unwrap(),
+            "123456789.abcdefghi.123456789.\u{e2}\u{98}"
+        );
+        assert_eq!(buf, &b"\x83"[..]);
     }
 }
