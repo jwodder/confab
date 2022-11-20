@@ -28,6 +28,18 @@ impl JsonStrMap {
         self
     }
 
+    pub(crate) fn raw_field(mut self, key: &str, value: &str) -> JsonStrMap {
+        if self.first {
+            self.first = false;
+        } else {
+            self.buf.push_str(", ");
+        }
+        write_json_str(key, &mut self.buf).unwrap();
+        self.buf.push_str(": ");
+        self.buf.push_str(value);
+        self
+    }
+
     pub(crate) fn finish(mut self) -> String {
         self.buf.push('}');
         self.buf
