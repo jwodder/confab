@@ -17,11 +17,17 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
 
+/// Asynchronous line-oriented interactive TCP client
+///
+/// See <https://github.com/jwodder/confab> for more information
 #[derive(Parser)]
 #[clap(version)]
 struct Arguments {
+    /// Terminate sent lines with CR LF instead of just LF
     #[clap(long)]
     crlf: bool,
+
+    /// Set text encoding
     #[clap(
         short = 'E',
         long,
@@ -29,15 +35,27 @@ struct Arguments {
         value_name = "utf8|utf8-latin1|latin1"
     )]
     encoding: CharEncoding,
-    #[clap(short = 'M', long, default_value = "65535")]
+
+    /// Set maximum length of lines read from remote server
+    #[clap(short = 'M', long, default_value = "65535", value_name = "INT")]
     max_line_length: NonZeroUsize,
+
+    /// Prepend timestamps to output messages
     #[clap(short = 't', long)]
     show_times: bool,
+
+    /// Connect using SSL/TLS
     #[clap(long)]
     tls: bool,
-    #[clap(short = 'T', long)]
+
+    /// Append a transcript of events to the given file
+    #[clap(short = 'T', long, value_name = "FILE")]
     transcript: Option<PathBuf>,
+
+    /// Remote host (domain name or IP address) to which to connect
     host: String,
+
+    /// Remote port (integer) to which to connect
     port: u16,
 }
 
