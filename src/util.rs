@@ -93,7 +93,7 @@ impl CharEncoding {
             CharEncoding::Utf8 | CharEncoding::Utf8Latin1 => Cow::from(s.as_bytes()),
             CharEncoding::Latin1 => Cow::from(
                 s.chars()
-                    .map(|c| u8::try_from(c).unwrap_or(0x3F))
+                    .map(|c| u8::try_from(c).unwrap_or(b'?'))
                     .collect::<Vec<_>>(),
             ),
         }
