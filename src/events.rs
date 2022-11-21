@@ -1,6 +1,6 @@
-use crate::util::{chomp, JsonStrMap};
+use crate::util::{chomp, display_vis, JsonStrMap};
 use chrono::{DateTime, Local};
-use std::borrow::Cow;
+use crossterm::style::{StyledContent, Stylize};
 use std::net::SocketAddr;
 
 pub(crate) enum Event {
@@ -104,15 +104,15 @@ impl Event {
         }
     }
 
-    pub(crate) fn message(&self) -> Cow<'_, str> {
+    pub(crate) fn message(&self) -> Vec<StyledContent<String>> {
         match self {
-            Event::ConnectStart { .. } => Cow::from("Connecting ..."),
-            Event::ConnectFinish { peer, .. } => Cow::from(format!("Connected to {peer}")),
-            Event::TlsStart { .. } => Cow::from("Initializing TLS ..."),
-            Event::TlsFinish { .. } => Cow::from("TLS established"),
-            Event::Recv { data, .. } => Cow::from(chomp(data)),
-            Event::Send { data, .. } => Cow::from(chomp(data)),
-            Event::Disconnect { .. } => Cow::from("Disconnected"),
+            Event::ConnectStart { .. } => vec![String::from("Connecting ...").stylize()],
+            Event::ConnectFinish { peer, .. } => vec![format!("Connected to {peer}").stylize()],
+            Event::TlsStart { .. } => vec![String::from("Initializing TLS ...").stylize()],
+            Event::TlsFinish { .. } => vec![String::from("TLS established").stylize()],
+            Event::Recv { data, .. } => display_vis(chomp(data)),
+            Event::Send { data, .. } => display_vis(chomp(data)),
+            Event::Disconnect { .. } => vec![String::from("Disconnected").stylize()],
         }
     }
 

@@ -107,7 +107,11 @@ impl Runner {
         if self.show_times {
             write!(self.stdout, "[{}] ", event.display_time())?;
         }
-        writeln!(self.stdout, "{} {}", event.sigil(), event.message())?;
+        write!(self.stdout, "{} ", event.sigil())?;
+        for chunk in event.message() {
+            write!(self.stdout, "{}", chunk)?;
+        }
+        writeln!(self.stdout)?;
         if let Some(fp) = self.transcript.as_mut() {
             // TODO: Warn if this errors, but keep running anyway
             writeln!(fp, "{}", event.to_json())?;

@@ -1,6 +1,9 @@
+use crossterm::style::{StyledContent, Stylize};
+use itertools::Itertools; // for group_by()
 use std::borrow::Cow;
 use std::fmt::{self, Display, Write};
 use std::str::FromStr;
+use unicode_general_category::{get_general_category, GeneralCategory};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct JsonStrMap {
@@ -148,6 +151,42 @@ pub(crate) fn chomp(s: &str) -> &str {
     s
 }
 
+pub(crate) fn display_vis(s: &str) -> Vec<StyledContent<String>> {
+    s.chars()
+        .group_by(|c| needs_vis(*c))
+        .into_iter()
+        .map(|(v, cs)| {
+            if v {
+                cs.map(vis).collect::<String>().reverse()
+            } else {
+                cs.collect::<String>().stylize()
+            }
+        })
+        .collect()
+}
+
+fn needs_vis(c: char) -> bool {
+    c != '\t'
+        && [
+            // These are the 'C' (Other) categories, excluding Cf (Format):
+            GeneralCategory::Control,
+            GeneralCategory::Surrogate,
+            GeneralCategory::PrivateUse,
+            GeneralCategory::Unassigned,
+        ]
+        .contains(&get_general_category(c))
+}
+
+fn vis(c: char) -> String {
+    if ('\x00'..' ').contains(&c) {
+        format!("^{}", char::from_u32((c as u32) | 0x40).unwrap())
+    } else if c == '\x7F' {
+        "^?".into()
+    } else {
+        format!("<U+{:04X}>", c as u32)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -232,6 +271,37 @@ mod test {
         assert_eq!(
             CharEncoding::Utf8Latin1.decode(bs),
             "Snow\u{c3}\u{a9}mon: \u{e2}\u{98}!"
+        );
+    }
+
+    #[rstest]
+    #[case('\x00', "^@")]
+    #[case('\x01', "^A")]
+    #[case('\x1F', "^_")]
+    #[case('\x7F', "^?")]
+    #[case('\u{80}', "<U+0080>")]
+    #[case('\u{ffff}', "<U+FFFF>")]
+    #[case('\u{10ffff}', "<U+10FFFF>")]
+    fn test_vis(#[case] c: char, #[case] display: &str) {
+        assert_eq!(vis(c), display);
+    }
+
+    #[test]
+    fn test_display_vis() {
+        let vised = display_vis(
+            "\x01ACTION reflects in\x08\x08on all the private use characters, like \u{E011}.\x01",
+        );
+        assert_eq!(
+            vised,
+            [
+                String::from("^A").reverse(),
+                String::from("ACTION reflects in").stylize(),
+                String::from("^H^H").reverse(),
+                String::from("on all the private use characters, like ").stylize(),
+                String::from("<U+E011>").reverse(),
+                String::from(".").stylize(),
+                String::from("^A").reverse(),
+            ]
         );
     }
 }
