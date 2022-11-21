@@ -44,11 +44,17 @@ Options
       server contains non-Latin-1 characters, they are replaced with question
       marks (`?`).
 
+- `-M <LIMIT>`, `--max-line-length <LIMIT>` — Set the maximum length in bytes
+  of each line read from the remote server (including the terminating newline).
+  If the server sends a line longer than this, the first `<LIMIT>` bytes will
+  be split off and treated as a whole line, with the remaining bytes treated as
+  the start of a new line.  [default value: 65535]
+
+- `--tls` — Connect using SSL/TLS
+
 - `-T <file>`, `--transcript <file>` — Append a transcript of events to the
   given file.  See [Transcript Format](#transcript-format) below for more
   information.
-
-- `--tls` — Connect using SSL/TLS
 
 
 Transcript Format

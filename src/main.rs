@@ -10,6 +10,7 @@ use futures::{SinkExt, StreamExt};
 use rustyline_async::{Readline, ReadlineError, SharedWriter};
 use std::fs::{File, OpenOptions};
 use std::io::Write;
+use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::pin::Pin;
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -28,10 +29,12 @@ struct Arguments {
         value_name = "utf8|utf8-latin1|latin1"
     )]
     encoding: CharEncoding,
-    #[clap(short = 'T', long)]
-    transcript: Option<PathBuf>,
+    #[clap(short = 'M', long, default_value = "65535")]
+    max_line_length: NonZeroUsize,
     #[clap(long)]
     tls: bool,
+    #[clap(short = 'T', long)]
+    transcript: Option<PathBuf>,
     host: String,
     port: u16,
 }
@@ -56,6 +59,7 @@ impl Arguments {
             transcript,
             crlf: self.crlf,
             encoding: self.encoding,
+            max_line_length: self.max_line_length,
             tls: self.tls,
             host: self.host,
             port: self.port,
@@ -69,6 +73,7 @@ struct Runner {
     transcript: Option<File>,
     crlf: bool,
     encoding: CharEncoding,
+    max_line_length: NonZeroUsize,
     tls: bool,
     host: String,
     port: u16,
@@ -86,7 +91,7 @@ impl Runner {
     }
 
     fn codec(&self) -> ConfabCodec {
-        ConfabCodec::new_with_max_length(65535).encoding(self.encoding)
+        ConfabCodec::new_with_max_length(self.max_line_length.get()).encoding(self.encoding)
     }
 
     async fn run(&mut self) -> anyhow::Result<()> {
