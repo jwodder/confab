@@ -31,6 +31,8 @@ struct Arguments {
     encoding: CharEncoding,
     #[clap(short = 'M', long, default_value = "65535")]
     max_line_length: NonZeroUsize,
+    #[clap(short = 't', long)]
+    show_times: bool,
     #[clap(long)]
     tls: bool,
     #[clap(short = 'T', long)]
@@ -63,6 +65,7 @@ impl Arguments {
             tls: self.tls,
             host: self.host,
             port: self.port,
+            show_times: self.show_times,
         })
     }
 }
@@ -77,11 +80,15 @@ struct Runner {
     tls: bool,
     host: String,
     port: u16,
+    show_times: bool,
 }
 
 impl Runner {
     fn report(&mut self, event: Event) -> std::io::Result<()> {
         // TODO: Replace these with async calls
+        if self.show_times {
+            write!(self.stdout, "[{}] ", event.display_time())?;
+        }
         writeln!(self.stdout, "{} {}", event.sigil(), event.message())?;
         if let Some(fp) = self.transcript.as_mut() {
             // TODO: Warn if this errors, but keep running anyway

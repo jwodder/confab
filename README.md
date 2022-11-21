@@ -50,6 +50,9 @@ Options
   be split off and treated as a whole line, with the remaining bytes treated as
   the start of a new line.  [default value: 65535]
 
+- `-t`, `--show-times` — Prepend a timestamp of the form `[HH:MM:SS]` to each
+  line printed to the terminal
+
 - `--tls` — Connect using SSL/TLS
 
 - `-T <file>`, `--transcript <file>` — Append a transcript of events to the

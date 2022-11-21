@@ -92,9 +92,9 @@ impl Event {
         }
     }
 
-    //pub(crate) fn display_time(&self) -> String {
-    //    self.timestamp().format("%H:%M:%S").to_string()
-    //}
+    pub(crate) fn display_time(&self) -> String {
+        self.timestamp().format("%H:%M:%S").to_string()
+    }
 
     pub(crate) fn sigil(&self) -> char {
         match self {
