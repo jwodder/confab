@@ -15,6 +15,7 @@ use std::io::{self, Write};
 use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::pin::Pin;
+use std::process::ExitCode;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
@@ -138,16 +139,21 @@ impl Runner {
         ConfabCodec::new_with_max_length(self.max_line_length.get()).encoding(self.encoding)
     }
 
-    async fn run(&mut self) -> Result<(), InterfaceError> {
+    async fn run(&mut self) -> Result<ExitCode, InterfaceError> {
         self.report(Event::connect_start(&self.host, self.port))?;
         match self.try_run().await {
-            Ok(()) => self.report(Event::disconnect())?,
+            Ok(()) => {
+                self.report(Event::disconnect())?;
+                Ok(ExitCode::SUCCESS)
+            }
             Err(e) => match e.downcast::<InterfaceError>() {
-                Ok(e) => return Err(e),
-                Err(e) => self.report(Event::error(e))?,
+                Ok(e) => Err(e),
+                Err(e) => {
+                    self.report(Event::error(e))?;
+                    Ok(ExitCode::FAILURE)
+                }
             },
         }
-        Ok(())
     }
 
     async fn try_run(&mut self) -> anyhow::Result<()> {
@@ -241,6 +247,6 @@ trait AsyncReadWrite: AsyncRead + AsyncWrite {}
 impl<T> AsyncReadWrite for T where T: AsyncRead + AsyncWrite {}
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> anyhow::Result<ExitCode> {
     Ok(Arguments::parse().open()?.run().await?)
 }
