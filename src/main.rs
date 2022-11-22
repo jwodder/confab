@@ -10,6 +10,7 @@ use futures::{SinkExt, StreamExt};
 use rustyline_async::{Readline, ReadlineError, SharedWriter};
 use std::fs::{File, OpenOptions};
 use std::io::Write;
+use std::marker::Unpin;
 use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::pin::Pin;
@@ -145,7 +146,17 @@ impl Runner {
         } else {
             Box::pin(conn)
         };
-        let mut frame = Framed::new(conn, self.codec());
+        match self.interact(Framed::new(conn, self.codec())).await {
+            Ok(()) => self.report(Event::disconnect())?,
+            Err(e) => self.report(Event::error(e))?,
+        }
+        Ok(())
+    }
+
+    async fn interact<A: AsyncReadWrite + Unpin>(
+        &mut self,
+        mut frame: Framed<A, ConfabCodec>,
+    ) -> anyhow::Result<()> {
         loop {
             let event = tokio::select! {
                 r = frame.next() => match r {
@@ -171,7 +182,6 @@ impl Runner {
             };
             self.report(event)?;
         }
-        self.report(Event::disconnect())?;
         Ok(())
     }
 }

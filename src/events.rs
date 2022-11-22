@@ -30,6 +30,10 @@ pub(crate) enum Event {
     Disconnect {
         timestamp: DateTime<Local>,
     },
+    Error {
+        timestamp: DateTime<Local>,
+        data: anyhow::Error,
+    },
 }
 
 impl Event {
@@ -80,6 +84,13 @@ impl Event {
         }
     }
 
+    pub(crate) fn error(data: anyhow::Error) -> Self {
+        Event::Error {
+            timestamp: Local::now(),
+            data,
+        }
+    }
+
     pub(crate) fn timestamp(&self) -> &DateTime<Local> {
         match self {
             Event::ConnectStart { timestamp, .. } => timestamp,
@@ -89,6 +100,7 @@ impl Event {
             Event::Recv { timestamp, .. } => timestamp,
             Event::Send { timestamp, .. } => timestamp,
             Event::Disconnect { timestamp } => timestamp,
+            Event::Error { timestamp, .. } => timestamp,
         }
     }
 
@@ -100,6 +112,7 @@ impl Event {
         match self {
             Event::Recv { .. } => '<',
             Event::Send { .. } => '>',
+            Event::Error { .. } => '!',
             _ => '*',
         }
     }
@@ -113,6 +126,7 @@ impl Event {
             Event::Recv { data, .. } => display_vis(chomp(data)),
             Event::Send { data, .. } => display_vis(chomp(data)),
             Event::Disconnect { .. } => vec![String::from("Disconnected").stylize()],
+            Event::Error { data, .. } => vec![format!("{data:#}").stylize()],
         }
     }
 
@@ -133,6 +147,10 @@ impl Event {
             Event::Recv { data, .. } => json.field("event", "recv").field("data", data).finish(),
             Event::Send { data, .. } => json.field("event", "send").field("data", data).finish(),
             Event::Disconnect { .. } => json.field("event", "disconnect").finish(),
+            Event::Error { data, .. } => json
+                .field("event", "error")
+                .field("data", &format!("{data:#}"))
+                .finish(),
         }
     }
 }

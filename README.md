@@ -98,3 +98,6 @@ field, along with any accompanying further fields, are as follows:
 
 - `"disconnect"` — Emitted when the connection is closed normally.  The event
   object has no additional fields.
+
+- `"error"` — Emitted when a fatal error occurs.  The event object also
+  contains a `"data"` field giving a human-readable error message.
