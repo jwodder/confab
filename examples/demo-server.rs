@@ -6,6 +6,7 @@ use std::error;
 use std::fmt;
 use std::net::{IpAddr, SocketAddr};
 use std::time::Duration;
+use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{interval, sleep};
 use tokio_stream::wrappers::IntervalStream;
@@ -58,6 +59,14 @@ impl Session {
         self.frame.send(line).await.map_err(ServerError::SendError)
     }
 
+    async fn send_bytes(&mut self, bytes: &[u8]) -> Result<(), ServerError> {
+        self.frame
+            .get_mut()
+            .write_all(bytes)
+            .await
+            .map_err(|e| ServerError::SendError(LinesCodecError::from(e)))
+    }
+
     async fn recv(&mut self) -> Result<String, ServerError> {
         match self.frame.next().await {
             Some(Ok(line)) => Ok(line),
@@ -77,11 +86,13 @@ impl Session {
     async fn interact(&mut self) -> Result<(), ServerError> {
         self.send("Welcome to the confab Demo Server!").await?;
         loop {
-            self.send("Commands: debug, ping, ctrl, quit").await?;
+            self.send("Commands: debug, ping, ctrl, bytes, quit")
+                .await?;
             match self.recv().await?.as_str() {
                 "debug" => self.debug().await?,
                 "ping" => self.ping().await?,
                 "ctrl" => self.ctrl().await?,
+                "bytes" => self.bytes().await?,
                 "quit" => {
                     self.send("Goodbye.").await?;
                     return Ok(());
@@ -147,6 +158,24 @@ impl Session {
                     None => return Ok(()),
                 },
                 _ = self.recv() => self.send("Not now, I'm sending stuff.").await?,
+            }
+        }
+    }
+
+    async fn bytes(&mut self) -> Result<(), ServerError> {
+        let blines = [
+            &b"Here is some non-UTF-8 data:\n"[..],
+            &b"Latin-1: Libert\xE9, \xE9galit\xE9, fraternit\xE9\n"[..],
+            &b"General garbage: \x89\xAB\xCD\xEF\n"[..],
+        ];
+        let mut stream = IntervalStream::new(interval(Duration::from_secs(1))).zip(iter(blines));
+        loop {
+            tokio::select! {
+                r = stream.next() => match r {
+                    Some((_, ln)) => self.send_bytes(ln).await?,
+                    None => return Ok(()),
+                },
+                _ = self.recv() => self.send_bytes("Not now, I'm sending stuff.\n".as_bytes()).await?,
             }
         }
     }
