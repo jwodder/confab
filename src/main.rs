@@ -10,7 +10,6 @@ use futures::{SinkExt, StreamExt};
 use rustyline_async::{Readline, ReadlineError, SharedWriter};
 use std::fs::{File, OpenOptions};
 use std::io::Write;
-use std::marker::Unpin;
 use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::pin::Pin;
@@ -134,6 +133,14 @@ impl Runner {
 
     async fn run(&mut self) -> anyhow::Result<()> {
         self.report(Event::connect_start(&self.host, self.port))?;
+        match self.try_run().await {
+            Ok(()) => self.report(Event::disconnect())?,
+            Err(e) => self.report(Event::error(e))?,
+        }
+        Ok(())
+    }
+
+    async fn try_run(&mut self) -> anyhow::Result<()> {
         let conn = TcpStream::connect((self.host.clone(), self.port))
             .await
             .context("Error connecting to server")?;
@@ -154,17 +161,7 @@ impl Runner {
         } else {
             Box::pin(conn)
         };
-        match self.interact(Framed::new(conn, self.codec())).await {
-            Ok(()) => self.report(Event::disconnect())?,
-            Err(e) => self.report(Event::error(e))?,
-        }
-        Ok(())
-    }
-
-    async fn interact<A: AsyncReadWrite + Unpin>(
-        &mut self,
-        mut frame: Framed<A, ConfabCodec>,
-    ) -> anyhow::Result<()> {
+        let mut frame = Framed::new(conn, self.codec());
         loop {
             let event = tokio::select! {
                 r = frame.next() => match r {
