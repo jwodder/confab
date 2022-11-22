@@ -41,6 +41,11 @@ struct Arguments {
     #[clap(short = 'M', long, default_value = "65535", value_name = "INT")]
     max_line_length: NonZeroUsize,
 
+    /// Use the given domain name for SNI and certificate hostname validation
+    /// [default: the remote host name]
+    #[clap(long, value_name = "DOMAIN")]
+    servername: Option<String>,
+
     /// Prepend timestamps to output messages
     #[clap(short = 't', long)]
     show_times: bool,
@@ -85,6 +90,7 @@ impl Arguments {
             host: self.host,
             port: self.port,
             show_times: self.show_times,
+            servername: self.servername,
         })
     }
 }
@@ -99,6 +105,7 @@ struct Runner {
     tls: bool,
     host: String,
     port: u16,
+    servername: Option<String>,
     show_times: bool,
 }
 
@@ -139,7 +146,7 @@ impl Runner {
                 native_tls::TlsConnector::new().context("Error creating TLS connector")?,
             );
             let conn = cx
-                .connect(&self.host, conn)
+                .connect(self.servername.as_ref().unwrap_or(&self.host), conn)
                 .await
                 .context("Error establishing TLS connection")?;
             self.report(Event::tls_finish())?;

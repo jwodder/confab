@@ -50,6 +50,9 @@ Options
   be split off and treated as a whole line, with the remaining bytes treated as
   the start of a new line.  [default value: 65535]
 
+- `--servername <DOMAIN>` — (with `--tls`) Use the given domain name for SNI
+  and certificate hostname validation; defaults to the remote host name
+
 - `-t`, `--show-times` — Prepend a timestamp of the form `[HH:MM:SS]` to each
   line printed to the terminal
 
