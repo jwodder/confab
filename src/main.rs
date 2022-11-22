@@ -104,7 +104,6 @@ struct Runner {
 
 impl Runner {
     fn report(&mut self, event: Event) -> std::io::Result<()> {
-        // TODO: Replace these with async calls
         if self.show_times {
             write!(self.stdout, "[{}] ", event.display_time())?;
         }
