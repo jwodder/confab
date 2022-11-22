@@ -114,8 +114,10 @@ impl Runner {
         }
         writeln!(self.stdout)?;
         if let Some(fp) = self.transcript.as_mut() {
-            // TODO: Warn if this errors, but keep running anyway
-            writeln!(fp, "{}", event.to_json())?;
+            if let Err(e) = writeln!(fp, "{}", event.to_json()) {
+                let _ = self.transcript.take();
+                writeln!(self.stdout, "! Error writing to transcript: {e}")?;
+            }
         }
         Ok(())
     }
