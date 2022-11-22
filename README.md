@@ -17,7 +17,7 @@ Open a TCP connection to the given host and port.  Lines entered by the user at
 the confab prompt are sent to the remote server and echoed locally with a "`>`"
 prefix, while lines received from the remote server are printed out above the
 prompt with a "`<`" prefix.  Communication stops when the remote server closes
-the connection or when the user presses Ctrl-D or Ctrl-C.
+the connection or when the user presses Ctrl-D.
 
 `confab` relies on
 [`rustyline-async`](https://github.com/zyansheep/rustyline-async) for its

@@ -164,7 +164,8 @@ impl Runner {
                         frame.send(&line).await.context("Error sending message")?;
                         Event::send(line)
                     }
-                    Err(ReadlineError::Eof) | Err(ReadlineError::Interrupted) | Err(ReadlineError::Closed) => break,
+                    Err(ReadlineError::Eof) | Err(ReadlineError::Closed) => break,
+                    Err(ReadlineError::Interrupted) => {writeln!(self.stdout, "^C")?; continue; }
                     Err(e) => return Err(e).context("Readline error"),
                 }
             };
