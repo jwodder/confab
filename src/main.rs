@@ -140,12 +140,8 @@ impl Runner {
     }
 
     async fn run(&mut self) -> Result<ExitCode, InterfaceError> {
-        self.report(Event::connect_start(&self.host, self.port))?;
         match self.try_run().await {
-            Ok(()) => {
-                self.report(Event::disconnect())?;
-                Ok(ExitCode::SUCCESS)
-            }
+            Ok(()) => Ok(ExitCode::SUCCESS),
             Err(e) => match e.downcast::<InterfaceError>() {
                 Ok(e) => Err(e),
                 Err(e) => {
@@ -157,6 +153,7 @@ impl Runner {
     }
 
     async fn try_run(&mut self) -> anyhow::Result<()> {
+        self.report(Event::connect_start(&self.host, self.port))?;
         let conn = TcpStream::connect((self.host.clone(), self.port))
             .await
             .context("Error connecting to server")?;
@@ -203,6 +200,7 @@ impl Runner {
             };
             self.report(event)?;
         }
+        self.report(Event::disconnect())?;
         Ok(())
     }
 }
