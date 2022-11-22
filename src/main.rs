@@ -5,11 +5,13 @@ use crate::codec::ConfabCodec;
 use crate::events::Event;
 use crate::util::CharEncoding;
 use anyhow::Context;
+use chrono::Local;
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use rustyline_async::{Readline, ReadlineError, SharedWriter};
+use std::fmt;
 use std::fs::{File, OpenOptions};
-use std::io::Write;
+use std::io::{self, Write};
 use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::pin::Pin;
@@ -109,19 +111,24 @@ struct Runner {
 }
 
 impl Runner {
-    fn report(&mut self, event: Event) -> std::io::Result<()> {
+    fn report(&mut self, event: Event) -> Result<(), InterfaceError> {
         if self.show_times {
-            write!(self.stdout, "[{}] ", event.display_time())?;
+            write!(self.stdout, "[{}] ", event.display_time()).map_err(InterfaceError::Write)?;
         }
-        write!(self.stdout, "{} ", event.sigil())?;
+        write!(self.stdout, "{} ", event.sigil()).map_err(InterfaceError::Write)?;
         for chunk in event.message() {
-            write!(self.stdout, "{}", chunk)?;
+            write!(self.stdout, "{}", chunk).map_err(InterfaceError::Write)?;
         }
-        writeln!(self.stdout)?;
+        writeln!(self.stdout).map_err(InterfaceError::Write)?;
         if let Some(fp) = self.transcript.as_mut() {
             if let Err(e) = writeln!(fp, "{}", event.to_json()) {
                 let _ = self.transcript.take();
-                writeln!(self.stdout, "! Error writing to transcript: {e}")?;
+                if self.show_times {
+                    write!(self.stdout, "[{}] ", Local::now().format("%H:%M:%S"))
+                        .map_err(InterfaceError::Write)?;
+                }
+                writeln!(self.stdout, "! Error writing to transcript: {e}")
+                    .map_err(InterfaceError::Write)?;
             }
         }
         Ok(())
@@ -131,11 +138,14 @@ impl Runner {
         ConfabCodec::new_with_max_length(self.max_line_length.get()).encoding(self.encoding)
     }
 
-    async fn run(&mut self) -> anyhow::Result<()> {
+    async fn run(&mut self) -> Result<(), InterfaceError> {
         self.report(Event::connect_start(&self.host, self.port))?;
         match self.try_run().await {
             Ok(()) => self.report(Event::disconnect())?,
-            Err(e) => self.report(Event::error(e))?,
+            Err(e) => match e.downcast::<InterfaceError>() {
+                Ok(e) => return Err(e),
+                Err(e) => self.report(Event::error(e))?,
+            },
         }
         Ok(())
     }
@@ -182,7 +192,7 @@ impl Runner {
                     }
                     Err(ReadlineError::Eof) | Err(ReadlineError::Closed) => break,
                     Err(ReadlineError::Interrupted) => {writeln!(self.stdout, "^C")?; continue; }
-                    Err(e) => return Err(e).context("Readline error"),
+                    Err(ReadlineError::IO(e)) => return Err(anyhow::Error::new(InterfaceError::Read(e))),
                 }
             };
             self.report(event)?;
@@ -197,11 +207,40 @@ impl Drop for Runner {
     }
 }
 
+enum InterfaceError {
+    Read(io::Error),
+    Write(io::Error),
+}
+
+impl fmt::Debug for InterfaceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
+
+impl fmt::Display for InterfaceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            InterfaceError::Read(e) => write!(f, "Error reading user input: {e}"),
+            InterfaceError::Write(e) => write!(f, "Error writing output: {e}"),
+        }
+    }
+}
+
+impl std::error::Error for InterfaceError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            InterfaceError::Read(e) => Some(e),
+            InterfaceError::Write(e) => Some(e),
+        }
+    }
+}
+
 trait AsyncReadWrite: AsyncRead + AsyncWrite {}
 
 impl<T> AsyncReadWrite for T where T: AsyncRead + AsyncWrite {}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    Arguments::parse().open()?.run().await
+    Ok(Arguments::parse().open()?.run().await?)
 }
