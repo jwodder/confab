@@ -78,6 +78,17 @@ jobs:
         if: matrix.use-cross
         run: cargo install cross
 
+      - name: Configure cross for OpenSSL
+        if: matrix.use-cross
+        run: |
+          cat <<'EOT' > Cross.toml
+          [target.${{ matrix.target }}]
+          pre-build = [
+              "dpkg --add-architecture $CROSS_DEB_ARCH",
+              "apt-get update && apt-get install --assume-yes libssl-dev:$CROSS_DEB_ARCH"
+          ]
+          EOT
+
       - name: Build
         if: "!matrix.use-cross"
         run: cargo build --release --target ${{ matrix.target }} --verbose
