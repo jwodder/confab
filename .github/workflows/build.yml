@@ -74,15 +74,15 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install cross
-        if: matrix.use-cross == 'true'
+        if: matrix.use-cross
         run: cargo install cross
 
       - name: Build
-        if: matrix.use-cross != 'true'
+        if: "!matrix.use-cross"
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Build w/cross
-        if: matrix.use-cross == 'true'
+        if: matrix.use-cross
         run: cross build --release --target ${{ matrix.target }}
 
       - name: Upload artifact
