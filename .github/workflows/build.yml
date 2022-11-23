@@ -80,11 +80,11 @@ jobs:
 
       - name: Build
         if: "!matrix.use-cross"
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --release --target ${{ matrix.target }} --verbose
 
       - name: Build w/cross
         if: matrix.use-cross
-        run: cross build --release --target ${{ matrix.target }}
+        run: cross build --release --target ${{ matrix.target }} --verbose
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
