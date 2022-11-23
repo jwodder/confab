@@ -1,0 +1,103 @@
+name: Build Binaries
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
+  pull_request:
+
+jobs:
+  mkrelease:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub release
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        run: |
+          if ! gh release list | awk -F'\t' '{print $3}' | grep -Fqx "$GITHUB_REF_NAME"
+          then
+              TAG_SUBJECT="$(git show -s --format=%s "$GITHUB_REF_NAME^{commit}")"
+              git show -s --format=%b "$GITHUB_REF_NAME^{commit}" \
+                | gh release create --title "$TAG_SUBJECT" --notes-file - "$GITHUB_REF_NAME"
+          else echo "Release '$GITHUB_REF_NAME' already exists."
+          fi
+
+  build:
+    name: build (${{ matrix.target }})
+    needs: mkrelease
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            os-name: macos
+            target: x86_64-apple-darwin
+            architecture: x86_64
+            suffix: ""
+            use-cross: false
+          - os: ubuntu-latest
+            os-name: linux
+            target: x86_64-unknown-linux-gnu
+            architecture: x86_64
+            suffix: ""
+            use-cross: false
+          - os: ubuntu-latest
+            os-name: linux
+            target: aarch64-unknown-linux-gnu
+            architecture: arm64
+            suffix: ""
+            use-cross: true
+          - os: ubuntu-latest
+            os-name: linux
+            target: i686-unknown-linux-gnu
+            architecture: i686
+            suffix: ""
+            use-cross: true
+          - os: windows-latest
+            os-name: windows
+            target: x86_64-pc-windows-msvc
+            architecture: x86_64
+            suffix: ".exe"
+            use-cross: false
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: Activate cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cross
+        if: matrix.use-cross == 'true'
+        run: cargo install cross
+
+      - name: Build
+        if: matrix.use-cross != 'true'
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Build w/cross
+        if: matrix.use-cross == 'true'
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: confab-${{ matrix.os-name }}-${{ matrix.architecture }}
+          path: target/${{ matrix.target }}/release/confab${{ matrix.suffix }}
+          retention-days: 10
+
+      - name: Upload release asset
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        run: |
+          cd target/${{ matrix.target }}/release
+          ASSET_NAME="confab-$GITHUB_REF_NAME-${{ matrix.os-name }}-${{ matrix.architecture }}"
+          mv -n confab${{ matrix.suffix }} "$ASSET_NAME"
+          gh release upload "$GITHUB_REF_NAME" "$ASSET_NAME"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
