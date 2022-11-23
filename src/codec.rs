@@ -42,7 +42,6 @@
 
 use crate::util::CharEncoding;
 use bytes::{BufMut, BytesMut};
-use std::borrow::Borrow;
 use std::{cmp, io};
 use tokio_util::codec::{Decoder, Encoder};
 
@@ -168,9 +167,8 @@ where
 
     fn encode(&mut self, line: T, buf: &mut BytesMut) -> Result<(), io::Error> {
         let line = self.encoding.encode(line.as_ref());
-        let lineref: &[u8] = line.borrow();
-        buf.reserve(lineref.len());
-        buf.put(lineref);
+        buf.reserve(line.len());
+        buf.put(&*line);
         Ok(())
     }
 }
