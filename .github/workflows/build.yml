@@ -37,31 +37,35 @@ jobs:
             architecture: x86_64
             suffix: ""
             use-cross: false
+            options: ""
           - os: ubuntu-latest
             os-name: linux
             target: x86_64-unknown-linux-gnu
             architecture: x86_64
             suffix: ""
             use-cross: false
+            options: --features vendored-openssl
           - os: ubuntu-latest
             os-name: linux
             target: aarch64-unknown-linux-gnu
             architecture: arm64
             suffix: ""
             use-cross: true
+            options: --features vendored-openssl
           - os: ubuntu-latest
             os-name: linux
             target: i686-unknown-linux-gnu
             architecture: i686
             suffix: ""
             use-cross: true
+            options: --features vendored-openssl
           - os: windows-latest
             os-name: windows
             target: x86_64-pc-windows-msvc
             architecture: x86_64
             suffix: ".exe"
             use-cross: false
-
+            options: ""
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -78,24 +82,13 @@ jobs:
         if: matrix.use-cross
         run: cargo install cross
 
-      - name: Configure cross for OpenSSL
-        if: matrix.use-cross
-        run: |
-          cat <<'EOT' > Cross.toml
-          [target.${{ matrix.target }}]
-          pre-build = [
-              "dpkg --add-architecture $CROSS_DEB_ARCH",
-              "apt-get update && apt-get install --assume-yes libssl-dev:$CROSS_DEB_ARCH"
-          ]
-          EOT
-
       - name: Build
         if: "!matrix.use-cross"
-        run: cargo build --release --target ${{ matrix.target }} --verbose
+        run: cargo build --release --target ${{ matrix.target }} --verbose ${{ matrix.options }}
 
       - name: Build w/cross
         if: matrix.use-cross
-        run: cross build --release --target ${{ matrix.target }} --verbose
+        run: cross build --release --target ${{ matrix.target }} --verbose ${{ matrix.options }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
