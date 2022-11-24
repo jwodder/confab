@@ -30,3 +30,7 @@ unicode-general-category = "0.6.0"
 rstest = { version = "0.16.0", default-features = false }
 tokio = { version = "1.22.0", features = ["io-util", "time"] }
 tokio-stream = { version = "0.1.11", features = ["time"] }
+
+[profile.release]
+lto = true
+strip = true
