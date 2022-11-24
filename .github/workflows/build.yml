@@ -99,10 +99,13 @@ jobs:
 
       - name: Upload release asset
         if: github.event_name == 'push' && github.ref_type == 'tag'
+        shell: bash
         run: |
-          cd target/${{ matrix.target }}/release
-          ASSET_NAME="confab-$GITHUB_REF_NAME-${{ matrix.os-name }}-${{ matrix.architecture }}"
-          mv -n confab${{ matrix.suffix }} "$ASSET_NAME"
-          gh release upload "$GITHUB_REF_NAME" "$ASSET_NAME"
+          name=confab-"$GITHUB_REF_NAME"-${{ matrix.target }}
+          mkdir "$name"
+          cp README.md LICENSE "$name"
+          cp target/${{ matrix.target }}/release/confab${{ matrix.suffix }} "$name"
+          tar zcf "$name.tar.gz" "$name"
+          gh release upload "$GITHUB_REF_NAME" "$name.tar.gz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
