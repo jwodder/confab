@@ -105,7 +105,14 @@ jobs:
           mkdir "$name"
           cp README.md LICENSE "$name"
           cp target/${{ matrix.target }}/release/confab${{ matrix.suffix }} "$name"
-          tar zcf "$name.tar.gz" "$name"
-          gh release upload "$GITHUB_REF_NAME" "$name.tar.gz"
+          if [ ${{ matrix.os-name }} = windows ]
+          then
+              asset="$name.zip"
+              7z -y a "$asset" "$name"
+          else
+              asset="$name.tar.gz"
+              tar zcf "$asset" "$name"
+          fi
+          gh release upload "$GITHUB_REF_NAME" "$asset"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
