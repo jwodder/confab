@@ -1,0 +1,133 @@
+.TH CONFAB 1 2022-11-24
+.SH NAME
+confab \- asynchronous line-oriented interactive TCP client
+.SH SYNOPSIS
+.B confab
+.RI [ options ]
+.I host
+.I port
+.SH DESCRIPTION
+.B confab
+is an asynchronous line-oriented interactive TCP client with TLS support.
+Use it to connect to a TCP server at a given host & port,
+and you'll be able to send messages line by line
+while lines received from the remote server are printed above the prompt.
+.PP
+Lines entered by the user at the
+.B confab
+prompt are sent to the remote server and echoed locally with a ">" prefix,
+while lines received from the remote server
+are printed out above the prompt with a "<" prefix.
+Communication stops when the remote server closes the connection
+or when the user presses Ctrl-D.
+.SH OPTIONS
+.TP
+.B --crlf
+Append CR LF (\(dq\(rsr\(rsn\(dq) to each line sent to the remote server
+instead of just LF (\(dq\(rsn\(dq)
+.TP
+\fB\-E\fR \fIencoding\fR, \fB\-\-encoding\fR \fIencoding\fR
+Set the text encoding for the connection.
+The available options are:
+.RS
+.TP
+.B utf8
+Use UTF-8.
+If a line received from the remote server contains an invalid UTF-8 sequence,
+the sequence is replaced with U+FFFD REPLACEMENT CHARACTER.
+.TP
+.B utf8-latin1
+Use UTF-8.
+If a line received from the remote server contains an invalid UTF-8 sequence,
+the entire line is instead decoded as Latin-1.
+(Useful for IRC!)
+.TP
+.B latin1
+Use Latin-1 (a.k.a.\& ISO-8859-1).
+If a line sent to the remote server contains non-Latin-1 characters,
+they are replaced with question marks (?).
+.RE
+.TP
+\fB\-M\fR \fIlimit\fR, \fB\-\-max\-line\-length\fR \fIlimit\fR
+Set the maximum length in bytes of each line read from the remote server
+(including the terminating newline).
+If the server sends a line longer than this,
+the first
+.I limit
+bytes will be split off and treated as a whole line,
+with the remaining bytes treated as the start of a new line.
+The default value is 65535.
+.TP
+.BI \-\-servername \ domain
+[used with \fB\-\-tls\fR]
+Use the given domain name for SNI and certificate hostname validation;
+defaults to the remote host name
+.TP
+.BR \-t ", " \-\-show\-times
+Prepend a timestamp of the form [HH:MM:SS] to each line printed to the terminal
+.TP
+.B \-\-tls
+Connect using SSL/TLS
+.TP
+\fB\-T\fR \fIfile\fR, \fB\-\-transcript\fR \fIfile\fR
+Append a transcript of events to the given file.  See
+.B TRANSCRIPT FORMAT
+below for more information.
+.SH TRANSCRIPT FORMAT
+The session transcripts produced by the
+.B -T
+option take the form of JSON Lines (a.k.a. newline-delimited JSON),
+that is, a series of lines with one JSON object per line.
+Each JSON object represents an event such as a line sent, a line received,
+or the start or end of the connection.
+.PP
+Each object contains, at minimum, a "timestamp" field containing a timestamp
+for the event in the form "YYYY-MM-DDTHH:MM:SS.ssssss+HH:MM"
+and an "event" field identifying the type of event.
+The possible values for the "event" field,
+along with any accompanying further fields, are as follows:
+.TP
+"connection-start"
+Emitted just before starting to connect to the remote server.
+The event object also contains "host" and "port" fields
+listing the remote host & port specified on the command line.
+.TP
+"connection-complete"
+Emitted after connecting successfully
+(but before negotiating TLS, if applicable).
+The event object also contains a "peer_ip" field
+listing the remote IP address that the connection was made to.
+.TP
+"tls-start"
+Emitted before starting the TLS handshake.
+The event object has no additional fields.
+.TP
+"tls-complete"
+Emitted after completing the TLS handshake.
+The event object has no additional fields.
+.TP
+"recv"
+Emitted whenever a line is received from the remote server.
+The event object also contains a "data" field giving the line received,
+including trailing newline (if any).
+.TP
+"send"
+Emitted whenever a line is send to the remote server.
+The event object also contains a "data" field giving the line sent,
+including trailing newline (if any).
+.TP
+"disconnect"
+Emitted when the connection is closed normally.
+The event object has no additional fields.
+.TP
+"error"
+Emitted when a fatal error occurs.
+The event object also contains a "data" field
+giving a human-readable error message.
+.SH SEE ALSO
+.BR nc (1),
+.BR netcat (1),
+.BR telnet (1)
+.PP
+Source code, issue tracker, and additional information can be found on GitHub at
+.RI < https://github.com/jwodder/confab >.
