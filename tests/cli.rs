@@ -1,5 +1,5 @@
 use expectrl::session::Session;
-use expectrl::{Eof, WaitStatus};
+use expectrl::{ControlCode, Eof, WaitStatus};
 use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
 use std::process::Command;
@@ -30,9 +30,13 @@ async fn testing_server(sender: Sender<SocketAddr>) {
         .send("Welcome to the confab Test Server!")
         .await
         .unwrap();
+    let mut i: usize = 1;
     loop {
         tokio::select! {
-            _ = sleep(Duration::from_secs(1)) => frame.send("Ping").await.unwrap(),
+            _ = sleep(Duration::from_secs(1)) => {
+                frame.send(format!("Ping {i}")).await.unwrap();
+                i += 1;
+            },
             r = frame.next() => match r {
                 Some(Ok(line)) => {
                     frame.send(format!("You sent: {line:?}")).await.unwrap();
@@ -67,10 +71,73 @@ async fn test_quit_session() {
         .await
         .unwrap();
     p.expect("confab> ").await.unwrap();
+    p.send("Hello!\r\n").await.unwrap();
+    p.expect(r#"< You sent: "Hello!""#).await.unwrap();
     p.send("quit\r\n").await.unwrap();
     p.expect("> quit").await.unwrap();
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
+    p.expect("* Disconnected").await.unwrap();
+    p.expect(Eof).await.unwrap();
+    assert_eq!(p.wait().unwrap(), WaitStatus::Exited(p.pid(), 0));
+}
+
+#[tokio::test]
+async fn test_async_recv() {
+    let (sender, receiver) = channel();
+    tokio::spawn(async move { testing_server(sender).await });
+    let addr = receiver.await.expect("Error receiving address from server");
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
+    cmd.arg(addr.ip().to_string());
+    cmd.arg(addr.port().to_string());
+    let mut p = Session::spawn(cmd)
+        .expect("Error spawning command")
+        .with_log(std::io::stdout())
+        .unwrap();
+    p.set_expect_timeout(Some(Duration::from_millis(500)));
+    p.expect("* Connecting ...").await.unwrap();
+    p.expect(format!("* Connected to {addr}")).await.unwrap();
+    p.expect("< Welcome to the confab Test Server!")
+        .await
+        .unwrap();
+    p.expect("confab> ").await.unwrap();
+    sleep(Duration::from_secs(1)).await;
+    p.expect("< Ping 1").await.unwrap();
+    sleep(Duration::from_secs(1)).await;
+    p.expect("< Ping 2").await.unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    p.expect("* Disconnected").await.unwrap();
+    p.expect(Eof).await.unwrap();
+    assert_eq!(p.wait().unwrap(), WaitStatus::Exited(p.pid(), 0));
+}
+
+#[tokio::test]
+async fn test_send_ctrl_d() {
+    let (sender, receiver) = channel();
+    tokio::spawn(async move { testing_server(sender).await });
+    let addr = receiver.await.expect("Error receiving address from server");
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
+    cmd.arg(addr.ip().to_string());
+    cmd.arg(addr.port().to_string());
+    let mut p = Session::spawn(cmd)
+        .expect("Error spawning command")
+        .with_log(std::io::stdout())
+        .unwrap();
+    p.set_expect_timeout(Some(Duration::from_millis(500)));
+    p.expect("* Connecting ...").await.unwrap();
+    p.expect(format!("* Connected to {addr}")).await.unwrap();
+    p.expect("< Welcome to the confab Test Server!")
+        .await
+        .unwrap();
+    p.expect("confab> ").await.unwrap();
+    p.send("Hello!\r\n").await.unwrap();
+    p.expect(r#"< You sent: "Hello!""#).await.unwrap();
+    p.send_control(ControlCode::EndOfTransmission)
+        .await
+        .unwrap();
     p.expect("* Disconnected").await.unwrap();
     p.expect(Eof).await.unwrap();
     assert_eq!(p.wait().unwrap(), WaitStatus::Exited(p.pid(), 0));
