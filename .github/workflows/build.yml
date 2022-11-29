@@ -103,7 +103,7 @@ jobs:
         run: |
           name=confab-"$GITHUB_REF_NAME"-${{ matrix.target }}
           mkdir "$name"
-          cp README.md LICENSE "$name"
+          cp README.md LICENSE doc/confab.1 "$name"
           cp target/${{ matrix.target }}/release/confab${{ matrix.suffix }} "$name"
           if [ ${{ matrix.os-name }} = windows ]
           then
