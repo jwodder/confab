@@ -1,3 +1,5 @@
+// <https://github.com/zhiburt/expectrl/issues/52>
+#![cfg(unix)]
 use expectrl::{spawn, ControlCode, Eof};
 use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
