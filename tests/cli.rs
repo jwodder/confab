@@ -1,13 +1,14 @@
-use expectrl::session::Session;
-use expectrl::{ControlCode, Eof, WaitStatus};
+use expectrl::{spawn, ControlCode, Eof};
 use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
-use std::process::Command;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::oneshot::{channel, Sender};
 use tokio::time::sleep;
 use tokio_util::codec::{Framed, LinesCodec};
+
+#[cfg(unix)]
+use expectrl::WaitStatus;
 
 async fn testing_server(sender: Sender<SocketAddr>) {
     let listener = TcpListener::bind("127.0.0.1:0")
@@ -57,13 +58,18 @@ async fn test_quit_session() {
     let (sender, receiver) = channel();
     tokio::spawn(async move { testing_server(sender).await });
     let addr = receiver.await.expect("Error receiving address from server");
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
-    cmd.arg(addr.ip().to_string());
-    cmd.arg(addr.port().to_string());
-    let mut p = Session::spawn(cmd)
-        .expect("Error spawning command")
-        .with_log(std::io::stdout())
-        .unwrap();
+    // <https://github.com/zhiburt/conpty/issues/5> means that passing a
+    // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
+    // Windows, so we have to construct a shell command instead.
+    let mut p = spawn(format!(
+        "{} {} {}",
+        env!("CARGO_BIN_EXE_confab"),
+        addr.ip(),
+        addr.port()
+    ))
+    .expect("Error spawning command")
+    .with_log(std::io::stdout())
+    .unwrap();
     p.set_expect_timeout(Some(Duration::from_millis(500)));
     p.expect("* Connecting ...").await.unwrap();
     p.expect(format!("* Connected to {addr}")).await.unwrap();
@@ -79,7 +85,10 @@ async fn test_quit_session() {
     p.expect("< Goodbye.").await.unwrap();
     p.expect("* Disconnected").await.unwrap();
     p.expect(Eof).await.unwrap();
+    #[cfg(unix)]
     assert_eq!(p.wait().unwrap(), WaitStatus::Exited(p.pid(), 0));
+    #[cfg(windows)]
+    assert_eq!(p.wait(None).unwrap(), 0);
 }
 
 #[tokio::test]
@@ -87,13 +96,18 @@ async fn test_async_recv() {
     let (sender, receiver) = channel();
     tokio::spawn(async move { testing_server(sender).await });
     let addr = receiver.await.expect("Error receiving address from server");
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
-    cmd.arg(addr.ip().to_string());
-    cmd.arg(addr.port().to_string());
-    let mut p = Session::spawn(cmd)
-        .expect("Error spawning command")
-        .with_log(std::io::stdout())
-        .unwrap();
+    // <https://github.com/zhiburt/conpty/issues/5> means that passing a
+    // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
+    // Windows, so we have to construct a shell command instead.
+    let mut p = spawn(format!(
+        "{} {} {}",
+        env!("CARGO_BIN_EXE_confab"),
+        addr.ip(),
+        addr.port()
+    ))
+    .expect("Error spawning command")
+    .with_log(std::io::stdout())
+    .unwrap();
     p.set_expect_timeout(Some(Duration::from_millis(500)));
     p.expect("* Connecting ...").await.unwrap();
     p.expect(format!("* Connected to {addr}")).await.unwrap();
@@ -111,7 +125,10 @@ async fn test_async_recv() {
     p.expect("< Goodbye.").await.unwrap();
     p.expect("* Disconnected").await.unwrap();
     p.expect(Eof).await.unwrap();
+    #[cfg(unix)]
     assert_eq!(p.wait().unwrap(), WaitStatus::Exited(p.pid(), 0));
+    #[cfg(windows)]
+    assert_eq!(p.wait(None).unwrap(), 0);
 }
 
 #[tokio::test]
@@ -119,13 +136,18 @@ async fn test_send_ctrl_d() {
     let (sender, receiver) = channel();
     tokio::spawn(async move { testing_server(sender).await });
     let addr = receiver.await.expect("Error receiving address from server");
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
-    cmd.arg(addr.ip().to_string());
-    cmd.arg(addr.port().to_string());
-    let mut p = Session::spawn(cmd)
-        .expect("Error spawning command")
-        .with_log(std::io::stdout())
-        .unwrap();
+    // <https://github.com/zhiburt/conpty/issues/5> means that passing a
+    // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
+    // Windows, so we have to construct a shell command instead.
+    let mut p = spawn(format!(
+        "{} {} {}",
+        env!("CARGO_BIN_EXE_confab"),
+        addr.ip(),
+        addr.port()
+    ))
+    .expect("Error spawning command")
+    .with_log(std::io::stdout())
+    .unwrap();
     p.set_expect_timeout(Some(Duration::from_millis(500)));
     p.expect("* Connecting ...").await.unwrap();
     p.expect(format!("* Connected to {addr}")).await.unwrap();
@@ -140,5 +162,8 @@ async fn test_send_ctrl_d() {
         .unwrap();
     p.expect("* Disconnected").await.unwrap();
     p.expect(Eof).await.unwrap();
+    #[cfg(unix)]
     assert_eq!(p.wait().unwrap(), WaitStatus::Exited(p.pid(), 0));
+    #[cfg(windows)]
+    assert_eq!(p.wait(None).unwrap(), 0);
 }
