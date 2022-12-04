@@ -12,6 +12,10 @@ jobs:
   mkrelease:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        uses: actions/checkout@v3
+
       - name: Create GitHub release
         if: github.event_name == 'push' && github.ref_type == 'tag'
         run: |
@@ -22,6 +26,8 @@ jobs:
                 | gh release create --title "$TAG_SUBJECT" --notes-file - "$GITHUB_REF_NAME"
           else echo "Release '$GITHUB_REF_NAME' already exists."
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     name: build (${{ matrix.target }})
