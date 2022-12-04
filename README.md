@@ -3,6 +3,8 @@
 [![codecov.io](https://codecov.io/gh/jwodder/confab/branch/master/graph/badge.svg)](https://codecov.io/gh/jwodder/confab)
 [![MIT License](https://img.shields.io/github/license/jwodder/confab.svg)](https://opensource.org/licenses/MIT)
 
+[GitHub](https://github.com/jwodder/confab) | [crates.io](https://crates.io/crates/confab) | [Issues](https://github.com/jwodder/confab/issues) <!-- | [Changelog](https://github.com/jwodder/confab/blob/master/CHANGELOG.md) -->
+
 `confab` is an asynchronous line-oriented interactive TCP client with TLS
 support.  Use it to connect to a TCP server, and you'll be able to send
 messages line by line while lines received from the remote server are printed

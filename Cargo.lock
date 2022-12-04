@@ -207,7 +207,7 @@ dependencies = [
 
 [[package]]
 name = "confab"
-version = "0.1.0-dev"
+version = "0.1.0-alpha"
 dependencies = [
  "anyhow",
  "bytes",
