@@ -23,7 +23,7 @@ itertools = "0.10.5"
 native-tls = "0.2.11"
 openssl = { version = "0.10.43", optional = true }
 rustyline-async = "0.3.0"
-tokio = { version = "1.22.0", features = ["macros", "net", "rt", "rt-multi-thread"] }
+tokio = { version = "1.23.0", features = ["macros", "net", "rt", "rt-multi-thread"] }
 tokio-native-tls = "0.3.0"
 tokio-util = { version = "0.7.4", features = ["codec"] }
 unicode-general-category = "0.6.0"
@@ -31,7 +31,7 @@ unicode-general-category = "0.6.0"
 [dev-dependencies]
 expectrl = { version = "0.6.0", features = ["async"] }
 rstest = { version = "0.16.0", default-features = false }
-tokio = { version = "1.22.0", features = ["io-util", "sync", "time"] }
+tokio = { version = "1.23.0", features = ["io-util", "sync", "time"] }
 tokio-stream = { version = "0.1.11", features = ["time"] }
 
 [features]
