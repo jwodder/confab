@@ -118,7 +118,7 @@ impl Runner {
         }
         write!(self.stdout, "{} ", event.sigil()).map_err(InterfaceError::Write)?;
         for chunk in event.message() {
-            write!(self.stdout, "{}", chunk).map_err(InterfaceError::Write)?;
+            write!(self.stdout, "{chunk}").map_err(InterfaceError::Write)?;
         }
         writeln!(self.stdout).map_err(InterfaceError::Write)?;
         if let Some(fp) = self.transcript.as_mut() {

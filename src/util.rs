@@ -70,7 +70,7 @@ fn write_json_str<W: Write>(s: &str, writer: &mut W) -> fmt::Result {
             c => {
                 let mut buf = [0u16; 2];
                 for b in c.encode_utf16(&mut buf) {
-                    write!(writer, "\\u{:04x}", b)?;
+                    write!(writer, "\\u{b:04x}")?;
                 }
             }
         }
