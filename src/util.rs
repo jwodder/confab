@@ -20,9 +20,7 @@ impl JsonStrMap {
     }
 
     pub(crate) fn field<D: Display + ?Sized>(mut self, key: &str, value: &D) -> JsonStrMap {
-        if self.first {
-            self.first = false;
-        } else {
+        if !std::mem::replace(&mut self.first, false) {
             self.buf.push_str(", ");
         }
         write_json_str(key, &mut self.buf).unwrap();
@@ -32,9 +30,7 @@ impl JsonStrMap {
     }
 
     pub(crate) fn raw_field(mut self, key: &str, value: &str) -> JsonStrMap {
-        if self.first {
-            self.first = false;
-        } else {
+        if !std::mem::replace(&mut self.first, false) {
             self.buf.push_str(", ");
         }
         write_json_str(key, &mut self.buf).unwrap();
