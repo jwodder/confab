@@ -22,7 +22,7 @@ futures = "0.3.26"
 itertools = "0.10.5"
 native-tls = "0.2.11"
 openssl = { version = "0.10.45", optional = true }
-rustyline-async = "0.3.0"
+rustyline-async = "0.3.1"
 tokio = { version = "1.25.0", features = ["macros", "net", "rt", "rt-multi-thread"] }
 tokio-native-tls = "0.3.1"
 tokio-util = { version = "0.7.7", features = ["codec"] }
