@@ -32,7 +32,7 @@ unicode-general-category = "0.6.0"
 expectrl = { version = "0.6.0", features = ["async"] }
 rstest = { version = "0.16.0", default-features = false }
 tokio = { version = "1.25.0", features = ["io-util", "sync", "time"] }
-tokio-stream = { version = "0.1.11", features = ["time"] }
+tokio-stream = { version = "0.1.12", features = ["time"] }
 
 [features]
 vendored-openssl = ["openssl/vendored"]
