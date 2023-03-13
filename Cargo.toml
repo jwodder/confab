@@ -18,7 +18,7 @@ bytes = "1.4.0"
 chrono = "0.4.24"
 clap = { version = "4.1.8", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
 crossterm = "0.26.1"
-futures = "0.3.26"
+futures = "0.3.27"
 itertools = "0.10.5"
 native-tls = "0.2.11"
 openssl = { version = "0.10.45", optional = true }
