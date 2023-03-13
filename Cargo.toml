@@ -15,7 +15,7 @@ exclude = ["/.*"]
 [dependencies]
 anyhow = "1.0.69"
 bytes = "1.4.0"
-chrono = "0.4.23"
+chrono = "0.4.24"
 clap = { version = "4.1.8", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
 crossterm = "0.26.1"
 futures = "0.3.26"
