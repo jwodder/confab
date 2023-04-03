@@ -1,6 +1,6 @@
 // <https://github.com/zhiburt/expectrl/issues/52>
 #![cfg(unix)]
-use expectrl::{spawn, ControlCode, Eof};
+use expectrl::{session::log, spawn, ControlCode, Eof};
 use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
 use std::time::Duration;
@@ -63,14 +63,16 @@ async fn test_quit_session() {
     // <https://github.com/zhiburt/conpty/issues/5> means that passing a
     // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
     // Windows, so we have to construct a shell command instead.
-    let mut p = spawn(format!(
-        "{} {} {}",
-        env!("CARGO_BIN_EXE_confab"),
-        addr.ip(),
-        addr.port()
-    ))
-    .expect("Error spawning command")
-    .with_log(std::io::stdout())
+    let mut p = log(
+        spawn(format!(
+            "{} {} {}",
+            env!("CARGO_BIN_EXE_confab"),
+            addr.ip(),
+            addr.port()
+        ))
+        .expect("Error spawning command"),
+        std::io::stdout(),
+    )
     .unwrap();
     p.set_expect_timeout(Some(Duration::from_millis(500)));
     p.expect("* Connecting ...").await.unwrap();
@@ -101,14 +103,16 @@ async fn test_async_recv() {
     // <https://github.com/zhiburt/conpty/issues/5> means that passing a
     // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
     // Windows, so we have to construct a shell command instead.
-    let mut p = spawn(format!(
-        "{} {} {}",
-        env!("CARGO_BIN_EXE_confab"),
-        addr.ip(),
-        addr.port()
-    ))
-    .expect("Error spawning command")
-    .with_log(std::io::stdout())
+    let mut p = log(
+        spawn(format!(
+            "{} {} {}",
+            env!("CARGO_BIN_EXE_confab"),
+            addr.ip(),
+            addr.port()
+        ))
+        .expect("Error spawning command"),
+        std::io::stdout(),
+    )
     .unwrap();
     p.set_expect_timeout(Some(Duration::from_millis(500)));
     p.expect("* Connecting ...").await.unwrap();
@@ -141,14 +145,16 @@ async fn test_send_ctrl_d() {
     // <https://github.com/zhiburt/conpty/issues/5> means that passing a
     // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
     // Windows, so we have to construct a shell command instead.
-    let mut p = spawn(format!(
-        "{} {} {}",
-        env!("CARGO_BIN_EXE_confab"),
-        addr.ip(),
-        addr.port()
-    ))
-    .expect("Error spawning command")
-    .with_log(std::io::stdout())
+    let mut p = log(
+        spawn(format!(
+            "{} {} {}",
+            env!("CARGO_BIN_EXE_confab"),
+            addr.ip(),
+            addr.port()
+        ))
+        .expect("Error spawning command"),
+        std::io::stdout(),
+    )
     .unwrap();
     p.set_expect_timeout(Some(Duration::from_millis(500)));
     p.expect("* Connecting ...").await.unwrap();
@@ -159,9 +165,7 @@ async fn test_send_ctrl_d() {
     p.expect("confab> ").await.unwrap();
     p.send("Hello!\r\n").await.unwrap();
     p.expect(r#"< You sent: "Hello!""#).await.unwrap();
-    p.send_control(ControlCode::EndOfTransmission)
-        .await
-        .unwrap();
+    p.send(ControlCode::EndOfTransmission).await.unwrap();
     p.expect("* Disconnected").await.unwrap();
     p.expect(Eof).await.unwrap();
     #[cfg(unix)]
