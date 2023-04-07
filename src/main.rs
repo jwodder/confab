@@ -115,23 +115,25 @@ struct Runner {
 
 impl Runner {
     fn report(&mut self, event: Event) -> Result<(), InterfaceError> {
+        self.report_inner(event).map_err(InterfaceError::Write)
+    }
+
+    fn report_inner(&mut self, event: Event) -> Result<(), io::Error> {
         if self.show_times {
-            write!(self.stdout, "[{}] ", event.display_time()).map_err(InterfaceError::Write)?;
+            write!(self.stdout, "[{}] ", event.display_time())?;
         }
-        write!(self.stdout, "{} ", event.sigil()).map_err(InterfaceError::Write)?;
+        write!(self.stdout, "{} ", event.sigil())?;
         for chunk in event.message() {
-            write!(self.stdout, "{chunk}").map_err(InterfaceError::Write)?;
+            write!(self.stdout, "{chunk}")?;
         }
-        writeln!(self.stdout).map_err(InterfaceError::Write)?;
+        writeln!(self.stdout)?;
         if let Some(fp) = self.transcript.as_mut() {
             if let Err(e) = writeln!(fp, "{}", event.to_json()) {
                 let _ = self.transcript.take();
                 if self.show_times {
-                    write!(self.stdout, "[{}] ", Local::now().format("%H:%M:%S"))
-                        .map_err(InterfaceError::Write)?;
+                    write!(self.stdout, "[{}] ", Local::now().format("%H:%M:%S"))?;
                 }
-                writeln!(self.stdout, "! Error writing to transcript: {e}")
-                    .map_err(InterfaceError::Write)?;
+                writeln!(self.stdout, "! Error writing to transcript: {e}")?;
             }
         }
         Ok(())
