@@ -1,8 +1,10 @@
 // <https://github.com/zhiburt/expectrl/issues/52>
 #![cfg(unix)]
-use expectrl::{session::log, spawn, ControlCode, Eof};
+use expectrl::session::{log, Session};
+use expectrl::{ControlCode, Eof};
 use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
+use std::process::Command;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::oneshot::{channel, Sender};
@@ -60,17 +62,11 @@ async fn test_quit_session() {
     let (sender, receiver) = channel();
     tokio::spawn(async move { testing_server(sender).await });
     let addr = receiver.await.expect("Error receiving address from server");
-    // <https://github.com/zhiburt/conpty/issues/5> means that passing a
-    // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
-    // Windows, so we have to construct a shell command instead.
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
+    cmd.arg(addr.ip().to_string());
+    cmd.arg(addr.port().to_string());
     let mut p = log(
-        spawn(format!(
-            "{} {} {}",
-            env!("CARGO_BIN_EXE_confab"),
-            addr.ip(),
-            addr.port()
-        ))
-        .expect("Error spawning command"),
+        Session::spawn(cmd).expect("Error spawning command"),
         std::io::stdout(),
     )
     .unwrap();
@@ -100,17 +96,11 @@ async fn test_async_recv() {
     let (sender, receiver) = channel();
     tokio::spawn(async move { testing_server(sender).await });
     let addr = receiver.await.expect("Error receiving address from server");
-    // <https://github.com/zhiburt/conpty/issues/5> means that passing a
-    // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
-    // Windows, so we have to construct a shell command instead.
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
+    cmd.arg(addr.ip().to_string());
+    cmd.arg(addr.port().to_string());
     let mut p = log(
-        spawn(format!(
-            "{} {} {}",
-            env!("CARGO_BIN_EXE_confab"),
-            addr.ip(),
-            addr.port()
-        ))
-        .expect("Error spawning command"),
+        Session::spawn(cmd).expect("Error spawning command"),
         std::io::stdout(),
     )
     .unwrap();
@@ -142,17 +132,11 @@ async fn test_send_ctrl_d() {
     let (sender, receiver) = channel();
     tokio::spawn(async move { testing_server(sender).await });
     let addr = receiver.await.expect("Error receiving address from server");
-    // <https://github.com/zhiburt/conpty/issues/5> means that passing a
-    // `std::process::Command` to `expectrl::Session::spawn()` doesn't work on
-    // Windows, so we have to construct a shell command instead.
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
+    cmd.arg(addr.ip().to_string());
+    cmd.arg(addr.port().to_string());
     let mut p = log(
-        spawn(format!(
-            "{} {} {}",
-            env!("CARGO_BIN_EXE_confab"),
-            addr.ip(),
-            addr.port()
-        ))
-        .expect("Error spawning command"),
+        Session::spawn(cmd).expect("Error spawning command"),
         std::io::stdout(),
     )
     .unwrap();
