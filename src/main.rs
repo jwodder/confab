@@ -33,6 +33,10 @@ struct Arguments {
     crlf: bool,
 
     /// Set text encoding
+    ///
+    /// "utf8" converts invalid byte sequences to the replacement character.
+    /// "utf8-latin1" handles invalid byte sequences by decoding the entire
+    /// line as Latin-1.
     #[clap(
         short = 'E',
         long,
@@ -41,8 +45,13 @@ struct Arguments {
     )]
     encoding: CharEncoding,
 
-    /// Set maximum length of lines read from remote server
-    #[clap(short = 'M', long, default_value = "65535", value_name = "INT")]
+    /// Set maximum length in bytes of lines read from remote server
+    ///
+    /// If the server sends a line longer than this (including the terminating
+    /// newline), the first <LIMIT> bytes will be split off and treated as a
+    /// whole line, with the remaining bytes treated as the start of a new
+    /// line.
+    #[clap(short = 'M', long, default_value = "65535", value_name = "LIMIT")]
     max_line_length: NonZeroUsize,
 
     /// Use the given domain name for SNI and certificate hostname validation
