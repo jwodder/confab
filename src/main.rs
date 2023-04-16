@@ -1,10 +1,8 @@
 mod codec;
 mod events;
-mod native_tls;
 mod util;
 use crate::codec::ConfabCodec;
 use crate::events::{now, Event, HMS_FMT};
-use crate::native_tls as tls;
 use crate::util::{latin1ify, CharEncoding};
 use anyhow::Context as _;
 use clap::Parser;
@@ -19,6 +17,18 @@ use std::process::ExitCode;
 use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
 use tokio_util::either::Either;
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "rustls")] {
+        mod rustls;
+        use crate::rustls as tls;
+    } else if #[cfg(feature = "native")] {
+        mod native_tls;
+        use crate::native_tls as tls;
+    } else {
+        compile_error("confab requires feature \"rustls\" or \"native\" to be enabled")
+    }
+}
 
 mod build {
     include!(concat!(env!("OUT_DIR"), "/build_info.rs"));

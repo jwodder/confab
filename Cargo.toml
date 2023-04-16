@@ -15,18 +15,21 @@ exclude = ["/.*"]
 [dependencies]
 anyhow = "1.0.71"
 bytes = "1.4.0"
+cfg-if = "1.0.0"
 clap = { version = "4.3.0", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
 crossterm = "0.26.1"
 futures = "0.3.28"
 itertools = "0.10.5"
-native-tls = "0.2.11"
+native-tls = { version = "0.2.11", optional = true }
 openssl = { version = "0.10.52", optional = true }
 rustyline-async = "0.3.2"
 time = { version = "0.3.21", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
 tokio = { version = "1.28.2", features = ["macros", "net", "rt", "rt-multi-thread"] }
-tokio-native-tls = "0.3.1"
+tokio-native-tls = { version = "0.3.1", optional = true }
+tokio-rustls = { version = "0.24.0", optional = true }
 tokio-util = { version = "0.7.8", features = ["codec"] }
 unicode-general-category = "0.6.0"
+webpki-roots = { version = "0.23.0", optional = true }
 
 [dev-dependencies]
 assert_matches = "1.5.0"
@@ -41,7 +44,10 @@ tokio = { version = "1.28.2", features = ["io-util", "sync", "time"] }
 tokio-stream = { version = "0.1.14", features = ["time"] }
 
 [features]
-vendored-openssl = ["openssl/vendored"]
+default = ["rustls"]
+rustls = ["dep:tokio-rustls", "dep:webpki-roots"]
+native = ["dep:native-tls", "dep:tokio-native-tls"]
+vendored-openssl = ["native", "openssl/vendored"]
 
 [profile.release]
 lto = true
