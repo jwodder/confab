@@ -1,8 +1,10 @@
 mod codec;
 mod events;
+mod native_tls;
 mod util;
 use crate::codec::ConfabCodec;
 use crate::events::{now, Event, HMS_FMT};
+use crate::native_tls as tls;
 use crate::util::{latin1ify, CharEncoding};
 use anyhow::Context as _;
 use clap::Parser;
@@ -179,13 +181,7 @@ impl Runner {
         ))?;
         let conn = if self.tls {
             self.report(Event::tls_start())?;
-            let cx = tokio_native_tls::TlsConnector::from(
-                native_tls::TlsConnector::new().context("Error creating TLS connector")?,
-            );
-            let conn = cx
-                .connect(self.servername.as_ref().unwrap_or(&self.host), conn)
-                .await
-                .context("Error establishing TLS connection")?;
+            let conn = tls::connect(conn, self.servername.as_ref().unwrap_or(&self.host)).await?;
             self.report(Event::tls_finish())?;
             Either::Right(conn)
         } else {
