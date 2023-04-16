@@ -41,3 +41,14 @@ vendored-openssl = ["openssl/vendored"]
 [profile.release]
 lto = true
 strip = true
+
+[profile.dist]
+inherits = "release"
+
+[workspace.metadata.dist]
+cargo-dist-version = "0.0.5"
+rust-toolchain-version = "stable"
+ci = ["github"]
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-pc-windows-msvc", "x86_64-unknown-linux-gnu"]
+#targets = ["aarch64-apple-darwin", "aarch64-unknown-linux-gnu", "i686-unknown-linux-gnu", "x86_64-apple-darwin", "x86_64-pc-windows-msvc", "x86_64-unknown-linux-gnu"]
+installers = ["shell", "powershell"]
