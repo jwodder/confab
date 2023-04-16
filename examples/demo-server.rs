@@ -27,12 +27,13 @@ async fn main() -> anyhow::Result<()> {
     let listener = TcpListener::bind((args.bind, args.port))
         .await
         .context("Error binding to port")?;
-    println!(
+    eprintln!(
         "Listening for connections at {} ...",
         listener
             .local_addr()
             .context("Error getting local address")?
     );
+    eprintln!("Press Ctrl-C to terminate.");
     loop {
         let (socket, addr) = listener
             .accept()
@@ -84,7 +85,11 @@ impl Session {
     }
 
     async fn interact(&mut self) -> Result<(), ServerError> {
-        self.send("Welcome to the confab Demo Server!").await?;
+        self.send(&format!(
+            "Welcome to the confab Demo Server, {}!",
+            self.addr
+        ))
+        .await?;
         loop {
             self.send("Commands: debug, ping, ctrl, bytes, quit")
                 .await?;
