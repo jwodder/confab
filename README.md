@@ -10,6 +10,37 @@ support.  Use it to connect to a TCP server, and you'll be able to send
 messages line by line while lines received from the remote server are printed
 above the prompt.
 
+Installation
+============
+
+Release Assets
+--------------
+
+Prebuilt binaries are available for the most common platforms.  The binaries
+for the latest release of the code can be found on [the Releases
+page](https://github.com/jwodder/confab/releases) under the "Assets" header.
+
+Cargo
+-----
+
+If you have [Rust and Cargo
+installed](https://www.rust-lang.org/tools/install), you can build the latest
+release of `confab` and install it in `~/.cargo/bin` by running:
+
+    cargo install confab
+
+`confab` has the following Cargo features, selectable via the `--features
+<LIST>` option to `cargo install`:
+
+- `vendored-openssl` — Compile a vendored copy of OpenSSL into `confab` instead
+  of using the platform's copy at runtime.  This makes it possible to build
+  `confab` on one system and run it on another system that has a different
+  version of OpenSSL.
+
+    - This option is only meaningful on platforms other than macOS and Windows,
+      on which `confab` does not use OpenSSL for TLS connections.
+
+
 Usage
 =====
 
