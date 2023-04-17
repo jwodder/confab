@@ -51,7 +51,7 @@ struct Arguments {
     /// newline), the first <LIMIT> bytes will be split off and treated as a
     /// whole line, with the remaining bytes treated as the start of a new
     /// line.
-    #[clap(short = 'M', long, default_value = "65535", value_name = "LIMIT")]
+    #[clap(long, default_value = "65535", value_name = "LIMIT")]
     max_line_length: NonZeroUsize,
 
     /// Use the given domain name for SNI and certificate hostname validation

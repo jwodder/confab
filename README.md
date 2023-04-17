@@ -65,9 +65,9 @@ Options
 - `-E <encoding>`, `--encoding <encoding>` — Set the text encoding for the
   connection.  The available options are:
 
-    - `utf8` — Use UTF-8.  If a line received from the remote server contains
-      an invalid UTF-8 sequence, the sequence is replaced with U+FFFD
-      REPLACEMENT CHARACTER (`�`).
+    - `utf8` *(default)* — Use UTF-8.  If a line received from the remote
+      server contains an invalid UTF-8 sequence, the sequence is replaced with
+      U+FFFD REPLACEMENT CHARACTER (`�`).
 
     - `utf8-latin1` — Use UTF-8.  If a line received from the remote server
       contains an invalid UTF-8 sequence, the entire line is instead decoded as
@@ -77,11 +77,11 @@ Options
       server contains non-Latin-1 characters, they are replaced with question
       marks (`?`).
 
-- `-M <LIMIT>`, `--max-line-length <LIMIT>` — Set the maximum length in bytes
-  of each line read from the remote server (including the terminating newline).
-  If the server sends a line longer than this, the first `<LIMIT>` bytes will
-  be split off and treated as a whole line, with the remaining bytes treated as
-  the start of a new line.  [default value: 65535]
+- `--max-line-length <LIMIT>` — Set the maximum length in bytes of each line
+  read from the remote server (including the terminating newline).  If the
+  server sends a line longer than this, the first `<LIMIT>` bytes will be split
+  off and treated as a whole line, with the remaining bytes treated as the
+  start of a new line.  [default value: 65535]
 
 - `--servername <DOMAIN>` — (with `--tls`) Use the given domain name for SNI
   and certificate hostname validation; defaults to the remote host name
@@ -99,10 +99,10 @@ Options
 Transcript Format
 =================
 
-The session transcripts produced by the `-T` option take the form of JSON Lines
-(a.k.a. newline-delimited JSON), that is, a series of lines with one JSON
-object per line.  Each JSON object represents an event such as a line sent, a
-line received, or the start or end of the connection.
+The session transcripts produced by the `--transcript` option take the form of
+JSON Lines (a.k.a. newline-delimited JSON), that is, a series of lines with one
+JSON object per line.  Each JSON object represents an event such as a line
+sent, a line received, or the start or end of the connection.
 
 Each object contains, at minimum, a `"timestamp"` field containing a timestamp
 for the event in the form `"YYYY-MM-DDTHH:MM:SS.ssssss+HH:MM"` and an `"event"`
