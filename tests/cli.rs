@@ -11,7 +11,7 @@ use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
 use tokio::sync::oneshot::{channel, Sender};
 use tokio::time::sleep;
-use tokio_util::codec::{Framed, LinesCodec};
+use tokio_util::codec::{AnyDelimiterCodec, Framed};
 
 #[cfg(unix)]
 use expectrl::WaitStatus;
@@ -34,7 +34,10 @@ async fn testing_server(sender: Sender<SocketAddr>) {
         .await
         .expect("Error listening for connection");
     drop(listener);
-    let mut frame = Framed::new(socket, LinesCodec::new_with_max_length(65535));
+    let mut frame = Framed::new(
+        socket,
+        AnyDelimiterCodec::new_with_max_length(b"\n".to_vec(), b"\n".to_vec(), 65535),
+    );
     frame
         .send("Welcome to the confab Test Server!")
         .await
@@ -48,7 +51,11 @@ async fn testing_server(sender: Sender<SocketAddr>) {
             },
             r = frame.next() => match r {
                 Some(Ok(line)) => {
-                    frame.send(format!("You sent: {line:?}")).await.unwrap();
+                    let repr = match std::str::from_utf8(line.as_ref()) {
+                        Ok(s) => format!("{s:?}"),
+                        Err(_) => format!("{line:?}"),
+                    };
+                    frame.send(format!("You sent: {repr}")).await.unwrap();
                     if line == "quit" {
                         frame.send("Goodbye.").await.unwrap();
                         break;
@@ -254,16 +261,17 @@ async fn test_send_utf8() {
     end_session(p).await;
 }
 
-// TODO: testing_server() needs to not decode input bytes as UTF-8.
-#[ignore]
 #[tokio::test]
 async fn test_send_latin1() {
     let mut p = start_session(&["-E", "latin1"]).await;
     p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
         .await
         .unwrap();
-    p.expect("> Fëanor is an ?.  Frosty is a ?.").await.unwrap();
-    p.expect(r#"< You sent: "Fëanor is an ?.  Frosty is a ?.""#)
+    //TODO: p.expect("> Fëanor is an ?.  Frosty is a ?.").await.unwrap();
+    p.expect("> Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.")
+        .await
+        .unwrap();
+    p.expect(r#"< You sent: b"F\xebanor is an ?.  Frosty is a ?.""#)
         .await
         .unwrap();
     p.send("quit\r\n").await.unwrap();
