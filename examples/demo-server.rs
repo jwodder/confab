@@ -77,11 +77,20 @@ impl Session {
     }
 
     async fn run(mut self) {
-        eprintln!("[{}] Connection received", self.addr);
+        self.log("Connection received");
         if let Err(e) = self.interact().await {
-            eprintln!("[{}] {}", self.addr, e);
+            self.log(e);
         }
-        eprintln!("[{}] Disconnecting ...", self.addr);
+        self.log("Disconnecting ...");
+    }
+
+    fn log<D: fmt::Display>(&self, event: D) {
+        eprintln!(
+            "[{}] [{}] {}",
+            chrono::Local::now().format("%H:%M:%S"),
+            self.addr,
+            event
+        );
     }
 
     async fn interact(&mut self) -> Result<(), ServerError> {
@@ -91,11 +100,12 @@ impl Session {
         ))
         .await?;
         loop {
-            self.send("Commands: debug, ping, ctrl, bytes, quit")
+            self.send("Commands: debug, ping, async, ctrl, bytes, quit")
                 .await?;
             match self.recv().await?.as_str() {
                 "debug" => self.debug().await?,
                 "ping" => self.ping().await?,
+                "async" => self.async_().await?,
                 "ctrl" => self.ctrl().await?,
                 "bytes" => self.bytes().await?,
                 "quit" => {
@@ -108,7 +118,8 @@ impl Session {
     }
 
     async fn debug(&mut self) -> Result<(), ServerError> {
-        self.send("Enter lines to send back.  Send \"quit\" to return to the main menu.")
+        self.send("Enter lines to send back.").await?;
+        self.send("Send \"quit\" to return to the main menu.")
             .await?;
         loop {
             let line = self.recv().await?;
@@ -133,6 +144,27 @@ impl Session {
                     r?;
                     self.send("Ok, stopping.").await?;
                     return Ok(());
+                }
+            }
+        }
+    }
+
+    async fn async_(&mut self) -> Result<(), ServerError> {
+        self.send("Enter lines to send back while I blather.")
+            .await?;
+        self.send("Send \"quit\" to return to the main menu.")
+            .await?;
+        loop {
+            tokio::select! {
+                _ = sleep(Duration::from_secs(1)) => {
+                    self.send("Blah blah blah.").await?;
+                }
+                r = self.recv() => {
+                    let line = r?;
+                    if line == "quit" {
+                        return Ok(());
+                    }
+                    self.send(&format!("You sent: {line:?}")).await?;
                 }
             }
         }
