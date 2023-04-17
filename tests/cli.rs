@@ -73,6 +73,11 @@ async fn testing_server(sender: Sender<SocketAddr>) {
                             "tion ullamco laboris nisi ut aliquip ex ea",
                             " commodo consequat."
                         )).await.unwrap();
+                    } else if line == "bytes" {
+                        let conn = frame.get_mut();
+                        conn.write_all(b"Here is some non-UTF-8 data:\n").await.unwrap();
+                        conn.write_all(b"Latin-1: Libert\xE9, \xE9galit\xE9, fraternit\xE9\n").await.unwrap();
+                        conn.write_all(b"General garbage: \x89\xAB\xCD\xEF\n").await.unwrap();
                     }
                 }
                 Some(Err(e)) => panic!("Error reading from connection: {e}"),
@@ -259,6 +264,46 @@ async fn test_send_latin1() {
         .unwrap();
     p.expect("> Fëanor is an ?.  Frosty is a ?.").await.unwrap();
     p.expect(r#"< You sent: "Fëanor is an ?.  Frosty is a ?.""#)
+        .await
+        .unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    end_session(p).await;
+}
+
+#[tokio::test]
+async fn test_receive_non_utf8() {
+    let mut p = start_session(&[]).await;
+    p.send("bytes\r\n").await.unwrap();
+    p.expect("> bytes").await.unwrap();
+    p.expect(r#"< You sent: "bytes""#).await.unwrap();
+    p.expect("< Here is some non-UTF-8 data:").await.unwrap();
+    p.expect("< Latin-1: Libert\u{FFFD}, \u{FFFD}galit\u{FFFD}, fraternit\u{FFFD}")
+        .await
+        .unwrap();
+    p.expect("< General garbage: \u{FFFD}\u{FFFD}\u{FFFD}\u{FFFD}")
+        .await
+        .unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    end_session(p).await;
+}
+
+#[tokio::test]
+async fn test_receive_non_utf8_with_latin1_fallback() {
+    let mut p = start_session(&["--encoding=utf8-latin1"]).await;
+    p.send("bytes\r\n").await.unwrap();
+    p.expect("> bytes").await.unwrap();
+    p.expect(r#"< You sent: "bytes""#).await.unwrap();
+    p.expect("< Here is some non-UTF-8 data:").await.unwrap();
+    p.expect("< Latin-1: Liberté, égalité, fraternité")
+        .await
+        .unwrap();
+    p.expect("< General garbage: \x1B[7m<U+0089>\x1B[0m\u{AB}\u{CD}\u{EF}")
         .await
         .unwrap();
     p.send("quit\r\n").await.unwrap();
