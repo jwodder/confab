@@ -48,25 +48,30 @@ jobs:
           echo "has-releases=$HAS_RELEASES" >> "$GITHUB_OUTPUT"
 
   upload-artifacts:
+    name: upload-artifacts (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
     needs: create-release
     if: needs.create-release.outputs.has-releases == 'true'
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - name: Installers
+            os: ubuntu-20.04
             dist-args: --artifacts=global
             install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.sh | sh
-          - os: macos-11
+          - name: macOS
+            os: macos-11
             dist-args: --artifacts=local --target=aarch64-apple-darwin --target=x86_64-apple-darwin
             install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.sh | sh
-          - os: ubuntu-20.04
+          - name: Linux
+            os: ubuntu-20.04
             # TODO: Check if this works: (Will require adding the extra targets
             # to the cargo-dist config):
             #dist-args: --artifacts=local --target=aarch64-unknown-linux-gnu --target=i686-unknown-linux-gnu --target=x86_64-unknown-linux-gnu
             dist-args: --artifacts=local --target=x86_64-unknown-linux-gnu
             install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.sh | sh
-          - os: windows-2019
+          - name: Windows
+            os: windows-2019
             dist-args: --artifacts=local --target=x86_64-pc-windows-msvc
             install-dist: irm https://github.com/axodotdev/cargo-dist/releases/download/v$Env:CARGO_DIST_VERSION/cargo-dist-v$Env:CARGO_DIST_VERSION-installer.ps1 | iex
     env:
