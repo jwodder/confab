@@ -16,9 +16,16 @@ Installation
 Release Assets
 --------------
 
-Prebuilt binaries are available for the most common platforms.  The binaries
-for the latest release of the code can be found on [the Releases
-page](https://github.com/jwodder/confab/releases) under the "Assets" header.
+Prebuilt binaries for the most common platforms are available as GitHub release
+assets.  [The page for the latest
+release](https://github.com/jwodder/confab/releases/latest) lists these under
+"Assets", along with installer scripts for both Unix-like systems and Windows.
+
+As an alternative to the installer scripts, if you have
+[`cargo-binstall`](https://github.com/cargo-bins/cargo-binstall) on your
+system, you can use it to download & install the appropriate release asset for
+your system for the latest version of `confab` by running `cargo binstall
+confab`.
 
 Cargo
 -----
