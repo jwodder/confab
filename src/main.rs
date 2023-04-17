@@ -128,14 +128,7 @@ impl Runner {
     }
 
     fn report_inner(&mut self, event: Event) -> Result<(), io::Error> {
-        if self.show_times {
-            write!(self.stdout, "[{}] ", event.display_time())?;
-        }
-        write!(self.stdout, "{} ", event.sigil())?;
-        for chunk in event.message() {
-            write!(self.stdout, "{chunk}")?;
-        }
-        writeln!(self.stdout)?;
+        writeln!(self.stdout, "{}", event.to_message(self.show_times))?;
         if let Some(fp) = self.transcript.as_mut() {
             if let Err(e) = writeln!(fp, "{}", event.to_json()) {
                 let _ = self.transcript.take();

@@ -1,6 +1,7 @@
 use crate::util::{chomp, display_vis, JsonStrMap};
 use chrono::{DateTime, Local};
 use crossterm::style::{StyledContent, Stylize};
+use std::fmt;
 use std::net::SocketAddr;
 
 pub(crate) enum Event {
@@ -117,7 +118,11 @@ impl Event {
         }
     }
 
-    pub(crate) fn message(&self) -> Vec<StyledContent<String>> {
+    pub(crate) fn to_message(&self, time: bool) -> EventDisplay<'_> {
+        EventDisplay { event: self, time }
+    }
+
+    fn message_chunks(&self) -> Vec<StyledContent<String>> {
         match self {
             Event::ConnectStart { .. } => vec![String::from("Connecting ...").stylize()],
             Event::ConnectFinish { peer, .. } => vec![format!("Connected to {peer}").stylize()],
@@ -152,5 +157,23 @@ impl Event {
                 .field("data", &format!("{data:#}"))
                 .finish(),
         }
+    }
+}
+
+pub(crate) struct EventDisplay<'a> {
+    event: &'a Event,
+    time: bool,
+}
+
+impl<'a> fmt::Display for EventDisplay<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.time {
+            write!(f, "[{}] ", self.event.display_time())?;
+        }
+        write!(f, "{} ", self.event.sigil())?;
+        for chunk in self.event.message_chunks() {
+            write!(f, "{chunk}")?;
+        }
+        Ok(())
     }
 }
