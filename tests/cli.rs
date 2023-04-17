@@ -118,6 +118,7 @@ async fn end_session(mut p: ExpectrlSession) {
 async fn test_quit_session() {
     let mut p = start_session(&[]).await;
     p.send("Hello!\r\n").await.unwrap();
+    p.expect("> Hello!").await.unwrap();
     p.expect(r#"< You sent: "Hello!""#).await.unwrap();
     p.send("quit\r\n").await.unwrap();
     p.expect("> quit").await.unwrap();
@@ -144,6 +145,7 @@ async fn test_async_recv() {
 async fn test_send_ctrl_d() {
     let mut p = start_session(&[]).await;
     p.send("Hello!\r\n").await.unwrap();
+    p.expect("> Hello!").await.unwrap();
     p.expect(r#"< You sent: "Hello!""#).await.unwrap();
     p.send(ControlCode::EndOfTransmission).await.unwrap();
     end_session(p).await;
@@ -178,6 +180,7 @@ async fn test_show_times() {
 async fn test_piecemeal_line() {
     let mut p = start_session(&[]).await;
     p.send("pieces\r\n").await.unwrap();
+    p.expect("> pieces").await.unwrap();
     p.expect(r#"< You sent: "pieces""#).await.unwrap();
     p.expect("< This line is|being sent in|pieces.|Did you get it all?")
         .await
@@ -193,6 +196,7 @@ async fn test_piecemeal_line() {
 async fn test_long_line() {
     let mut p = start_session(&["--max-line-length", "42"]).await;
     p.send("long\r\n").await.unwrap();
+    p.expect("> long").await.unwrap();
     p.expect(r#"< You sent: "long""#).await.unwrap();
     p.expect("< This is a very long line.  I'm not going t")
         .await
