@@ -52,8 +52,7 @@ async fn testing_server(sender: Sender<SocketAddr>) {
                     if line == "quit" {
                         frame.send("Goodbye.").await.unwrap();
                         break;
-                    }
-                    if line == "pieces" {
+                    } else if line == "pieces" {
                         let conn = frame.get_mut();
                         conn.write_all(b"This line is|").await.unwrap();
                         sleep(Duration::from_millis(50)).await;
@@ -62,6 +61,18 @@ async fn testing_server(sender: Sender<SocketAddr>) {
                         conn.write_all(b"pieces.|").await.unwrap();
                         sleep(Duration::from_millis(50)).await;
                         conn.write_all(b"Did you get it all?\n").await.unwrap();
+                    } else if line == "long" {
+                        frame.send(concat!(
+                            "This is a very long line.  I'm not going t",
+                            "o bore you with the details, so instead I'",
+                            "ll bore you with some mangled Cicero: Lore",
+                            "m ipsum dolor sit amet, consectetur adipis",
+                            "icing elit, sed do eiusmod tempor incididu",
+                            "nt ut labore et dolore magna aliqua.  Ut e",
+                            "nim ad minim veniam, quis nostrud exercita",
+                            "tion ullamco laboris nisi ut aliquip ex ea",
+                            " commodo consequat."
+                        )).await.unwrap();
                     }
                 }
                 Some(Err(e)) => panic!("Error reading from connection: {e}"),
@@ -171,6 +182,43 @@ async fn test_piecemeal_line() {
     p.expect("< This line is|being sent in|pieces.|Did you get it all?")
         .await
         .unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    end_session(p).await;
+}
+
+#[tokio::test]
+async fn test_long_line() {
+    let mut p = start_session(&["--max-line-length", "42"]).await;
+    p.send("long\r\n").await.unwrap();
+    p.expect(r#"< You sent: "long""#).await.unwrap();
+    p.expect("< This is a very long line.  I'm not going t")
+        .await
+        .unwrap();
+    p.expect("< o bore you with the details, so instead I'")
+        .await
+        .unwrap();
+    p.expect("< ll bore you with some mangled Cicero: Lore")
+        .await
+        .unwrap();
+    p.expect("< m ipsum dolor sit amet, consectetur adipis")
+        .await
+        .unwrap();
+    p.expect("< icing elit, sed do eiusmod tempor incididu")
+        .await
+        .unwrap();
+    p.expect("< nt ut labore et dolore magna aliqua.  Ut e")
+        .await
+        .unwrap();
+    p.expect("< nim ad minim veniam, quis nostrud exercita")
+        .await
+        .unwrap();
+    p.expect("< tion ullamco laboris nisi ut aliquip ex ea")
+        .await
+        .unwrap();
+    p.expect("<  commodo consequat.").await.unwrap();
     p.send("quit\r\n").await.unwrap();
     p.expect("> quit").await.unwrap();
     p.expect(r#"< You sent: "quit""#).await.unwrap();
