@@ -2,7 +2,7 @@
 #![cfg(unix)]
 use expectrl::session::{log, OsProcess, OsProcessStream, Session};
 use expectrl::stream::log::LogStream;
-use expectrl::{ControlCode, Eof};
+use expectrl::{ControlCode, Eof, Regex};
 use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
 use std::process::Command;
@@ -60,11 +60,12 @@ async fn testing_server(sender: Sender<SocketAddr>) {
     }
 }
 
-async fn start_session() -> ExpectrlSession {
+async fn start_session(opts: &[&str]) -> ExpectrlSession {
     let (sender, receiver) = channel();
     tokio::spawn(async move { testing_server(sender).await });
     let addr = receiver.await.expect("Error receiving address from server");
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
+    cmd.args(opts);
     cmd.arg(addr.ip().to_string());
     cmd.arg(addr.port().to_string());
     let mut p = log(
@@ -93,7 +94,7 @@ async fn end_session(mut p: ExpectrlSession) {
 
 #[tokio::test]
 async fn test_quit_session() {
-    let mut p = start_session().await;
+    let mut p = start_session(&[]).await;
     p.send("Hello!\r\n").await.unwrap();
     p.expect(r#"< You sent: "Hello!""#).await.unwrap();
     p.send("quit\r\n").await.unwrap();
@@ -105,7 +106,7 @@ async fn test_quit_session() {
 
 #[tokio::test]
 async fn test_async_recv() {
-    let mut p = start_session().await;
+    let mut p = start_session(&[]).await;
     sleep(Duration::from_secs(1)).await;
     p.expect("< Ping 1").await.unwrap();
     sleep(Duration::from_secs(1)).await;
@@ -119,9 +120,34 @@ async fn test_async_recv() {
 
 #[tokio::test]
 async fn test_send_ctrl_d() {
-    let mut p = start_session().await;
+    let mut p = start_session(&[]).await;
     p.send("Hello!\r\n").await.unwrap();
     p.expect(r#"< You sent: "Hello!""#).await.unwrap();
     p.send(ControlCode::EndOfTransmission).await.unwrap();
+    end_session(p).await;
+}
+
+#[tokio::test]
+async fn test_show_times() {
+    static TIME_RGX: &str = r#"\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]"#;
+    let mut p = start_session(&["--show-times"]).await;
+    sleep(Duration::from_secs(1)).await;
+    p.expect(Regex(format!("{} < Ping 1", TIME_RGX)))
+        .await
+        .unwrap();
+    sleep(Duration::from_secs(1)).await;
+    p.expect(Regex(format!("{} < Ping 2", TIME_RGX)))
+        .await
+        .unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect(Regex(format!("{} > quit", TIME_RGX)))
+        .await
+        .unwrap();
+    p.expect(Regex(format!(r#"{} < You sent: "quit""#, TIME_RGX)))
+        .await
+        .unwrap();
+    p.expect(Regex(format!(r#"{} < Goodbye\."#, TIME_RGX)))
+        .await
+        .unwrap();
     end_session(p).await;
 }
