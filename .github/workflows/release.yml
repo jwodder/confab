@@ -44,7 +44,7 @@ jobs:
 
           gh release upload ${{ github.ref_name }} dist-manifest.json
 
-          HAS_RELEASES=$(jq --raw-output ".releases != null" | dist-manifest.json)
+          HAS_RELEASES=$(jq --raw-output ".releases != null" dist-manifest.json)
           echo "has-releases=$HAS_RELEASES" >> "$GITHUB_OUTPUT"
 
   upload-artifacts:
@@ -68,7 +68,7 @@ jobs:
             install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.sh | sh
           - os: windows-2019
             dist-args: --artifacts=local --target=x86_64-pc-windows-msvc
-            install-dist: irm https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.ps1 | iex
+            install-dist: irm https://github.com/axodotdev/cargo-dist/releases/download/v$Env:CARGO_DIST_VERSION/cargo-dist-v$Env:CARGO_DIST_VERSION-installer.ps1 | iex
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -90,8 +90,8 @@ jobs:
             --tag=${{ github.ref_name }} \
             --output-format=json \
             ${{ matrix.dist-args }} > dist-manifest.json
-          jq -r ".artifacts[]?.path | select(. != null)" dist-manifest.json | \
-            xargs gh release upload ${{ github.ref_name }}
+          jq -j '.artifacts[]?.path | select(. != null) | "\(.)\u0000"' dist-manifest.json | \
+            xargs -0 gh release upload ${{ github.ref_name }}
 
   publish-release:
     needs: [create-release, upload-artifacts]
