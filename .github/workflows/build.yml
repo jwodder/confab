@@ -21,20 +21,6 @@ jobs:
             suffix: ""
             use-cross: true
             options: ""
-         #- target: aarch64-unknown-linux-gnu
-         #  os: ubuntu-latest
-         #  os-name: linux
-         #  architecture: arm64
-         #  suffix: ""
-         #  use-cross: true
-         #  options: --features vendored-openssl
-         #- target: i686-unknown-linux-gnu
-         #  os: ubuntu-latest
-         #  os-name: linux
-         #  architecture: i686
-         #  suffix: ""
-         #  use-cross: true
-         #  options: --features vendored-openssl
           - target: x86_64-apple-darwin
             os: macos-latest
             os-name: macos
