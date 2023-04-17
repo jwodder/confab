@@ -4,74 +4,58 @@ on:
   push:
     branches:
       - master
-    tags:
-      - "v*"
   pull_request:
 
 jobs:
-  mkrelease:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        if: github.event_name == 'push' && github.ref_type == 'tag'
-        uses: actions/checkout@v3
-
-      - name: Create GitHub release
-        if: github.event_name == 'push' && github.ref_type == 'tag'
-        run: |
-          if ! gh release list | awk -F'\t' '{print $3}' | grep -Fqx "$GITHUB_REF_NAME"
-          then
-              TAG_SUBJECT="$(git show -s --format=%s "$GITHUB_REF_NAME^{commit}")"
-              git show -s --format=%b "$GITHUB_REF_NAME^{commit}" \
-                | gh release create --title "$TAG_SUBJECT" --notes-file - "$GITHUB_REF_NAME"
-          else echo "Release '$GITHUB_REF_NAME' already exists."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build:
     name: build (${{ matrix.target }})
-    needs: mkrelease
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: macos-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
             os-name: macos
-            target: x86_64-apple-darwin
+            architecture: arm64
+            suffix: ""
+            use-cross: true
+            options: ""
+         #- target: aarch64-unknown-linux-gnu
+         #  os: ubuntu-latest
+         #  os-name: linux
+         #  architecture: arm64
+         #  suffix: ""
+         #  use-cross: true
+         #  options: --features vendored-openssl
+         #- target: i686-unknown-linux-gnu
+         #  os: ubuntu-latest
+         #  os-name: linux
+         #  architecture: i686
+         #  suffix: ""
+         #  use-cross: true
+         #  options: --features vendored-openssl
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            os-name: macos
             architecture: x86_64
             suffix: ""
             use-cross: false
             options: ""
-          - os: ubuntu-latest
-            os-name: linux
-            target: x86_64-unknown-linux-gnu
-            architecture: x86_64
-            suffix: ""
-            use-cross: false
-            options: --features vendored-openssl
-          - os: ubuntu-latest
-            os-name: linux
-            target: aarch64-unknown-linux-gnu
-            architecture: arm64
-            suffix: ""
-            use-cross: true
-            options: --features vendored-openssl
-          - os: ubuntu-latest
-            os-name: linux
-            target: i686-unknown-linux-gnu
-            architecture: i686
-            suffix: ""
-            use-cross: true
-            options: --features vendored-openssl
-          - os: windows-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
             os-name: windows
-            target: x86_64-pc-windows-msvc
             architecture: x86_64
             suffix: ".exe"
             use-cross: false
             options: ""
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            os-name: linux
+            architecture: x86_64
+            suffix: ""
+            use-cross: false
+            options: --features vendored-openssl
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -104,23 +88,3 @@ jobs:
           name: confab-${{ matrix.os-name }}-${{ matrix.architecture }}
           path: target/${{ matrix.target }}/release/confab${{ matrix.suffix }}
           retention-days: 10
-
-      - name: Upload release asset
-        if: github.event_name == 'push' && github.ref_type == 'tag'
-        shell: bash
-        run: |
-          name=confab-"$GITHUB_REF_NAME"-${{ matrix.target }}
-          mkdir "$name"
-          cp README.md LICENSE doc/confab.1 "$name"
-          cp target/${{ matrix.target }}/release/confab${{ matrix.suffix }} "$name"
-          if [ ${{ matrix.os-name }} = windows ]
-          then
-              asset="$name.zip"
-              7z -y a "$asset" "$name"
-          else
-              asset="$name.tar.gz"
-              tar zcf "$asset" "$name"
-          fi
-          gh release upload "$GITHUB_REF_NAME" "$asset"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
