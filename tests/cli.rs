@@ -7,6 +7,7 @@ use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
 use std::process::Command;
 use std::time::Duration;
+use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
 use tokio::sync::oneshot::{channel, Sender};
 use tokio::time::sleep;
@@ -51,6 +52,16 @@ async fn testing_server(sender: Sender<SocketAddr>) {
                     if line == "quit" {
                         frame.send("Goodbye.").await.unwrap();
                         break;
+                    }
+                    if line == "pieces" {
+                        let conn = frame.get_mut();
+                        conn.write_all(b"This line is|").await.unwrap();
+                        sleep(Duration::from_millis(50)).await;
+                        conn.write_all(b"being sent in|").await.unwrap();
+                        sleep(Duration::from_millis(50)).await;
+                        conn.write_all(b"pieces.|").await.unwrap();
+                        sleep(Duration::from_millis(50)).await;
+                        conn.write_all(b"Did you get it all?\n").await.unwrap();
                     }
                 }
                 Some(Err(e)) => panic!("Error reading from connection: {e}"),
@@ -149,5 +160,20 @@ async fn test_show_times() {
     p.expect(Regex(format!(r#"{} < Goodbye\."#, TIME_RGX)))
         .await
         .unwrap();
+    end_session(p).await;
+}
+
+#[tokio::test]
+async fn test_piecemeal_line() {
+    let mut p = start_session(&[]).await;
+    p.send("pieces\r\n").await.unwrap();
+    p.expect(r#"< You sent: "pieces""#).await.unwrap();
+    p.expect("< This line is|being sent in|pieces.|Did you get it all?")
+        .await
+        .unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
 }
