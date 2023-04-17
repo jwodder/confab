@@ -110,10 +110,6 @@ impl CharEncoding {
     }
 }
 
-fn decode_latin1(bs: Vec<u8>) -> String {
-    bs.into_iter().map(char::from).collect()
-}
-
 impl FromStr for CharEncoding {
     type Err = CharEncodingLookupError;
 
@@ -145,6 +141,10 @@ pub(crate) fn chomp(s: &str) -> &str {
     let s = s.strip_suffix('\n').unwrap_or(s);
     let s = s.strip_suffix('\r').unwrap_or(s);
     s
+}
+
+pub(crate) fn latin1ify(s: String) -> String {
+    s.replace(|c| (c as u32) > 0xFF, "?")
 }
 
 pub(crate) fn display_vis(s: &str) -> Vec<StyledContent<String>> {
@@ -181,6 +181,10 @@ fn vis(c: char) -> String {
     } else {
         format!("<U+{:04X}>", c as u32)
     }
+}
+
+fn decode_latin1(bs: Vec<u8>) -> String {
+    bs.into_iter().map(char::from).collect()
 }
 
 #[cfg(test)]
@@ -299,5 +303,11 @@ mod test {
                 String::from("^A").reverse(),
             ]
         );
+    }
+
+    #[test]
+    fn test_latin1ify() {
+        let s = String::from("Snowémon: ☃!");
+        assert_eq!(latin1ify(s), String::from("Snowémon: ?!"));
     }
 }

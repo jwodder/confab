@@ -267,10 +267,7 @@ async fn test_send_latin1() {
     p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
         .await
         .unwrap();
-    //TODO: p.expect("> Fëanor is an ?.  Frosty is a ?.").await.unwrap();
-    p.expect("> Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.")
-        .await
-        .unwrap();
+    p.expect("> Fëanor is an ?.  Frosty is a ?.").await.unwrap();
     p.expect(r#"< You sent: b"F\xebanor is an ?.  Frosty is a ?.""#)
         .await
         .unwrap();

@@ -3,7 +3,7 @@ mod events;
 mod util;
 use crate::codec::ConfabCodec;
 use crate::events::Event;
-use crate::util::CharEncoding;
+use crate::util::{latin1ify, CharEncoding};
 use anyhow::Context as _;
 use chrono::Local;
 use clap::Parser;
@@ -192,6 +192,13 @@ impl Runner {
                 input = self.rl.readline() => match input {
                     Ok(mut line) => {
                         self.rl.add_history_entry(line.clone());
+                        if self.encoding == CharEncoding::Latin1 {
+                            // We need to convert non-Latin-1 characters to '?'
+                            // here rather than waiting for the codec to do it
+                            // so that the Event will reflect the actual
+                            // characters sent.
+                            line = latin1ify(line);
+                        }
                         if self.crlf {
                             line.push_str("\r\n");
                         } else {
