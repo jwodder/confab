@@ -229,3 +229,41 @@ async fn test_long_line() {
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
 }
+
+#[tokio::test]
+async fn test_send_utf8() {
+    let mut p = start_session(&[]).await;
+    p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
+        .await
+        .unwrap();
+    p.expect("> Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.")
+        .await
+        .unwrap();
+    p.expect("< You sent: \"Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\"")
+        .await
+        .unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    end_session(p).await;
+}
+
+// TODO: testing_server() needs to not decode input bytes as UTF-8.
+#[ignore]
+#[tokio::test]
+async fn test_send_latin1() {
+    let mut p = start_session(&["-E", "latin1"]).await;
+    p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
+        .await
+        .unwrap();
+    p.expect("> Fëanor is an ?.  Frosty is a ?.").await.unwrap();
+    p.expect(r#"< You sent: "Fëanor is an ?.  Frosty is a ?.""#)
+        .await
+        .unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    end_session(p).await;
+}
