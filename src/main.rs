@@ -8,19 +8,16 @@ use anyhow::Context as _;
 use chrono::Local;
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
-use pin_project::pin_project;
 use rustyline_async::{Readline, ReadlineError, SharedWriter};
 use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::io::{self, Write};
 use std::num::NonZeroUsize;
 use std::path::PathBuf;
-use std::pin::Pin;
 use std::process::ExitCode;
-use std::task::{Context, Poll};
-use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
+use tokio_util::either::Either;
 
 /// Asynchronous line-oriented interactive TCP client
 ///
@@ -176,9 +173,9 @@ impl Runner {
                 .await
                 .context("Error establishing TLS connection")?;
             self.report(Event::tls_finish())?;
-            Connection::Tls(conn)
+            Either::Right(conn)
         } else {
-            Connection::Plain(conn)
+            Either::Left(conn)
         };
         tokio::pin!(conn);
         let mut frame = Framed::new(conn, self.codec());
@@ -250,70 +247,6 @@ impl std::error::Error for InterfaceError {
         match self {
             InterfaceError::Read(e) => Some(e),
             InterfaceError::Write(e) => Some(e),
-        }
-    }
-}
-
-#[pin_project(project=ConnectionProj)]
-enum Connection {
-    Plain(#[pin] TcpStream),
-    Tls(#[pin] tokio_native_tls::TlsStream<TcpStream>),
-}
-
-impl AsyncRead for Connection {
-    fn poll_read(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &mut ReadBuf<'_>,
-    ) -> Poll<io::Result<()>> {
-        match self.project() {
-            ConnectionProj::Plain(conn) => conn.poll_read(cx, buf),
-            ConnectionProj::Tls(conn) => conn.poll_read(cx, buf),
-        }
-    }
-}
-
-impl AsyncWrite for Connection {
-    fn poll_write(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &[u8],
-    ) -> Poll<io::Result<usize>> {
-        match self.project() {
-            ConnectionProj::Plain(conn) => conn.poll_write(cx, buf),
-            ConnectionProj::Tls(conn) => conn.poll_write(cx, buf),
-        }
-    }
-
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        match self.project() {
-            ConnectionProj::Plain(conn) => conn.poll_flush(cx),
-            ConnectionProj::Tls(conn) => conn.poll_flush(cx),
-        }
-    }
-
-    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        match self.project() {
-            ConnectionProj::Plain(conn) => conn.poll_shutdown(cx),
-            ConnectionProj::Tls(conn) => conn.poll_shutdown(cx),
-        }
-    }
-
-    fn poll_write_vectored(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        bufs: &[io::IoSlice<'_>],
-    ) -> Poll<io::Result<usize>> {
-        match self.project() {
-            ConnectionProj::Plain(conn) => conn.poll_write_vectored(cx, bufs),
-            ConnectionProj::Tls(conn) => conn.poll_write_vectored(cx, bufs),
-        }
-    }
-
-    fn is_write_vectored(&self) -> bool {
-        match self {
-            Connection::Plain(conn) => conn.is_write_vectored(),
-            Connection::Tls(conn) => conn.is_write_vectored(),
         }
     }
 }

@@ -218,7 +218,6 @@ dependencies = [
  "itertools",
  "native-tls",
  "openssl",
- "pin-project",
  "rstest",
  "rustyline-async",
  "tokio",
