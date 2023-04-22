@@ -355,7 +355,9 @@ async fn test_long_line() {
 
 #[tokio::test]
 async fn test_send_utf8() {
-    let (mut p, _) = start_session(&[]).await;
+    let tmpdir = tempdir().unwrap();
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
     p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
         .await
         .unwrap();
@@ -370,6 +372,17 @@ async fn test_send_utf8() {
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\n"),
+            Msg::Recv("You sent: \"Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\"\n"),
+            Msg::Send("quit\n"),
+            Msg::Recv("You sent: \"quit\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
+    );
 }
 
 #[tokio::test]
