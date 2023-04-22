@@ -9,6 +9,7 @@ use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
 use serde_jsonlines::json_lines;
 use std::net::{IpAddr, SocketAddr};
+use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
 use tempfile::tempdir;
@@ -56,6 +57,12 @@ enum Event {
         timestamp: DateTime<FixedOffset>,
         data: String,
     },
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum Msg {
+    Recv(&'static str),
+    Send(&'static str),
 }
 
 async fn testing_server(sender: Sender<SocketAddr>) {
@@ -166,6 +173,28 @@ async fn end_session(mut p: ExpectrlSession) {
     assert_eq!(p.wait(None).unwrap(), 0);
 }
 
+fn check_transcript(path: PathBuf, addr: SocketAddr, messages: &[Msg]) {
+    let mut events = json_lines::<Event, _>(path).unwrap();
+    assert_matches!(events.next(), Some(Ok(Event::ConnectionStart {host, port, ..})) if host == addr.ip().to_string() && port == addr.port());
+    assert_matches!(events.next(), Some(Ok(Event::ConnectionComplete {peer_ip, ..})) if peer_ip == addr.ip());
+    assert_matches!(
+        events.next(),
+        Some(Ok(Event::Recv { data, .. })) if data == "Welcome to the confab Test Server!\n"
+    );
+    for msg in messages {
+        match msg {
+            Msg::Recv(s) => {
+                assert_matches!(events.next(), Some(Ok(Event::Recv { data, .. })) if data == *s)
+            }
+            Msg::Send(s) => {
+                assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) if data == *s)
+            }
+        }
+    }
+    assert_matches!(events.next(), Some(Ok(Event::Disconnect { .. })));
+    assert_matches!(events.next(), None);
+}
+
 #[tokio::test]
 async fn test_quit_session() {
     let (mut p, _) = start_session(&[]).await;
@@ -230,7 +259,9 @@ async fn test_show_times() {
 
 #[tokio::test]
 async fn test_piecemeal_line() {
-    let (mut p, _) = start_session(&[]).await;
+    let tmpdir = tempdir().unwrap();
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
     p.send("pieces\r\n").await.unwrap();
     p.expect("> pieces").await.unwrap();
     p.expect(r#"< You sent: "pieces""#).await.unwrap();
@@ -242,11 +273,31 @@ async fn test_piecemeal_line() {
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Send("pieces\n"),
+            Msg::Recv("You sent: \"pieces\"\n"),
+            Msg::Recv("This line is|being sent in|pieces.|Did you get it all?\n"),
+            Msg::Send("quit\n"),
+            Msg::Recv("You sent: \"quit\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
+    );
 }
 
 #[tokio::test]
 async fn test_long_line() {
-    let (mut p, _) = start_session(&["--max-line-length", "42"]).await;
+    let tmpdir = tempdir().unwrap();
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) = start_session(&[
+        "--max-line-length",
+        "42",
+        "--transcript",
+        transcript.to_str().unwrap(),
+    ])
+    .await;
     p.send("long\r\n").await.unwrap();
     p.expect("> long").await.unwrap();
     p.expect(r#"< You sent: "long""#).await.unwrap();
@@ -280,6 +331,26 @@ async fn test_long_line() {
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Send("long\n"),
+            Msg::Recv("You sent: \"long\"\n"),
+            Msg::Recv("This is a very long line.  I'm not going t"),
+            Msg::Recv("o bore you with the details, so instead I'"),
+            Msg::Recv("ll bore you with some mangled Cicero: Lore"),
+            Msg::Recv("m ipsum dolor sit amet, consectetur adipis"),
+            Msg::Recv("icing elit, sed do eiusmod tempor incididu"),
+            Msg::Recv("nt ut labore et dolore magna aliqua.  Ut e"),
+            Msg::Recv("nim ad minim veniam, quis nostrud exercita"),
+            Msg::Recv("tion ullamco laboris nisi ut aliquip ex ea"),
+            Msg::Recv(" commodo consequat.\n"),
+            Msg::Send("quit\n"),
+            Msg::Recv("You sent: \"quit\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
+    );
 }
 
 #[tokio::test]
@@ -303,7 +374,10 @@ async fn test_send_utf8() {
 
 #[tokio::test]
 async fn test_send_latin1() {
-    let (mut p, _) = start_session(&["-E", "latin1"]).await;
+    let tmpdir = tempdir().unwrap();
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) =
+        start_session(&["-E", "latin1", "--transcript", transcript.to_str().unwrap()]).await;
     p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
         .await
         .unwrap();
@@ -316,11 +390,24 @@ async fn test_send_latin1() {
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Send("Fëanor is an ?.  Frosty is a ?.\n"),
+            Msg::Recv("You sent: b\"F\\xebanor is an ?.  Frosty is a ?.\"\n"),
+            Msg::Send("quit\n"),
+            Msg::Recv("You sent: \"quit\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
+    );
 }
 
 #[tokio::test]
 async fn test_receive_non_utf8() {
-    let (mut p, _) = start_session(&[]).await;
+    let tmpdir = tempdir().unwrap();
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
     p.send("bytes\r\n").await.unwrap();
     p.expect("> bytes").await.unwrap();
     p.expect(r#"< You sent: "bytes""#).await.unwrap();
@@ -336,11 +423,32 @@ async fn test_receive_non_utf8() {
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Send("bytes\n"),
+            Msg::Recv("You sent: \"bytes\"\n"),
+            Msg::Recv("Here is some non-UTF-8 data:\n"),
+            Msg::Recv("Latin-1: Libert\u{FFFD}, \u{FFFD}galit\u{FFFD}, fraternit\u{FFFD}\n"),
+            Msg::Recv("General garbage: \u{FFFD}\u{FFFD}\u{FFFD}\u{FFFD}\n"),
+            Msg::Send("quit\n"),
+            Msg::Recv("You sent: \"quit\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
+    );
 }
 
 #[tokio::test]
 async fn test_receive_non_utf8_with_latin1_fallback() {
-    let (mut p, _) = start_session(&["--encoding=utf8-latin1"]).await;
+    let tmpdir = tempdir().unwrap();
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) = start_session(&[
+        "--encoding=utf8-latin1",
+        "--transcript",
+        transcript.to_str().unwrap(),
+    ])
+    .await;
     p.send("bytes\r\n").await.unwrap();
     p.expect("> bytes").await.unwrap();
     p.expect(r#"< You sent: "bytes""#).await.unwrap();
@@ -356,13 +464,27 @@ async fn test_receive_non_utf8_with_latin1_fallback() {
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Send("bytes\n"),
+            Msg::Recv("You sent: \"bytes\"\n"),
+            Msg::Recv("Here is some non-UTF-8 data:\n"),
+            Msg::Recv("Latin-1: Liberté, égalité, fraternité\n"),
+            Msg::Recv("General garbage: \u{89}\u{AB}\u{CD}\u{EF}\n"),
+            Msg::Send("quit\n"),
+            Msg::Recv("You sent: \"quit\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
+    );
 }
 
 #[tokio::test]
 async fn test_transcript() {
     let tmpdir = tempdir().unwrap();
-    let transcript_path = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) = start_session(&["--transcript", transcript_path.to_str().unwrap()]).await;
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
     sleep(Duration::from_secs(1)).await;
     p.expect("< Ping 1").await.unwrap();
     sleep(Duration::from_secs(1)).await;
@@ -375,40 +497,17 @@ async fn test_transcript() {
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
-    let mut events = json_lines::<Event, _>(transcript_path).unwrap();
-    assert_matches!(events.next(), Some(Ok(Event::ConnectionStart {host, port, ..})) if host == addr.ip().to_string() && port == addr.port());
-    assert_matches!(events.next(), Some(Ok(Event::ConnectionComplete {peer_ip, ..})) if peer_ip == addr.ip());
-    assert_matches!(
-        events.next(),
-        Some(Ok(Event::Recv { data, .. })) if data == "Welcome to the confab Test Server!\n"
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Recv("Ping 1\n"),
+            Msg::Recv("Ping 2\n"),
+            Msg::Send("Hello!\n"),
+            Msg::Recv("You sent: \"Hello!\"\n"),
+            Msg::Send("quit\n"),
+            Msg::Recv("You sent: \"quit\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
     );
-    assert_matches!(
-        events.next(),
-        Some(Ok(Event::Recv { data, .. })) if data == "Ping 1\n"
-    );
-    assert_matches!(
-        events.next(),
-        Some(Ok(Event::Recv { data, .. })) if data == "Ping 2\n"
-    );
-    assert_matches!(
-        events.next(),
-        Some(Ok(Event::Send { data, .. })) if data == "Hello!\n"
-    );
-    assert_matches!(
-        events.next(),
-        Some(Ok(Event::Recv { data, .. }))
-        if data == "You sent: \"Hello!\"\n"
-    );
-    assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) if data == "quit\n");
-    assert_matches!(
-        events.next(),
-        Some(Ok(Event::Recv { data, .. }))
-        if data == "You sent: \"quit\"\n"
-    );
-    assert_matches!(
-        events.next(),
-        Some(Ok(Event::Recv { data, .. })) if data == "Goodbye.\n"
-    );
-    assert_matches!(events.next(), Some(Ok(Event::Disconnect { .. })));
-    assert_matches!(events.next(), None);
 }
