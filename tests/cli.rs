@@ -7,11 +7,12 @@ use expectrl::{ControlCode, Eof, Regex};
 use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
 use serde_jsonlines::json_lines;
+use std::ffi::OsStr;
 use std::net::{IpAddr, SocketAddr};
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
-use tempfile::tempdir;
+use tempfile::{tempdir, TempDir};
 use time::OffsetDateTime;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
@@ -23,6 +24,255 @@ use tokio_util::codec::{AnyDelimiterCodec, Framed};
 use expectrl::WaitStatus;
 
 type ExpectrlSession = Session<OsProcess, LogStream<OsProcessStream, std::io::Stdout>>;
+
+struct Tester {
+    cmd: Command,
+    transcript: bool,
+    show_times: bool,
+}
+
+impl Tester {
+    fn new() -> Tester {
+        Tester {
+            cmd: Command::new(env!("CARGO_BIN_EXE_confab")),
+            transcript: false,
+            show_times: false,
+        }
+    }
+
+    fn arg<S: AsRef<OsStr>>(mut self, arg: S) -> Tester {
+        self.cmd.arg(arg);
+        self
+    }
+
+    fn transcript(mut self) -> Tester {
+        self.transcript = true;
+        self
+    }
+
+    fn show_times(mut self) -> Tester {
+        self.show_times = true;
+        self
+    }
+
+    async fn build(mut self) -> Runner {
+        let (sender, receiver) = channel();
+        tokio::spawn(async move { testing_server(sender).await });
+        let addr = receiver.await.expect("Error receiving address from server");
+        let transcript = if self.transcript {
+            let transcript = Transcript::new();
+            self.cmd.arg("--transcript");
+            self.cmd.arg(&transcript.path);
+            Some(transcript)
+        } else {
+            None
+        };
+        if self.show_times {
+            self.cmd.arg("--show-times");
+        }
+        self.cmd.arg(addr.ip().to_string());
+        self.cmd.arg(addr.port().to_string());
+        let mut p = log(
+            Session::spawn(self.cmd).expect("Error spawning command"),
+            std::io::stdout(),
+        )
+        .unwrap();
+        p.set_expect_timeout(Some(Duration::from_millis(500)));
+        let mut runner = Runner {
+            p,
+            addr,
+            transcript,
+            show_times: self.show_times,
+        };
+        runner.connect().await;
+        runner.get("Welcome to the confab Test Server!").await;
+        runner.p.expect("confab> ").await.unwrap();
+        runner
+    }
+}
+
+struct Runner {
+    p: ExpectrlSession,
+    addr: SocketAddr,
+    transcript: Option<Transcript>,
+    show_times: bool,
+}
+
+impl Runner {
+    async fn connect(&mut self) {
+        self.expect("* Connecting ...").await;
+        self.expect(format!("* Connected to {}", self.addr)).await;
+    }
+
+    async fn finish(mut self) {
+        // TODO: Apply show_times:
+        self.expect("* Disconnected").await;
+        self.p.expect(Eof).await.unwrap();
+        #[cfg(unix)]
+        assert_eq!(self.p.wait().unwrap(), WaitStatus::Exited(self.p.pid(), 0));
+        #[cfg(windows)]
+        assert_eq!(self.p.wait(None).unwrap(), 0);
+        if let Some(xscript) = self.transcript {
+            xscript.check(self.addr);
+        }
+    }
+
+    async fn expect<S: AsRef<str>>(&mut self, s: S) {
+        static TIME_RGX: &str = r"\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]";
+        let s = s.as_ref();
+        let r = if self.show_times {
+            self.p
+                .expect(Regex(format!("{} {}", TIME_RGX, regex::escape(s))))
+                .await
+        } else {
+            self.p.expect(s).await
+        };
+        if let Err(e) = r {
+            panic!("confab did not print {s:?}: {e}");
+        }
+    }
+
+    async fn enter<S: Into<Sent>>(&mut self, entry: S) {
+        let entry = entry.into();
+        self.p.send(entry.typed()).await.unwrap();
+        self.expect(entry.printed()).await;
+        self.transcribe(entry.transcription());
+    }
+
+    async fn get<R: Into<Recv>>(&mut self, r: R) {
+        let r = r.into();
+        self.expect(r.printed()).await;
+        self.transcribe(r.transcription());
+    }
+
+    async fn quit(mut self) {
+        self.enter("quit").await;
+        self.get(r#"You sent: "quit""#).await;
+        self.get("Goodbye.").await;
+        self.finish().await;
+    }
+
+    async fn cntrl_d(mut self) {
+        self.p.send(ControlCode::EndOfTransmission).await.unwrap();
+        self.finish().await;
+    }
+
+    fn transcribe(&mut self, msg: Msg) {
+        if let Some(xscript) = self.transcript.as_mut() {
+            xscript.log(msg);
+        }
+    }
+}
+
+struct Transcript {
+    _tmpdir: TempDir,
+    path: PathBuf,
+    messages: Vec<Msg>,
+}
+
+impl Transcript {
+    fn new() -> Transcript {
+        let tmpdir = tempdir().unwrap();
+        let path = tmpdir.path().join("transcript.jsonl");
+        Transcript {
+            _tmpdir: tmpdir,
+            path,
+            messages: Vec::new(),
+        }
+    }
+
+    fn log(&mut self, msg: Msg) {
+        self.messages.push(msg);
+    }
+
+    fn check(&self, addr: SocketAddr) {
+        let mut events = json_lines::<Event, _>(&self.path).unwrap();
+        assert_matches!(events.next(), Some(Ok(Event::ConnectionStart {host, port, ..})) if host == addr.ip().to_string() && port == addr.port());
+        assert_matches!(events.next(), Some(Ok(Event::ConnectionComplete {peer_ip, ..})) if peer_ip == addr.ip());
+        for msg in &self.messages {
+            match msg {
+                Msg::Recv(s) => {
+                    assert_matches!(events.next(), Some(Ok(Event::Recv { data, .. })) if &data == s, "{s:?}")
+                }
+                Msg::Send(s) => {
+                    assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) if &data == s, "{s:?}")
+                }
+            }
+        }
+        assert_matches!(events.next(), Some(Ok(Event::Disconnect { .. })));
+        assert_matches!(events.next(), None);
+    }
+}
+
+struct Sent {
+    /// Text typed into confab (sans terminating CR LF)
+    typed: &'static str,
+    /// Text echoed by confab after "> "
+    printed: Option<&'static str>,
+    /// String stored in transcript (sans terminating LF)
+    transcription: Option<&'static str>,
+}
+
+impl Sent {
+    fn typed(&self) -> String {
+        // We have to use CR LF as the line terminator when writing to a
+        // terminal:
+        format!("{}\r\n", self.typed)
+    }
+
+    fn printed(&self) -> String {
+        match self.printed {
+            Some(s) => format!("> {s}"),
+            None => format!("> {}", self.typed),
+        }
+    }
+
+    fn transcription(&self) -> Msg {
+        match self.transcription {
+            Some(s) => Msg::Send(format!("{s}\n")),
+            None => Msg::Send(format!("{}\n", self.typed)),
+        }
+    }
+}
+
+impl From<&'static str> for Sent {
+    fn from(s: &'static str) -> Sent {
+        Sent {
+            typed: s,
+            printed: None,
+            transcription: None,
+        }
+    }
+}
+
+struct Recv {
+    /// Response from server as output by confab (sans leading "< ")
+    printed: &'static str,
+    /// Response as stored in transcript, *including* trailing LF (if any)
+    transcription: Option<&'static str>,
+}
+
+impl Recv {
+    fn printed(&self) -> String {
+        format!("< {}", self.printed)
+    }
+
+    fn transcription(&self) -> Msg {
+        match self.transcription {
+            Some(s) => Msg::Recv(s.into()),
+            None => Msg::Recv(format!("{}\n", self.printed)),
+        }
+    }
+}
+
+impl From<&'static str> for Recv {
+    fn from(s: &'static str) -> Recv {
+        Recv {
+            printed: s,
+            transcription: None,
+        }
+    }
+}
 
 #[derive(Debug, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case", tag = "event")]
@@ -69,8 +319,8 @@ enum Event {
 
 #[derive(Debug, Eq, PartialEq)]
 enum Msg {
-    Recv(&'static str),
-    Send(&'static str),
+    Recv(String),
+    Send(String),
 }
 
 async fn testing_server(sender: Sender<SocketAddr>) {
@@ -154,447 +404,190 @@ async fn testing_server(sender: Sender<SocketAddr>) {
     }
 }
 
-async fn start_session(opts: &[&str]) -> (ExpectrlSession, SocketAddr) {
-    let (sender, receiver) = channel();
-    tokio::spawn(async move { testing_server(sender).await });
-    let addr = receiver.await.expect("Error receiving address from server");
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_confab"));
-    cmd.args(opts);
-    cmd.arg(addr.ip().to_string());
-    cmd.arg(addr.port().to_string());
-    let mut p = log(
-        Session::spawn(cmd).expect("Error spawning command"),
-        std::io::stdout(),
-    )
-    .unwrap();
-    p.set_expect_timeout(Some(Duration::from_millis(500)));
-    p.expect("* Connecting ...").await.unwrap();
-    p.expect(format!("* Connected to {addr}")).await.unwrap();
-    p.expect("< Welcome to the confab Test Server!")
-        .await
-        .unwrap();
-    p.expect("confab> ").await.unwrap();
-    (p, addr)
-}
-
-async fn end_session(mut p: ExpectrlSession) {
-    p.expect("* Disconnected").await.unwrap();
-    p.expect(Eof).await.unwrap();
-    #[cfg(unix)]
-    assert_eq!(p.wait().unwrap(), WaitStatus::Exited(p.pid(), 0));
-    #[cfg(windows)]
-    assert_eq!(p.wait(None).unwrap(), 0);
-}
-
-fn check_transcript(path: PathBuf, addr: SocketAddr, messages: &[Msg]) {
-    let mut events = json_lines::<Event, _>(path).unwrap();
-    assert_matches!(events.next(), Some(Ok(Event::ConnectionStart {host, port, ..})) if host == addr.ip().to_string() && port == addr.port());
-    assert_matches!(events.next(), Some(Ok(Event::ConnectionComplete {peer_ip, ..})) if peer_ip == addr.ip());
-    assert_matches!(
-        events.next(),
-        Some(Ok(Event::Recv { data, .. })) if data == "Welcome to the confab Test Server!\n"
-    );
-    for msg in messages {
-        match msg {
-            Msg::Recv(s) => {
-                assert_matches!(events.next(), Some(Ok(Event::Recv { data, .. })) if data == *s)
-            }
-            Msg::Send(s) => {
-                assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) if data == *s)
-            }
-        }
-    }
-    assert_matches!(events.next(), Some(Ok(Event::Disconnect { .. })));
-    assert_matches!(events.next(), None);
-}
-
 #[tokio::test]
 async fn test_quit_session() {
-    let (mut p, _) = start_session(&[]).await;
-    p.send("Hello!\r\n").await.unwrap();
-    p.expect("> Hello!").await.unwrap();
-    p.expect(r#"< You sent: "Hello!""#).await.unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
+    let mut r = Tester::new().build().await;
+    r.enter("Hello!").await;
+    r.get(r#"You sent: "Hello!""#).await;
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_async_recv() {
-    let (mut p, _) = start_session(&[]).await;
+    let mut r = Tester::new().transcript().build().await;
     sleep(Duration::from_secs(1)).await;
-    p.expect("< Ping 1").await.unwrap();
+    r.get("Ping 1").await;
     sleep(Duration::from_secs(1)).await;
-    p.expect("< Ping 2").await.unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
+    r.get("Ping 2").await;
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_send_ctrl_d() {
-    let (mut p, _) = start_session(&[]).await;
-    p.send("Hello!\r\n").await.unwrap();
-    p.expect("> Hello!").await.unwrap();
-    p.expect(r#"< You sent: "Hello!""#).await.unwrap();
-    p.send(ControlCode::EndOfTransmission).await.unwrap();
-    end_session(p).await;
+    let mut r = Tester::new().build().await;
+    r.enter("Hello!").await;
+    r.get(r#"You sent: "Hello!""#).await;
+    r.cntrl_d().await;
 }
 
 #[tokio::test]
 async fn test_show_times() {
-    static TIME_RGX: &str = r"\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]";
-    let (mut p, _) = start_session(&["--show-times"]).await;
+    let mut r = Tester::new().show_times().build().await;
     sleep(Duration::from_secs(1)).await;
-    p.expect(Regex(format!("{} < Ping 1", TIME_RGX)))
-        .await
-        .unwrap();
+    r.get("Ping 1").await;
     sleep(Duration::from_secs(1)).await;
-    p.expect(Regex(format!("{} < Ping 2", TIME_RGX)))
-        .await
-        .unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect(Regex(format!("{} > quit", TIME_RGX)))
-        .await
-        .unwrap();
-    p.expect(Regex(format!(r#"{} < You sent: "quit""#, TIME_RGX)))
-        .await
-        .unwrap();
-    p.expect(Regex(format!(r#"{} < Goodbye\."#, TIME_RGX)))
-        .await
-        .unwrap();
-    end_session(p).await;
+    r.get("Ping 2").await;
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_piecemeal_line() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
-    p.send("pieces\r\n").await.unwrap();
-    p.expect("> pieces").await.unwrap();
-    p.expect(r#"< You sent: "pieces""#).await.unwrap();
-    p.expect("< This line is|being sent in|pieces.|Did you get it all?")
-        .await
-        .unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Send("pieces\n"),
-            Msg::Recv("You sent: \"pieces\"\n"),
-            Msg::Recv("This line is|being sent in|pieces.|Did you get it all?\n"),
-            Msg::Send("quit\n"),
-            Msg::Recv("You sent: \"quit\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
+    let mut r = Tester::new().transcript().build().await;
+    r.enter("pieces").await;
+    r.get(r#"You sent: "pieces""#).await;
+    r.get("This line is|being sent in|pieces.|Did you get it all?")
+        .await;
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_long_line() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) = start_session(&[
-        "--max-line-length",
-        "42",
-        "--transcript",
-        transcript.to_str().unwrap(),
-    ])
-    .await;
-    p.send("long\r\n").await.unwrap();
-    p.expect("> long").await.unwrap();
-    p.expect(r#"< You sent: "long""#).await.unwrap();
-    p.expect("< This is a very long line.  I'm not going t")
-        .await
-        .unwrap();
-    p.expect("< o bore you with the details, so instead I'")
-        .await
-        .unwrap();
-    p.expect("< ll bore you with some mangled Cicero: Lore")
-        .await
-        .unwrap();
-    p.expect("< m ipsum dolor sit amet, consectetur adipis")
-        .await
-        .unwrap();
-    p.expect("< icing elit, sed do eiusmod tempor incididu")
-        .await
-        .unwrap();
-    p.expect("< nt ut labore et dolore magna aliqua.  Ut e")
-        .await
-        .unwrap();
-    p.expect("< nim ad minim veniam, quis nostrud exercita")
-        .await
-        .unwrap();
-    p.expect("< tion ullamco laboris nisi ut aliquip ex ea")
-        .await
-        .unwrap();
-    p.expect("<  commodo consequat.").await.unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Send("long\n"),
-            Msg::Recv("You sent: \"long\"\n"),
-            Msg::Recv("This is a very long line.  I'm not going t"),
-            Msg::Recv("o bore you with the details, so instead I'"),
-            Msg::Recv("ll bore you with some mangled Cicero: Lore"),
-            Msg::Recv("m ipsum dolor sit amet, consectetur adipis"),
-            Msg::Recv("icing elit, sed do eiusmod tempor incididu"),
-            Msg::Recv("nt ut labore et dolore magna aliqua.  Ut e"),
-            Msg::Recv("nim ad minim veniam, quis nostrud exercita"),
-            Msg::Recv("tion ullamco laboris nisi ut aliquip ex ea"),
-            Msg::Recv(" commodo consequat.\n"),
-            Msg::Send("quit\n"),
-            Msg::Recv("You sent: \"quit\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
+    let mut r = Tester::new()
+        .arg("--max-line-length")
+        .arg("42")
+        .transcript()
+        .build()
+        .await;
+
+    fn unterminated(s: &'static str) -> Recv {
+        Recv {
+            printed: s,
+            transcription: Some(s),
+        }
+    }
+
+    r.enter("long").await;
+    r.get(r#"You sent: "long""#).await;
+    r.get(unterminated("This is a very long line.  I'm not going t"))
+        .await;
+    r.get(unterminated("o bore you with the details, so instead I'"))
+        .await;
+    r.get(unterminated("ll bore you with some mangled Cicero: Lore"))
+        .await;
+    r.get(unterminated("m ipsum dolor sit amet, consectetur adipis"))
+        .await;
+    r.get(unterminated("icing elit, sed do eiusmod tempor incididu"))
+        .await;
+    r.get(unterminated("nt ut labore et dolore magna aliqua.  Ut e"))
+        .await;
+    r.get(unterminated("nim ad minim veniam, quis nostrud exercita"))
+        .await;
+    r.get(unterminated("tion ullamco laboris nisi ut aliquip ex ea"))
+        .await;
+    r.get(" commodo consequat.").await;
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_send_utf8() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
-    p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
-        .await
-        .unwrap();
-    p.expect("> Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.")
-        .await
-        .unwrap();
-    p.expect("< You sent: \"Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\"")
-        .await
-        .unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\n"),
-            Msg::Recv("You sent: \"Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\"\n"),
-            Msg::Send("quit\n"),
-            Msg::Recv("You sent: \"quit\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
+    let mut r = Tester::new().transcript().build().await;
+    r.enter("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.")
+        .await;
+    r.get("You sent: \"Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\"")
+        .await;
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_send_latin1() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) =
-        start_session(&["-E", "latin1", "--transcript", transcript.to_str().unwrap()]).await;
-    p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
-        .await
-        .unwrap();
-    p.expect("> Fëanor is an ?.  Frosty is a ?.").await.unwrap();
-    p.expect(r#"< You sent: b"F\xebanor is an ?.  Frosty is a ?.""#)
-        .await
-        .unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Send("Fëanor is an ?.  Frosty is a ?.\n"),
-            Msg::Recv("You sent: b\"F\\xebanor is an ?.  Frosty is a ?.\"\n"),
-            Msg::Send("quit\n"),
-            Msg::Recv("You sent: \"quit\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
+    let mut r = Tester::new()
+        .arg("-E")
+        .arg("latin1")
+        .transcript()
+        .build()
+        .await;
+    r.enter(Sent {
+        typed: "Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.",
+        printed: Some("Fëanor is an ?.  Frosty is a ?."),
+        transcription: Some("Fëanor is an ?.  Frosty is a ?."),
+    })
+    .await;
+    r.get(r#"You sent: b"F\xebanor is an ?.  Frosty is a ?.""#)
+        .await;
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_receive_non_utf8() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
-    p.send("bytes\r\n").await.unwrap();
-    p.expect("> bytes").await.unwrap();
-    p.expect(r#"< You sent: "bytes""#).await.unwrap();
-    p.expect("< Here is some non-UTF-8 data:").await.unwrap();
-    p.expect("< Latin-1: Libert\u{FFFD}, \u{FFFD}galit\u{FFFD}, fraternit\u{FFFD}")
-        .await
-        .unwrap();
-    p.expect("< General garbage: \u{FFFD}\u{FFFD}\u{FFFD}\u{FFFD}")
-        .await
-        .unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Send("bytes\n"),
-            Msg::Recv("You sent: \"bytes\"\n"),
-            Msg::Recv("Here is some non-UTF-8 data:\n"),
-            Msg::Recv("Latin-1: Libert\u{FFFD}, \u{FFFD}galit\u{FFFD}, fraternit\u{FFFD}\n"),
-            Msg::Recv("General garbage: \u{FFFD}\u{FFFD}\u{FFFD}\u{FFFD}\n"),
-            Msg::Send("quit\n"),
-            Msg::Recv("You sent: \"quit\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
+    let mut r = Tester::new().transcript().build().await;
+    r.enter("bytes").await;
+    r.get(r#"You sent: "bytes""#).await;
+    r.get("Here is some non-UTF-8 data:").await;
+    r.get("Latin-1: Libert\u{FFFD}, \u{FFFD}galit\u{FFFD}, fraternit\u{FFFD}")
+        .await;
+    r.get("General garbage: \u{FFFD}\u{FFFD}\u{FFFD}\u{FFFD}")
+        .await;
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_receive_non_utf8_with_latin1_fallback() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) = start_session(&[
-        "--encoding=utf8-latin1",
-        "--transcript",
-        transcript.to_str().unwrap(),
-    ])
+    let mut r = Tester::new()
+        .arg("--encoding=utf8-latin1")
+        .transcript()
+        .build()
+        .await;
+    r.enter("bytes").await;
+    r.get(r#"You sent: "bytes""#).await;
+    r.get("Here is some non-UTF-8 data:").await;
+    r.get("Latin-1: Liberté, égalité, fraternité").await;
+    r.get(Recv {
+        printed: "General garbage: \x1B[7m<U+0089>\x1B[0m\u{AB}\u{CD}\u{EF}",
+        transcription: Some("General garbage: \u{89}\u{AB}\u{CD}\u{EF}\n"),
+    })
     .await;
-    p.send("bytes\r\n").await.unwrap();
-    p.expect("> bytes").await.unwrap();
-    p.expect(r#"< You sent: "bytes""#).await.unwrap();
-    p.expect("< Here is some non-UTF-8 data:").await.unwrap();
-    p.expect("< Latin-1: Liberté, égalité, fraternité")
-        .await
-        .unwrap();
-    p.expect("< General garbage: \x1B[7m<U+0089>\x1B[0m\u{AB}\u{CD}\u{EF}")
-        .await
-        .unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Send("bytes\n"),
-            Msg::Recv("You sent: \"bytes\"\n"),
-            Msg::Recv("Here is some non-UTF-8 data:\n"),
-            Msg::Recv("Latin-1: Liberté, égalité, fraternité\n"),
-            Msg::Recv("General garbage: \u{89}\u{AB}\u{CD}\u{EF}\n"),
-            Msg::Send("quit\n"),
-            Msg::Recv("You sent: \"quit\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
-}
-
-#[tokio::test]
-async fn test_transcript() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
-    sleep(Duration::from_secs(1)).await;
-    p.expect("< Ping 1").await.unwrap();
-    sleep(Duration::from_secs(1)).await;
-    p.expect("< Ping 2").await.unwrap();
-    p.send("Hello!\r\n").await.unwrap();
-    p.expect("> Hello!").await.unwrap();
-    p.expect(r#"< You sent: "Hello!""#).await.unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Recv("Ping 1\n"),
-            Msg::Recv("Ping 2\n"),
-            Msg::Send("Hello!\n"),
-            Msg::Recv("You sent: \"Hello!\"\n"),
-            Msg::Send("quit\n"),
-            Msg::Recv("You sent: \"quit\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
+    r.quit().await;
 }
 
 #[tokio::test]
 async fn test_send_crlf() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) =
-        start_session(&["--crlf", "--transcript", transcript.to_str().unwrap()]).await;
-    p.send("crlf\r\n").await.unwrap();
-    p.expect("> crlf").await.unwrap();
-    p.expect(r#"< You sent: "crlf\r""#).await.unwrap();
+    let mut r = Tester::new().arg("--crlf").transcript().build().await;
+    r.enter(Sent {
+        typed: "crlf",
+        printed: None,
+        transcription: Some("crlf\r"),
+    })
+    .await;
+    r.get(r#"You sent: "crlf\r""#).await;
     // TODO: Properly assert that the carriage return isn't printed in any form
     // here:
-    p.expect("< CR LF:").await.unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit\r""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Send("crlf\r\n"),
-            Msg::Recv("You sent: \"crlf\\r\"\n"),
-            Msg::Recv("CR LF:\r\n"),
-            Msg::Send("quit\r\n"),
-            Msg::Recv("You sent: \"quit\\r\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
+    r.get(Recv {
+        printed: "CR LF:",
+        transcription: Some("CR LF:\r\n"),
+    })
+    .await;
+    r.enter(Sent {
+        typed: "quit",
+        printed: None,
+        transcription: Some("quit\r"),
+    })
+    .await;
+    r.get(r#"You sent: "quit\r""#).await;
+    r.get("Goodbye.").await;
+    r.finish().await;
 }
 
 #[tokio::test]
 async fn test_no_crlf_recv_crlf() {
-    let tmpdir = tempdir().unwrap();
-    let transcript = tmpdir.path().join("transcript.jsonl");
-    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
-    p.send("crlf\r\n").await.unwrap();
-    p.expect("> crlf").await.unwrap();
-    p.expect("< You sent: \"crlf\"").await.unwrap();
+    let mut r = Tester::new().transcript().build().await;
+    r.enter("crlf").await;
+    r.get("You sent: \"crlf\"").await;
     // TODO: Properly assert that the carriage return isn't printed in any form
     // here:
-    p.expect("< CR LF:").await.unwrap();
-    p.send("quit\r\n").await.unwrap();
-    p.expect("> quit").await.unwrap();
-    p.expect(r#"< You sent: "quit""#).await.unwrap();
-    p.expect("< Goodbye.").await.unwrap();
-    end_session(p).await;
-    check_transcript(
-        transcript,
-        addr,
-        &[
-            Msg::Send("crlf\n"),
-            Msg::Recv("You sent: \"crlf\"\n"),
-            Msg::Recv("CR LF:\r\n"),
-            Msg::Send("quit\n"),
-            Msg::Recv("You sent: \"quit\"\n"),
-            Msg::Recv("Goodbye.\n"),
-        ],
-    );
+    r.get(Recv {
+        printed: "CR LF:",
+        transcription: Some("CR LF:\r\n"),
+    })
+    .await;
+    r.quit().await;
 }

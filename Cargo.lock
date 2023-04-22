@@ -275,6 +275,7 @@ dependencies = [
  "itertools",
  "native-tls",
  "openssl",
+ "regex",
  "rstest",
  "rustls-native-certs",
  "rustyline-async",
