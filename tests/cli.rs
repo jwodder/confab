@@ -1,12 +1,17 @@
 // <https://github.com/zhiburt/expectrl/issues/52>
 #![cfg(unix)]
+use assert_matches::assert_matches;
+use chrono::{offset::FixedOffset, DateTime};
 use expectrl::session::{log, OsProcess, OsProcessStream, Session};
 use expectrl::stream::log::LogStream;
 use expectrl::{ControlCode, Eof, Regex};
 use futures::{SinkExt, StreamExt};
-use std::net::SocketAddr;
+use serde::Deserialize;
+use serde_jsonlines::json_lines;
+use std::net::{IpAddr, SocketAddr};
 use std::process::Command;
 use std::time::Duration;
+use tempfile::tempdir;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
 use tokio::sync::oneshot::{channel, Sender};
@@ -17,6 +22,41 @@ use tokio_util::codec::{AnyDelimiterCodec, Framed};
 use expectrl::WaitStatus;
 
 type ExpectrlSession = Session<OsProcess, LogStream<OsProcessStream, std::io::Stdout>>;
+
+#[derive(Debug, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case", tag = "event")]
+enum Event {
+    ConnectionStart {
+        timestamp: DateTime<FixedOffset>,
+        host: String,
+        port: u16,
+    },
+    ConnectionComplete {
+        timestamp: DateTime<FixedOffset>,
+        peer_ip: IpAddr,
+    },
+    TlsStart {
+        timestamp: DateTime<FixedOffset>,
+    },
+    TlsComplete {
+        timestamp: DateTime<FixedOffset>,
+    },
+    Recv {
+        timestamp: DateTime<FixedOffset>,
+        data: String,
+    },
+    Send {
+        timestamp: DateTime<FixedOffset>,
+        data: String,
+    },
+    Disconnect {
+        timestamp: DateTime<FixedOffset>,
+    },
+    Error {
+        timestamp: DateTime<FixedOffset>,
+        data: String,
+    },
+}
 
 async fn testing_server(sender: Sender<SocketAddr>) {
     let listener = TcpListener::bind("127.0.0.1:0")
@@ -94,7 +134,7 @@ async fn testing_server(sender: Sender<SocketAddr>) {
     }
 }
 
-async fn start_session(opts: &[&str]) -> ExpectrlSession {
+async fn start_session(opts: &[&str]) -> (ExpectrlSession, SocketAddr) {
     let (sender, receiver) = channel();
     tokio::spawn(async move { testing_server(sender).await });
     let addr = receiver.await.expect("Error receiving address from server");
@@ -114,7 +154,7 @@ async fn start_session(opts: &[&str]) -> ExpectrlSession {
         .await
         .unwrap();
     p.expect("confab> ").await.unwrap();
-    p
+    (p, addr)
 }
 
 async fn end_session(mut p: ExpectrlSession) {
@@ -128,7 +168,7 @@ async fn end_session(mut p: ExpectrlSession) {
 
 #[tokio::test]
 async fn test_quit_session() {
-    let mut p = start_session(&[]).await;
+    let (mut p, _) = start_session(&[]).await;
     p.send("Hello!\r\n").await.unwrap();
     p.expect("> Hello!").await.unwrap();
     p.expect(r#"< You sent: "Hello!""#).await.unwrap();
@@ -141,7 +181,7 @@ async fn test_quit_session() {
 
 #[tokio::test]
 async fn test_async_recv() {
-    let mut p = start_session(&[]).await;
+    let (mut p, _) = start_session(&[]).await;
     sleep(Duration::from_secs(1)).await;
     p.expect("< Ping 1").await.unwrap();
     sleep(Duration::from_secs(1)).await;
@@ -155,7 +195,7 @@ async fn test_async_recv() {
 
 #[tokio::test]
 async fn test_send_ctrl_d() {
-    let mut p = start_session(&[]).await;
+    let (mut p, _) = start_session(&[]).await;
     p.send("Hello!\r\n").await.unwrap();
     p.expect("> Hello!").await.unwrap();
     p.expect(r#"< You sent: "Hello!""#).await.unwrap();
@@ -166,7 +206,7 @@ async fn test_send_ctrl_d() {
 #[tokio::test]
 async fn test_show_times() {
     static TIME_RGX: &str = r#"\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]"#;
-    let mut p = start_session(&["--show-times"]).await;
+    let (mut p, _) = start_session(&["--show-times"]).await;
     sleep(Duration::from_secs(1)).await;
     p.expect(Regex(format!("{} < Ping 1", TIME_RGX)))
         .await
@@ -190,7 +230,7 @@ async fn test_show_times() {
 
 #[tokio::test]
 async fn test_piecemeal_line() {
-    let mut p = start_session(&[]).await;
+    let (mut p, _) = start_session(&[]).await;
     p.send("pieces\r\n").await.unwrap();
     p.expect("> pieces").await.unwrap();
     p.expect(r#"< You sent: "pieces""#).await.unwrap();
@@ -206,7 +246,7 @@ async fn test_piecemeal_line() {
 
 #[tokio::test]
 async fn test_long_line() {
-    let mut p = start_session(&["--max-line-length", "42"]).await;
+    let (mut p, _) = start_session(&["--max-line-length", "42"]).await;
     p.send("long\r\n").await.unwrap();
     p.expect("> long").await.unwrap();
     p.expect(r#"< You sent: "long""#).await.unwrap();
@@ -244,7 +284,7 @@ async fn test_long_line() {
 
 #[tokio::test]
 async fn test_send_utf8() {
-    let mut p = start_session(&[]).await;
+    let (mut p, _) = start_session(&[]).await;
     p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
         .await
         .unwrap();
@@ -263,7 +303,7 @@ async fn test_send_utf8() {
 
 #[tokio::test]
 async fn test_send_latin1() {
-    let mut p = start_session(&["-E", "latin1"]).await;
+    let (mut p, _) = start_session(&["-E", "latin1"]).await;
     p.send("Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.\r\n")
         .await
         .unwrap();
@@ -280,7 +320,7 @@ async fn test_send_latin1() {
 
 #[tokio::test]
 async fn test_receive_non_utf8() {
-    let mut p = start_session(&[]).await;
+    let (mut p, _) = start_session(&[]).await;
     p.send("bytes\r\n").await.unwrap();
     p.expect("> bytes").await.unwrap();
     p.expect(r#"< You sent: "bytes""#).await.unwrap();
@@ -300,7 +340,7 @@ async fn test_receive_non_utf8() {
 
 #[tokio::test]
 async fn test_receive_non_utf8_with_latin1_fallback() {
-    let mut p = start_session(&["--encoding=utf8-latin1"]).await;
+    let (mut p, _) = start_session(&["--encoding=utf8-latin1"]).await;
     p.send("bytes\r\n").await.unwrap();
     p.expect("> bytes").await.unwrap();
     p.expect(r#"< You sent: "bytes""#).await.unwrap();
@@ -316,4 +356,59 @@ async fn test_receive_non_utf8_with_latin1_fallback() {
     p.expect(r#"< You sent: "quit""#).await.unwrap();
     p.expect("< Goodbye.").await.unwrap();
     end_session(p).await;
+}
+
+#[tokio::test]
+async fn test_transcript() {
+    let tmpdir = tempdir().unwrap();
+    let transcript_path = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) = start_session(&["--transcript", transcript_path.to_str().unwrap()]).await;
+    sleep(Duration::from_secs(1)).await;
+    p.expect("< Ping 1").await.unwrap();
+    sleep(Duration::from_secs(1)).await;
+    p.expect("< Ping 2").await.unwrap();
+    p.send("Hello!\r\n").await.unwrap();
+    p.expect("> Hello!").await.unwrap();
+    p.expect(r#"< You sent: "Hello!""#).await.unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    end_session(p).await;
+    let mut events = json_lines::<Event, _>(transcript_path).unwrap();
+    assert_matches!(events.next(), Some(Ok(Event::ConnectionStart {host, port, ..})) if host == addr.ip().to_string() && port == addr.port());
+    assert_matches!(events.next(), Some(Ok(Event::ConnectionComplete {peer_ip, ..})) if peer_ip == addr.ip());
+    assert_matches!(
+        events.next(),
+        Some(Ok(Event::Recv { data, .. })) if data == "Welcome to the confab Test Server!\n"
+    );
+    assert_matches!(
+        events.next(),
+        Some(Ok(Event::Recv { data, .. })) if data == "Ping 1\n"
+    );
+    assert_matches!(
+        events.next(),
+        Some(Ok(Event::Recv { data, .. })) if data == "Ping 2\n"
+    );
+    assert_matches!(
+        events.next(),
+        Some(Ok(Event::Send { data, .. })) if data == "Hello!\n"
+    );
+    assert_matches!(
+        events.next(),
+        Some(Ok(Event::Recv { data, .. }))
+        if data == "You sent: \"Hello!\"\n"
+    );
+    assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) if data == "quit\n");
+    assert_matches!(
+        events.next(),
+        Some(Ok(Event::Recv { data, .. }))
+        if data == "You sent: \"quit\"\n"
+    );
+    assert_matches!(
+        events.next(),
+        Some(Ok(Event::Recv { data, .. })) if data == "Goodbye.\n"
+    );
+    assert_matches!(events.next(), Some(Ok(Event::Disconnect { .. })));
+    assert_matches!(events.next(), None);
 }
