@@ -103,6 +103,9 @@ async fn testing_server(sender: Sender<SocketAddr>) {
                         Err(_) => format!("{line:?}"),
                     };
                     frame.send(format!("You sent: {repr}")).await.unwrap();
+                    let line = if line.ends_with(&b"\r"[..]) {
+                        line.slice(..(line.len() - 1))
+                    } else { line };
                     if line == "quit" {
                         frame.send("Goodbye.").await.unwrap();
                         break;
@@ -132,6 +135,8 @@ async fn testing_server(sender: Sender<SocketAddr>) {
                         conn.write_all(b"Here is some non-UTF-8 data:\n").await.unwrap();
                         conn.write_all(b"Latin-1: Libert\xE9, \xE9galit\xE9, fraternit\xE9\n").await.unwrap();
                         conn.write_all(b"General garbage: \x89\xAB\xCD\xEF\n").await.unwrap();
+                    } else if line == "crlf" {
+                        frame.send("CR LF:\r").await.unwrap();
                     }
                 }
                 Some(Err(e)) => panic!("Error reading from connection: {e}"),
@@ -518,6 +523,67 @@ async fn test_transcript() {
             Msg::Recv("Ping 2\n"),
             Msg::Send("Hello!\n"),
             Msg::Recv("You sent: \"Hello!\"\n"),
+            Msg::Send("quit\n"),
+            Msg::Recv("You sent: \"quit\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
+    );
+}
+
+#[tokio::test]
+async fn test_send_crlf() {
+    let tmpdir = tempdir().unwrap();
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) =
+        start_session(&["--crlf", "--transcript", transcript.to_str().unwrap()]).await;
+    p.send("crlf\r\n").await.unwrap();
+    p.expect("> crlf").await.unwrap();
+    p.expect(r#"< You sent: "crlf\r""#).await.unwrap();
+    // TODO: Properly assert that the carriage return isn't printed in any form
+    // here:
+    p.expect("< CR LF:").await.unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit\r""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    end_session(p).await;
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Send("crlf\r\n"),
+            Msg::Recv("You sent: \"crlf\\r\"\n"),
+            Msg::Recv("CR LF:\r\n"),
+            Msg::Send("quit\r\n"),
+            Msg::Recv("You sent: \"quit\\r\"\n"),
+            Msg::Recv("Goodbye.\n"),
+        ],
+    );
+}
+
+#[tokio::test]
+async fn test_no_crlf_recv_crlf() {
+    let tmpdir = tempdir().unwrap();
+    let transcript = tmpdir.path().join("transcript.jsonl");
+    let (mut p, addr) = start_session(&["--transcript", transcript.to_str().unwrap()]).await;
+    p.send("crlf\r\n").await.unwrap();
+    p.expect("> crlf").await.unwrap();
+    p.expect("< You sent: \"crlf\"").await.unwrap();
+    // TODO: Properly assert that the carriage return isn't printed in any form
+    // here:
+    p.expect("< CR LF:").await.unwrap();
+    p.send("quit\r\n").await.unwrap();
+    p.expect("> quit").await.unwrap();
+    p.expect(r#"< You sent: "quit""#).await.unwrap();
+    p.expect("< Goodbye.").await.unwrap();
+    end_session(p).await;
+    check_transcript(
+        transcript,
+        addr,
+        &[
+            Msg::Send("crlf\n"),
+            Msg::Recv("You sent: \"crlf\"\n"),
+            Msg::Recv("CR LF:\r\n"),
             Msg::Send("quit\n"),
             Msg::Recv("You sent: \"quit\"\n"),
             Msg::Recv("Goodbye.\n"),
