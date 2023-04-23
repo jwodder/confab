@@ -7,6 +7,7 @@ use expectrl::{ControlCode, Eof, Regex};
 use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
 use serde_jsonlines::json_lines;
+use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::net::{IpAddr, SocketAddr};
 use std::path::PathBuf;
@@ -192,10 +193,10 @@ impl Transcript {
         for msg in &self.messages {
             match msg {
                 Msg::Recv(s) => {
-                    assert_matches!(events.next(), Some(Ok(Event::Recv { data, .. })) if &data == s, "{s:?}")
+                    assert_matches!(events.next(), Some(Ok(Event::Recv { data, .. })) if &data == s, "{:?}", s.as_ref())
                 }
                 Msg::Send(s) => {
-                    assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) if &data == s, "{s:?}")
+                    assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) if &data == s, "{:?}", s.as_ref())
                 }
             }
         }
@@ -209,7 +210,7 @@ struct Sent {
     typed: &'static str,
     /// Text echoed by confab after "> "
     printed: Option<&'static str>,
-    /// String stored in transcript (sans terminating LF)
+    /// String stored in transcript, *including* terminating LF
     transcription: Option<&'static str>,
 }
 
@@ -229,8 +230,8 @@ impl Sent {
 
     fn transcription(&self) -> Msg {
         match self.transcription {
-            Some(s) => Msg::Send(format!("{s}\n")),
-            None => Msg::Send(format!("{}\n", self.typed)),
+            Some(s) => Msg::Send(s.into()),
+            None => Msg::Send(format!("{}\n", self.typed).into()),
         }
     }
 }
@@ -260,7 +261,7 @@ impl Recv {
     fn transcription(&self) -> Msg {
         match self.transcription {
             Some(s) => Msg::Recv(s.into()),
-            None => Msg::Recv(format!("{}\n", self.printed)),
+            None => Msg::Recv(format!("{}\n", self.printed).into()),
         }
     }
 }
@@ -319,8 +320,8 @@ enum Event {
 
 #[derive(Debug, Eq, PartialEq)]
 enum Msg {
-    Recv(String),
-    Send(String),
+    Recv(Cow<'static, str>),
+    Send(Cow<'static, str>),
 }
 
 async fn testing_server(sender: Sender<SocketAddr>) {
@@ -509,7 +510,7 @@ async fn test_send_latin1() {
     r.enter(Sent {
         typed: "Fëanor is an \u{1F9DD}.  Frosty is a \u{2603}.",
         printed: Some("Fëanor is an ?.  Frosty is a ?."),
-        transcription: Some("Fëanor is an ?.  Frosty is a ?."),
+        transcription: Some("Fëanor is an ?.  Frosty is a ?.\n"),
     })
     .await;
     r.get(r#"You sent: b"F\xebanor is an ?.  Frosty is a ?.""#)
@@ -555,7 +556,7 @@ async fn test_send_crlf() {
     r.enter(Sent {
         typed: "crlf",
         printed: None,
-        transcription: Some("crlf\r"),
+        transcription: Some("crlf\r\n"),
     })
     .await;
     r.get(r#"You sent: "crlf\r""#).await;
@@ -569,7 +570,7 @@ async fn test_send_crlf() {
     r.enter(Sent {
         typed: "quit",
         printed: None,
-        transcription: Some("quit\r"),
+        transcription: Some("quit\r\n"),
     })
     .await;
     r.get(r#"You sent: "quit\r""#).await;
