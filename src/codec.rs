@@ -202,7 +202,7 @@ fn find_final_char_boundary(buf: &[u8]) -> usize {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use rstest::rstest;
 

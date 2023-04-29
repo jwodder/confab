@@ -188,7 +188,7 @@ fn decode_latin1(bs: Vec<u8>) -> String {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use rstest::rstest;
 
