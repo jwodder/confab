@@ -25,7 +25,7 @@ openssl = { version = "0.10.51", optional = true }
 rustyline-async = "0.3.1"
 tokio = { version = "1.27.0", features = ["macros", "net", "rt", "rt-multi-thread"] }
 tokio-native-tls = "0.3.1"
-tokio-util = { version = "0.7.7", features = ["codec"] }
+tokio-util = { version = "0.7.8", features = ["codec"] }
 unicode-general-category = "0.6.0"
 
 [dev-dependencies]
