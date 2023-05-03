@@ -1,4 +1,4 @@
-.TH CONFAB 1 2022-11-24
+.TH CONFAB 1 2023-05-03
 .SH NAME
 confab \- asynchronous line-oriented interactive TCP client
 .SH SYNOPSIS
@@ -32,6 +32,7 @@ The available options are:
 .RS
 .TP
 .B utf8
+.I (default)
 Use UTF-8.
 If a line received from the remote server contains an invalid UTF-8 sequence,
 the sequence is replaced with U+FFFD REPLACEMENT CHARACTER.
@@ -48,7 +49,7 @@ If a line sent to the remote server contains non-Latin-1 characters,
 they are replaced with question marks (?).
 .RE
 .TP
-\fB\-M\fR \fIlimit\fR, \fB\-\-max\-line\-length\fR \fIlimit\fR
+\fB\-\-max\-line\-length\fR \fIlimit\fR
 Set the maximum length in bytes of each line read from the remote server
 (including the terminating newline).
 If the server sends a line longer than this,
@@ -75,7 +76,7 @@ Append a transcript of events to the given file.  See
 below for more information.
 .SH TRANSCRIPT FORMAT
 The session transcripts produced by the
-.B -T
+.B --transcript
 option take the form of JSON Lines (a.k.a. newline-delimited JSON),
 that is, a series of lines with one JSON object per line.
 Each JSON object represents an event such as a line sent, a line received,
