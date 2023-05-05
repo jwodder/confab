@@ -9,7 +9,7 @@ on:
       - '*-?v[0-9]+*'
 
 env:
-  CARGO_DIST_VERSION: 0.0.5
+  CARGO_DIST_VERSION: 0.0.6
 
 jobs:
   create-release:
@@ -34,7 +34,7 @@ jobs:
         id: create-release
         run: |
           set -ex
-          cargo dist manifest --tag=${{ github.ref_name }} --artifacts=all --no-local-paths --output-format=json > dist-manifest.json
+          cargo dist plan --tag=${{ github.ref_name }} --output-format=json > dist-manifest.json
           cat dist-manifest.json
 
           ANNOUNCEMENT_TITLE=$(jq --raw-output ".announcement_title" dist-manifest.json)
