@@ -106,7 +106,6 @@ impl Runner {
     }
 
     async fn finish(mut self) {
-        // TODO: Apply show_times:
         self.expect("* Disconnected").await;
         self.p.expect(Eof).await.unwrap();
         #[cfg(unix)]
