@@ -1,6 +1,6 @@
 v0.1.0 (in development)
 -----------------------
-- MSRV increased to 1.64
+- MSRV increased to 1.65
 - Added extended `--help` output for `--encoding` and `--max-line-length`
 - Removed the `-M` short form of the `--max-line-length` option
 - When `--encoding latin1` is in effect and the user inputs a line containing
