@@ -2,10 +2,9 @@ mod codec;
 mod events;
 mod util;
 use crate::codec::ConfabCodec;
-use crate::events::Event;
+use crate::events::{now, Event, HMS_FMT};
 use crate::util::{latin1ify, CharEncoding};
 use anyhow::Context as _;
-use chrono::Local;
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use rustyline_async::{Readline, ReadlineError, SharedWriter};
@@ -130,7 +129,7 @@ impl Runner {
             if let Err(e) = writeln!(fp, "{}", event.to_json()) {
                 let _ = self.transcript.take();
                 if self.show_times {
-                    write!(self.stdout, "[{}] ", Local::now().format("%H:%M:%S"))?;
+                    write!(self.stdout, "[{}] ", now().format(&HMS_FMT).unwrap())?;
                 }
                 writeln!(self.stdout, "! Error writing to transcript: {e}")?;
             }

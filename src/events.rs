@@ -1,38 +1,43 @@
 use crate::util::{chomp, display_vis, JsonStrMap};
-use chrono::{DateTime, Local};
 use crossterm::style::{StyledContent, Stylize};
 use std::fmt;
 use std::net::SocketAddr;
+use time::format_description::well_known::Rfc3339;
+use time::format_description::FormatItem;
+use time::macros::format_description;
+use time::OffsetDateTime;
+
+pub(crate) static HMS_FMT: &[FormatItem<'_>] = format_description!("[hour]:[minute]:[second]");
 
 pub(crate) enum Event {
     ConnectStart {
-        timestamp: DateTime<Local>,
+        timestamp: OffsetDateTime,
         host: String,
         port: u16,
     },
     ConnectFinish {
-        timestamp: DateTime<Local>,
+        timestamp: OffsetDateTime,
         peer: SocketAddr,
     },
     TlsStart {
-        timestamp: DateTime<Local>,
+        timestamp: OffsetDateTime,
     },
     TlsFinish {
-        timestamp: DateTime<Local>,
+        timestamp: OffsetDateTime,
     },
     Recv {
-        timestamp: DateTime<Local>,
+        timestamp: OffsetDateTime,
         data: String,
     },
     Send {
-        timestamp: DateTime<Local>,
+        timestamp: OffsetDateTime,
         data: String,
     },
     Disconnect {
-        timestamp: DateTime<Local>,
+        timestamp: OffsetDateTime,
     },
     Error {
-        timestamp: DateTime<Local>,
+        timestamp: OffsetDateTime,
         data: anyhow::Error,
     },
 }
@@ -40,7 +45,7 @@ pub(crate) enum Event {
 impl Event {
     pub(crate) fn connect_start(host: &str, port: u16) -> Self {
         Event::ConnectStart {
-            timestamp: Local::now(),
+            timestamp: now(),
             host: String::from(host),
             port,
         }
@@ -48,51 +53,45 @@ impl Event {
 
     pub(crate) fn connect_finish(peer: SocketAddr) -> Self {
         Event::ConnectFinish {
-            timestamp: Local::now(),
+            timestamp: now(),
             peer,
         }
     }
 
     pub(crate) fn tls_start() -> Self {
-        Event::TlsStart {
-            timestamp: Local::now(),
-        }
+        Event::TlsStart { timestamp: now() }
     }
 
     pub(crate) fn tls_finish() -> Self {
-        Event::TlsFinish {
-            timestamp: Local::now(),
-        }
+        Event::TlsFinish { timestamp: now() }
     }
 
     pub(crate) fn recv(data: String) -> Self {
         Event::Recv {
-            timestamp: Local::now(),
+            timestamp: now(),
             data,
         }
     }
 
     pub(crate) fn send(data: String) -> Self {
         Event::Send {
-            timestamp: Local::now(),
+            timestamp: now(),
             data,
         }
     }
 
     pub(crate) fn disconnect() -> Self {
-        Event::Disconnect {
-            timestamp: Local::now(),
-        }
+        Event::Disconnect { timestamp: now() }
     }
 
     pub(crate) fn error(data: anyhow::Error) -> Self {
         Event::Error {
-            timestamp: Local::now(),
+            timestamp: now(),
             data,
         }
     }
 
-    pub(crate) fn timestamp(&self) -> &DateTime<Local> {
+    pub(crate) fn timestamp(&self) -> &OffsetDateTime {
         match self {
             Event::ConnectStart { timestamp, .. } => timestamp,
             Event::ConnectFinish { timestamp, .. } => timestamp,
@@ -106,7 +105,7 @@ impl Event {
     }
 
     pub(crate) fn display_time(&self) -> String {
-        self.timestamp().format("%H:%M:%S").to_string()
+        self.timestamp().format(&HMS_FMT).unwrap()
     }
 
     pub(crate) fn sigil(&self) -> char {
@@ -136,7 +135,8 @@ impl Event {
     }
 
     pub(crate) fn to_json(&self) -> String {
-        let json = JsonStrMap::new().field("timestamp", &self.timestamp().to_rfc3339());
+        let json =
+            JsonStrMap::new().field("timestamp", &self.timestamp().format(&Rfc3339).unwrap());
         match self {
             Event::ConnectStart { host, port, .. } => json
                 .field("event", "connection-start")
@@ -176,4 +176,8 @@ impl<'a> fmt::Display for EventDisplay<'a> {
         }
         Ok(())
     }
+}
+
+pub(crate) fn now() -> OffsetDateTime {
+    OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc())
 }
