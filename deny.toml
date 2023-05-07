@@ -1,0 +1,25 @@
+targets = []
+all-features = true
+no-default-features = false
+
+[advisories]
+db-path = "~/.cargo/advisory-db"
+notice = "warn"
+unmaintained = "warn"
+vulnerability = "deny"
+yanked = "deny"
+
+[bans]
+multiple-versions = "allow"
+wildcards = "allow"
+
+[licenses]
+allow = []
+allow-osi-fsf-free = "either"
+copyleft = "deny"
+default = "deny"
+unlicensed = "deny"
+
+[sources]
+unknown-git = "deny"
+unknown-registry = "deny"

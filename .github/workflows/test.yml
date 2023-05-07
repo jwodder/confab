@@ -117,4 +117,13 @@ jobs:
       - name: Check formatting
         run: cargo fmt --check
 
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Run `cargo deny check`
+        uses: EmbarkStudios/cargo-deny-action@v1
+
 # vim:set et sts=2:
