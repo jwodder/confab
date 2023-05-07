@@ -36,6 +36,8 @@ release of `confab` and install it in `~/.cargo/bin` by running:
 
     cargo install confab
 
+At least version 1.65 of Rust is required.
+
 `confab` has the following Cargo features, selectable via the `--features
 <LIST>` option to `cargo install`:
 
