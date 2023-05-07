@@ -46,8 +46,8 @@ At least version 1.65 of Rust is required.
   `confab` on one system and run it on another system that has a different
   version of OpenSSL.
 
-    - This option is only meaningful on platforms other than macOS and Windows,
-      on which `confab` does not use OpenSSL for TLS connections.
+    - This option is not meaningful on macOS or Windows, on which `confab` does
+      not use OpenSSL for TLS connections.
 
 
 Usage
