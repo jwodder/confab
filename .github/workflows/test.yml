@@ -126,4 +126,20 @@ jobs:
       - name: Run `cargo deny check`
         uses: EmbarkStudios/cargo-deny-action@v1
 
+  thirdparty:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Install cargo-bundle-licenses
+        uses: taiki-e/cache-cargo-install-action@v1
+        with:
+          tool: cargo-bundle-licenses
+
+      - name: Check that third party licenses haven't changed
+        run: |
+          cargo bundle-licenses --check-previous \
+            -f toml -o CI.yaml -p THIRDPARTY.toml
+
 # vim:set et sts=2:

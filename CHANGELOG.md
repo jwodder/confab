@@ -9,6 +9,7 @@ v0.1.0 (in development)
   sent to the server
 - Use [`cargo-dist`](https://github.com/axodotdev/cargo-dist) for building
   release assets and installers
+- Include third party licenses in release assets
 
 v0.1.0-alpha (2022-12-04)
 -------------------------
