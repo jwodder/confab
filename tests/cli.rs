@@ -1,7 +1,6 @@
 // <https://github.com/zhiburt/expectrl/issues/52>
 #![cfg(unix)]
 use assert_matches::assert_matches;
-use chrono::{offset::FixedOffset, DateTime};
 use expectrl::session::{log, OsProcess, OsProcessStream, Session};
 use expectrl::stream::log::LogStream;
 use expectrl::{ControlCode, Eof, Regex};
@@ -13,6 +12,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
 use tempfile::tempdir;
+use time::OffsetDateTime;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
 use tokio::sync::oneshot::{channel, Sender};
@@ -28,33 +28,41 @@ type ExpectrlSession = Session<OsProcess, LogStream<OsProcessStream, std::io::St
 #[serde(rename_all = "kebab-case", tag = "event")]
 enum Event {
     ConnectionStart {
-        timestamp: DateTime<FixedOffset>,
+        #[serde(with = "time::serde::rfc3339")]
+        timestamp: OffsetDateTime,
         host: String,
         port: u16,
     },
     ConnectionComplete {
-        timestamp: DateTime<FixedOffset>,
+        #[serde(with = "time::serde::rfc3339")]
+        timestamp: OffsetDateTime,
         peer_ip: IpAddr,
     },
     TlsStart {
-        timestamp: DateTime<FixedOffset>,
+        #[serde(with = "time::serde::rfc3339")]
+        timestamp: OffsetDateTime,
     },
     TlsComplete {
-        timestamp: DateTime<FixedOffset>,
+        #[serde(with = "time::serde::rfc3339")]
+        timestamp: OffsetDateTime,
     },
     Recv {
-        timestamp: DateTime<FixedOffset>,
+        #[serde(with = "time::serde::rfc3339")]
+        timestamp: OffsetDateTime,
         data: String,
     },
     Send {
-        timestamp: DateTime<FixedOffset>,
+        #[serde(with = "time::serde::rfc3339")]
+        timestamp: OffsetDateTime,
         data: String,
     },
     Disconnect {
-        timestamp: DateTime<FixedOffset>,
+        #[serde(with = "time::serde::rfc3339")]
+        timestamp: OffsetDateTime,
     },
     Error {
-        timestamp: DateTime<FixedOffset>,
+        #[serde(with = "time::serde::rfc3339")]
+        timestamp: OffsetDateTime,
         data: String,
     },
 }
