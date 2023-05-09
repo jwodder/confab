@@ -58,7 +58,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build crate
-        run: cargo build --verbose
+        run: cargo build --all-targets --verbose
 
       - name: Test crate
         run: cargo test --verbose
