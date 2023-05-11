@@ -1,6 +1,7 @@
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![CI Status](https://github.com/jwodder/confab/actions/workflows/test.yml/badge.svg)](https://github.com/jwodder/confab/actions/workflows/test.yml)
 [![codecov.io](https://codecov.io/gh/jwodder/confab/branch/master/graph/badge.svg)](https://codecov.io/gh/jwodder/confab)
+[![Minimum Supported Rust Version](https://img.shields.io/badge/MSRV-1.65-orange)](https://www.rust-lang.org)
 [![MIT License](https://img.shields.io/github/license/jwodder/confab.svg)](https://opensource.org/licenses/MIT)
 
 [GitHub](https://github.com/jwodder/confab) | [crates.io](https://crates.io/crates/confab) | [Issues](https://github.com/jwodder/confab/issues) | [Changelog](https://github.com/jwodder/confab/blob/master/CHANGELOG.md)
@@ -35,8 +36,6 @@ installed](https://www.rust-lang.org/tools/install), you can build the latest
 release of `confab` and install it in `~/.cargo/bin` by running:
 
     cargo install confab
-
-At least version 1.65 of Rust is required.
 
 `confab` has the following Cargo features, selectable via the `--features
 <LIST>` option to `cargo install`:
