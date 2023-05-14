@@ -85,6 +85,8 @@ Options
       server contains non-Latin-1 characters, they are replaced with question
       marks (`?`).
 
+- `-h`, `--help` — Display a summary of the command-line options and exit
+
 - `--max-line-length <LIMIT>` — Set the maximum length in bytes of each line
   read from the remote server (including the terminating newline).  If the
   server sends a line longer than this, the first `<LIMIT>` bytes will be split
@@ -102,6 +104,8 @@ Options
 - `-T <file>`, `--transcript <file>` — Append a transcript of events to the
   given file.  See [Transcript Format](#transcript-format) below for more
   information.
+
+- `-V`, `--version` — Show the program version and exit
 
 
 Transcript Format

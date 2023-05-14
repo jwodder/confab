@@ -1,4 +1,4 @@
-.TH CONFAB 1 2023-05-03
+.TH CONFAB 1 2023-05-14
 .SH NAME
 confab \- asynchronous line-oriented interactive TCP client
 .SH SYNOPSIS
@@ -49,6 +49,9 @@ If a line sent to the remote server contains non-Latin-1 characters,
 they are replaced with question marks (?).
 .RE
 .TP
+\fB\-h\fR, \fB\-\-help\fR
+Display a summary of the command-line options and exit
+.TP
 \fB\-\-max\-line\-length\fR \fIlimit\fR
 Set the maximum length in bytes of each line read from the remote server
 (including the terminating newline).
@@ -59,7 +62,7 @@ bytes will be split off and treated as a whole line,
 with the remaining bytes treated as the start of a new line.
 The default value is 65535.
 .TP
-.BI \-\-servername \ domain
+\fB\-\-servername\fR \fIdomain\fR
 [used with \fB\-\-tls\fR]
 Use the given domain name for SNI and certificate hostname validation;
 defaults to the remote host name
@@ -74,6 +77,9 @@ Connect using SSL/TLS
 Append a transcript of events to the given file.  See
 .B TRANSCRIPT FORMAT
 below for more information.
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Show the program version and exit
 .SH TRANSCRIPT FORMAT
 The session transcripts produced by the
 .B --transcript
@@ -125,6 +131,14 @@ The event object has no additional fields.
 Emitted when a fatal error occurs.
 The event object also contains a "data" field
 giving a human-readable error message.
+.SH AUTHOR
+John T. Wodder II
+.RI < confab@varonathe.org >
+.SH LICENSE
+.B confab
+is distributed under the terms of the MIT license.  See the
+.I LICENSE
+file in the source repository for more information.
 .SH SEE ALSO
 .BR nc (1),
 .BR netcat (1),
