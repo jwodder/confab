@@ -29,7 +29,7 @@ mod build {
 #[clap(version)]
 struct Arguments {
     /// Show build information
-    #[clap(long)]
+    #[clap(long, exclusive = true)]
     build_info: bool,
 
     /// Terminate sent lines with CR LF instead of just LF
@@ -76,9 +76,15 @@ struct Arguments {
     transcript: Option<PathBuf>,
 
     /// Remote host (domain name or IP address) to which to connect
+    #[clap(default_value = "localhost", required = true)]
+    // The dummy default value is just there so that `--build-info` can be made
+    // exclusive.
     host: String,
 
     /// Remote port (integer) to which to connect
+    #[clap(default_value_t = 80, required = true)]
+    // The dummy default value is just there so that `--build-info` can be made
+    // exclusive.
     port: u16,
 }
 
