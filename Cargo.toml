@@ -59,6 +59,7 @@ installers = ["shell", "powershell"]
 include = ["THIRDPARTY.toml", "doc/confab.1"]
 
 [build-dependencies]
+anyhow = "1.0.71"
 cargo_metadata = "0.15.4"
 semver = "1.0.17"
 time = { version = "0.3.21", default-features = false, features = ["std", "formatting"] }

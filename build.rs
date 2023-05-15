@@ -1,3 +1,4 @@
+use anyhow::{bail, Context};
 use cargo_metadata::{CargoOpt, DependencyKind, MetadataCommand, Node, Package, PackageId};
 use semver::Version;
 use std::collections::{BTreeMap, HashSet, VecDeque};
@@ -9,13 +10,13 @@ use std::process::{Command, Stdio};
 use time::format_description::well_known::Rfc3339;
 use time::OffsetDateTime;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> anyhow::Result<()> {
     println!("cargo:rerun-if-changed=Cargo.lock");
     println!("cargo:rerun-if-changed=.git/HEAD");
     println!("cargo:rerun-if-changed=.git/refs");
 
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR envvar not set");
-    let out_dir = env::var("OUT_DIR").expect("OUT_DIR envvar not set");
+    let manifest_dir = getenv("CARGO_MANIFEST_DIR")?;
+    let out_dir = getenv("OUT_DIR")?;
     let mut fp = BufWriter::new(File::create(Path::new(&out_dir).join("build_info.rs"))?);
 
     writeln!(
@@ -24,21 +25,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         OffsetDateTime::now_utc().format(&Rfc3339).unwrap(),
     )?;
 
-    let target = env::var("TARGET").expect("TARGET envvar not set");
+    let target = getenv("TARGET")?;
     writeln!(&mut fp, "pub const TARGET_TRIPLE: &str = {target:?};")?;
-
     writeln!(
         &mut fp,
         "pub const HOST_TRIPLE: &str = {:?};",
-        env::var("HOST").expect("HOST envvar not set"),
+        getenv("HOST")?
     )?;
 
     let mut features = Vec::new();
     for (key, _) in env::vars_os() {
-        if let Some(s) = key.to_str() {
-            if let Some(feat) = s.strip_prefix("CARGO_FEATURE_") {
-                features.push(feat.to_ascii_lowercase().replace('_', "-"));
-            }
+        if let Some(feat) = key.to_str().and_then(|s| s.strip_prefix("CARGO_FEATURE_")) {
+            features.push(feat.to_ascii_lowercase().replace('_', "-"));
         }
     }
     features.sort();
@@ -48,12 +46,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         features.join(", ")
     )?;
 
-    let rustc_v = Command::new(env::var("RUSTC").expect("RUSTC envvar not set"))
+    let rv = Command::new(getenv("RUSTC")?)
         .arg("-V")
-        .output()?;
-    let mut rv = String::from_utf8(rustc_v.stdout)?;
+        .output()
+        .context("failed to get compiler version")?;
+    if !rv.status.success() {
+        bail!("compiler version command was not successful: {}", rv.status);
+    }
+    let mut rv = String::from_utf8(rv.stdout).context("compiler version output was not UTF-8")?;
     chomp(&mut rv);
-
     writeln!(&mut fp, "pub const RUSTC_VERSION: &str = {:?};", rv)?;
 
     match Command::new("git")
@@ -70,8 +71,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .arg("rev-parse")
                 .arg("HEAD")
                 .current_dir(&manifest_dir)
-                .output()?;
-            let mut revision = String::from_utf8(output.stdout)?;
+                .output()
+                .context("failed to run `git rev-parse HEAD`")?;
+            if !output.status.success() {
+                bail!(
+                    "`git rev-parse HEAD` command was not successful: {}",
+                    output.status
+                );
+            }
+            let mut revision = String::from_utf8(output.stdout)
+                .context("`git rev-parse HEAD` output was not UTF-8")?;
             chomp(&mut revision);
             writeln!(
                 &mut fp,
@@ -88,10 +97,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // repository
             writeln!(&mut fp, "pub const GIT_COMMIT_HASH: Option<&str> = None;")?;
         }
-        Err(e) => return Err(e.into()),
+        Err(e) => return Err(e).context("failed to run `git rev-parse --git-dir`"),
     }
 
-    let package = env::var("CARGO_PKG_NAME").expect("CARGO_PKG_NAME envvar not set");
+    let package = getenv("CARGO_PKG_NAME")?;
     let deps = normal_dependencies(manifest_dir, &package, &target, features)?;
     writeln!(
         &mut fp,
@@ -105,6 +114,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     fp.flush()?;
     Ok(())
+}
+
+fn getenv(name: &str) -> anyhow::Result<String> {
+    env::var(name).with_context(|| format!("{name} envvar not set"))
 }
 
 fn chomp(s: &mut String) {
@@ -121,25 +134,25 @@ fn normal_dependencies<P: AsRef<Path>>(
     package: &str,
     target: &str,
     features: Vec<String>,
-) -> cargo_metadata::Result<Vec<(String, Version)>> {
+) -> anyhow::Result<Vec<(String, Version)>> {
     let metadata = MetadataCommand::new()
         .manifest_path(&manifest_dir.as_ref().join("Cargo.toml"))
         .features(CargoOpt::NoDefaultFeatures)
         .features(CargoOpt::SomeFeatures(features))
         .other_options(vec![format!("--filter-platform={target}")])
-        .exec()?;
+        .exec()
+        .context("failed to get Cargo metadata")?;
     let Some(root_id) = metadata.workspace_members.iter().find(|pkgid| {
-        let pkg = package_by_id(&metadata.packages, pkgid);
-        pkg.name == package
+        package_by_id(&metadata.packages, pkgid).map_or(false, |pkg| pkg.name == package)
     }) else {
-        panic!("Package {package} not found in metadata");
+        bail!("Package {package} not found in metadata");
     };
     let mut dependencies = BTreeMap::new();
     let mut queue = VecDeque::<&PackageId>::from([root_id]);
     let mut seen = HashSet::<&PackageId>::new();
     let nodes = metadata.resolve.unwrap().nodes;
     while let Some(pkgid) = queue.pop_front() {
-        let n = node_by_id(&nodes, pkgid);
+        let n = node_by_id(&nodes, pkgid)?;
         for dep in &n.deps {
             if dep
                 .dep_kinds
@@ -148,7 +161,7 @@ fn normal_dependencies<P: AsRef<Path>>(
                 && seen.insert(&dep.pkg)
             {
                 queue.push_back(&dep.pkg);
-                let pkg = package_by_id(&metadata.packages, &dep.pkg);
+                let pkg = package_by_id(&metadata.packages, &dep.pkg)?;
                 dependencies.insert(pkg.name.clone(), pkg.version.clone());
             }
         }
@@ -156,16 +169,16 @@ fn normal_dependencies<P: AsRef<Path>>(
     Ok(dependencies.into_iter().collect())
 }
 
-fn package_by_id<'a>(packages: &'a [Package], pkgid: &'a PackageId) -> &'a Package {
+fn package_by_id<'a>(packages: &'a [Package], pkgid: &'a PackageId) -> anyhow::Result<&'a Package> {
     let Some(pkg) = packages.iter().find(|p| &p.id == pkgid) else {
-        panic!("Package ID {pkgid} not found in metadata");
+        bail!("Package ID {pkgid} not found in metadata");
     };
-    pkg
+    Ok(pkg)
 }
 
-fn node_by_id<'a>(nodes: &'a [Node], pkgid: &'a PackageId) -> &'a Node {
+fn node_by_id<'a>(nodes: &'a [Node], pkgid: &'a PackageId) -> anyhow::Result<&'a Node> {
     let Some(n) = nodes.iter().find(|n| &n.id == pkgid) else {
-        panic!("Node with ID {pkgid} not found in metadata");
+        bail!("Node with ID {pkgid} not found in metadata");
     };
-    n
+    Ok(n)
 }
