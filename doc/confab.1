@@ -1,4 +1,4 @@
-.TH CONFAB 1 2023-05-14
+.TH CONFAB 1 2023-05-15
 .SH NAME
 confab \- asynchronous line-oriented interactive TCP client
 .SH SYNOPSIS
@@ -21,6 +21,9 @@ are printed out above the prompt with a "<" prefix.
 Communication stops when the remote server closes the connection
 or when the user presses Ctrl-D.
 .SH OPTIONS
+.TP
+.B --build-info
+Display a summary of the program's build information & dependencies and exit
 .TP
 .B --crlf
 Append CR LF (\(dq\(rsr\(rsn\(dq) to each line sent to the remote server

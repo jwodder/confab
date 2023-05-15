@@ -28,7 +28,7 @@ mod build {
 #[derive(Clone, Debug, Eq, Parser, PartialEq)]
 #[clap(version)]
 struct Arguments {
-    /// Show build information
+    /// Display a summary of build information & dependencies and exit
     #[clap(long, exclusive = true)]
     build_info: bool,
 
