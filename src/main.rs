@@ -18,12 +18,20 @@ use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
 use tokio_util::either::Either;
 
+mod build {
+    include!(concat!(env!("OUT_DIR"), "/build_info.rs"));
+}
+
 /// Asynchronous line-oriented interactive TCP client
 ///
 /// See <https://github.com/jwodder/confab> for more information
 #[derive(Parser)]
 #[clap(version)]
 struct Arguments {
+    /// Show build information
+    #[clap(long)]
+    build_info: bool,
+
     /// Terminate sent lines with CR LF instead of just LF
     #[clap(long)]
     crlf: bool,
@@ -252,5 +260,36 @@ impl std::error::Error for InterfaceError {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
-    Ok(Arguments::parse().open()?.run().await?)
+    let args = Arguments::parse();
+    if args.build_info {
+        build_info();
+        Ok(ExitCode::SUCCESS)
+    } else {
+        Ok(args.open()?.run().await?)
+    }
+}
+
+fn build_info() {
+    use build::*;
+    println!(
+        "This is {} version {}, built {BUILD_TIMESTAMP} for {TARGET_TRIPLE}.",
+        env!("CARGO_PKG_NAME"),
+        env!("CARGO_PKG_VERSION")
+    );
+    println!();
+    if let Some(hash) = GIT_COMMIT_HASH {
+        println!("Git revision: {hash}");
+    }
+    println!("Compiler: {RUSTC_VERSION}");
+    println!("Host triple: {HOST_TRIPLE}");
+    if FEATURES.is_empty() {
+        println!("Enabled features: <none>");
+    } else {
+        println!("Enabled features: {FEATURES}");
+    }
+    println!();
+    println!("Dependencies:");
+    for (name, version) in DEPENDENCIES {
+        println!(" - {name} {version}");
+    }
 }
