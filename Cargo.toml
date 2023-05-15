@@ -23,7 +23,7 @@ native-tls = "0.2.11"
 openssl = { version = "0.10.52", optional = true }
 rustyline-async = "0.3.1"
 time = { version = "0.3.21", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
-tokio = { version = "1.28.0", features = ["macros", "net", "rt", "rt-multi-thread"] }
+tokio = { version = "1.28.1", features = ["macros", "net", "rt", "rt-multi-thread"] }
 tokio-native-tls = "0.3.1"
 tokio-util = { version = "0.7.8", features = ["codec"] }
 unicode-general-category = "0.6.0"
@@ -37,7 +37,7 @@ serde-jsonlines = "0.4.0"
 serde_json = "1.0.96"
 tempfile = "3.5.0"
 time = { version = "0.3.21", default-features = false, features = ["serde-human-readable"] }
-tokio = { version = "1.28.0", features = ["io-util", "sync", "time"] }
+tokio = { version = "1.28.1", features = ["io-util", "sync", "time"] }
 tokio-stream = { version = "0.1.14", features = ["time"] }
 
 [features]
