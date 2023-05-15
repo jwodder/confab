@@ -25,7 +25,7 @@ mod build {
 /// Asynchronous line-oriented interactive TCP client
 ///
 /// See <https://github.com/jwodder/confab> for more information
-#[derive(Parser)]
+#[derive(Clone, Debug, Eq, Parser, PartialEq)]
 #[clap(version)]
 struct Arguments {
     /// Show build information
@@ -299,5 +299,37 @@ fn build_info() {
     println!("Dependencies:");
     for (name, version) in DEPENDENCIES {
         println!(" - {name} {version}");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::error::ErrorKind;
+    use clap::CommandFactory;
+
+    #[test]
+    fn validate_cli() {
+        Arguments::command().debug_assert()
+    }
+
+    #[test]
+    fn just_build_info() {
+        let args = Arguments::try_parse_from(["confab", "--build-info"]).unwrap();
+        assert!(args.build_info);
+    }
+
+    #[test]
+    fn build_info_and_args() {
+        let args = Arguments::try_parse_from(["confab", "--build-info", "localhost", "80"]);
+        assert!(args.is_err());
+        assert_eq!(args.unwrap_err().kind(), ErrorKind::ArgumentConflict);
+    }
+
+    #[test]
+    fn no_args() {
+        let args = Arguments::try_parse_from(["confab"]);
+        assert!(args.is_err());
+        assert_eq!(args.unwrap_err().kind(), ErrorKind::MissingRequiredArgument);
     }
 }
