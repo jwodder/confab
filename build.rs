@@ -1,7 +1,7 @@
 use anyhow::{bail, Context};
 use cargo_metadata::{CargoOpt, DependencyKind, MetadataCommand, Node, Package, PackageId};
 use semver::Version;
-use std::collections::{BTreeMap, HashSet, VecDeque};
+use std::collections::{HashSet, VecDeque};
 use std::env;
 use std::fs::File;
 use std::io::{BufWriter, ErrorKind, Write};
@@ -147,7 +147,7 @@ fn normal_dependencies<P: AsRef<Path>>(
     }) else {
         bail!("Package {package} not found in metadata");
     };
-    let mut dependencies = BTreeMap::new();
+    let mut dependencies = Vec::new();
     let mut queue = VecDeque::<&PackageId>::from([root_id]);
     let mut seen = HashSet::<&PackageId>::new();
     let nodes = metadata.resolve.unwrap().nodes;
@@ -162,11 +162,12 @@ fn normal_dependencies<P: AsRef<Path>>(
             {
                 queue.push_back(&dep.pkg);
                 let pkg = package_by_id(&metadata.packages, &dep.pkg)?;
-                dependencies.insert(pkg.name.clone(), pkg.version.clone());
+                dependencies.push((pkg.name.clone(), pkg.version.clone()));
             }
         }
     }
-    Ok(dependencies.into_iter().collect())
+    dependencies.sort_unstable();
+    Ok(dependencies)
 }
 
 fn package_by_id<'a>(packages: &'a [Package], pkgid: &'a PackageId) -> anyhow::Result<&'a Package> {
