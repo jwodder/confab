@@ -57,7 +57,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Activate cache
-        if: "!startsWith(github.ref_name, 'dependabot/')"
+        if: github.actor != 'dependabot[bot]'
         uses: Swatinem/rust-cache@v2
 
       - name: Install cross
