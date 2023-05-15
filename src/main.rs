@@ -18,12 +18,20 @@ use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
 use tokio_util::either::Either;
 
+mod build {
+    include!(concat!(env!("OUT_DIR"), "/build_info.rs"));
+}
+
 /// Asynchronous line-oriented interactive TCP client
 ///
 /// See <https://github.com/jwodder/confab> for more information
-#[derive(Parser)]
+#[derive(Clone, Debug, Eq, Parser, PartialEq)]
 #[clap(version)]
 struct Arguments {
+    /// Display a summary of build information & dependencies and exit
+    #[clap(long, exclusive = true)]
+    build_info: bool,
+
     /// Terminate sent lines with CR LF instead of just LF
     #[clap(long)]
     crlf: bool,
@@ -68,9 +76,15 @@ struct Arguments {
     transcript: Option<PathBuf>,
 
     /// Remote host (domain name or IP address) to which to connect
+    #[clap(default_value = "localhost", required = true)]
+    // The dummy default value is just there so that `--build-info` can be made
+    // exclusive.
     host: String,
 
     /// Remote port (integer) to which to connect
+    #[clap(default_value_t = 80, required = true)]
+    // The dummy default value is just there so that `--build-info` can be made
+    // exclusive.
     port: u16,
 }
 
@@ -252,5 +266,70 @@ impl std::error::Error for InterfaceError {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
-    Ok(Arguments::parse().open()?.run().await?)
+    let args = Arguments::parse();
+    if args.build_info {
+        build_info();
+        Ok(ExitCode::SUCCESS)
+    } else {
+        Ok(args.open()?.run().await?)
+    }
+}
+
+fn build_info() {
+    use build::*;
+    println!(
+        "This is {} version {}.",
+        env!("CARGO_PKG_NAME"),
+        env!("CARGO_PKG_VERSION")
+    );
+    println!();
+    println!("Built: {BUILD_TIMESTAMP}");
+    println!("Target triple: {TARGET_TRIPLE}");
+    println!("Compiler: {RUSTC_VERSION}");
+    println!("Compiler host triple: {HOST_TRIPLE}");
+    if let Some(hash) = GIT_COMMIT_HASH {
+        println!("Source Git revision: {hash}");
+    }
+    if FEATURES.is_empty() {
+        println!("Enabled features: <none>");
+    } else {
+        println!("Enabled features: {FEATURES}");
+    }
+    println!();
+    println!("Dependencies:");
+    for (name, version) in DEPENDENCIES {
+        println!(" - {name} {version}");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::error::ErrorKind;
+    use clap::CommandFactory;
+
+    #[test]
+    fn validate_cli() {
+        Arguments::command().debug_assert()
+    }
+
+    #[test]
+    fn just_build_info() {
+        let args = Arguments::try_parse_from(["confab", "--build-info"]).unwrap();
+        assert!(args.build_info);
+    }
+
+    #[test]
+    fn build_info_and_args() {
+        let args = Arguments::try_parse_from(["confab", "--build-info", "localhost", "80"]);
+        assert!(args.is_err());
+        assert_eq!(args.unwrap_err().kind(), ErrorKind::ArgumentConflict);
+    }
+
+    #[test]
+    fn no_args() {
+        let args = Arguments::try_parse_from(["confab"]);
+        assert!(args.is_err());
+        assert_eq!(args.unwrap_err().kind(), ErrorKind::MissingRequiredArgument);
+    }
 }

@@ -10,6 +10,7 @@ v0.1.0 (in development)
 - Use [`cargo-dist`](https://github.com/axodotdev/cargo-dist) for building
   release assets and installers
 - Include third party licenses in release assets
+- Added a `--build-info` option for displaying build information & dependencies
 
 v0.1.0-alpha (2022-12-04)
 -------------------------

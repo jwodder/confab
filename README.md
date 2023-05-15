@@ -67,6 +67,9 @@ readline-like capabilities; see there for the supported control sequences.
 Options
 -------
 
+- `--build-info` — Display a summary of the program's build information &
+  dependencies and exit
+
 - `--crlf` — Append CR LF (`"\r\n"`) to each line sent to the remote server
   instead of just LF (`"\n"`)
 
