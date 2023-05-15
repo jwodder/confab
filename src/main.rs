@@ -278,16 +278,18 @@ async fn main() -> anyhow::Result<ExitCode> {
 fn build_info() {
     use build::*;
     println!(
-        "This is {} version {}, built {BUILD_TIMESTAMP} for {TARGET_TRIPLE}.",
+        "This is {} version {}.",
         env!("CARGO_PKG_NAME"),
         env!("CARGO_PKG_VERSION")
     );
     println!();
-    if let Some(hash) = GIT_COMMIT_HASH {
-        println!("Git revision: {hash}");
-    }
+    println!("Built: {BUILD_TIMESTAMP}");
+    println!("Target triple: {TARGET_TRIPLE}");
     println!("Compiler: {RUSTC_VERSION}");
-    println!("Host triple: {HOST_TRIPLE}");
+    println!("Compiler host triple: {HOST_TRIPLE}");
+    if let Some(hash) = GIT_COMMIT_HASH {
+        println!("Source Git revision: {hash}");
+    }
     if FEATURES.is_empty() {
         println!("Enabled features: <none>");
     } else {
