@@ -969,7 +969,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.2.7"
+package_version = "4.3.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1205,7 +1205,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.2.7"
+package_version = "4.3.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1442,7 +1442,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_derive"
-package_version = "4.2.0"
+package_version = "4.3.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1679,7 +1679,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_lex"
-package_version = "0.4.1"
+package_version = "0.5.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8003,7 +8003,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "linux-raw-sys"
-package_version = "0.3.7"
+package_version = "0.3.8"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -11890,7 +11890,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.56"
+package_version = "1.0.58"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -13138,7 +13138,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "security-framework"
-package_version = "2.8.2"
+package_version = "2.9.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
