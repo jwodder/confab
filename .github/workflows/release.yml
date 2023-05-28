@@ -28,7 +28,7 @@ jobs:
           rustup default stable
 
       - name: Install cargo-dist
-        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.sh | sh
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-installer.sh | sh
 
       - name: Create release
         id: create-release
@@ -58,19 +58,19 @@ jobs:
           - name: Installers
             os: ubuntu-20.04
             dist-args: --artifacts=global
-            install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.sh | sh
+            install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-installer.sh | sh
           - name: macOS
             os: macos-11
             dist-args: --artifacts=local --target=aarch64-apple-darwin --target=x86_64-apple-darwin
-            install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.sh | sh
+            install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-installer.sh | sh
           - name: Linux
             os: ubuntu-20.04
             dist-args: --artifacts=local --target=x86_64-unknown-linux-gnu
-            install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-v$CARGO_DIST_VERSION-installer.sh | sh
+            install-dist: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v$CARGO_DIST_VERSION/cargo-dist-installer.sh | sh
           - name: Windows
             os: windows-2019
             dist-args: --artifacts=local --target=x86_64-pc-windows-msvc
-            install-dist: irm https://github.com/axodotdev/cargo-dist/releases/download/v$Env:CARGO_DIST_VERSION/cargo-dist-v$Env:CARGO_DIST_VERSION-installer.ps1 | iex
+            install-dist: irm https://github.com/axodotdev/cargo-dist/releases/download/v$Env:CARGO_DIST_VERSION/cargo-dist-installer.ps1 | iex
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
