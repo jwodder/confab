@@ -1,5 +1,5 @@
-v0.1.0 (in development)
------------------------
+v0.1.0 (2023-05-28)
+-------------------
 - Increased MSRV to 1.65
 - Added extended `--help` output for `--encoding` and `--max-line-length`
 - Removed the `-M` short form of the `--max-line-length` option
