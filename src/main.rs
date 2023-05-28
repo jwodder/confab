@@ -90,8 +90,9 @@ struct Arguments {
 
 impl Arguments {
     fn open(self) -> anyhow::Result<Runner> {
-        let (rl, stdout) =
+        let (mut rl, stdout) =
             Readline::new("confab> ".into()).context("Error constructing Readline object")?;
+        rl.should_print_line_on(false, false);
         let transcript = match self.transcript {
             Some(path) => Some(
                 OpenOptions::new()
