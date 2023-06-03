@@ -1,5 +1,5 @@
-v0.2.0 (in development)
------------------------
+v0.2.0 (2023-06-03)
+-------------------
 - `confab` is now built using [`rustls`](https://github.com/rustls/rustls)
   instead of [`native-tls`](https://github.com/sfackler/rust-native-tls) by
   default; `native-tls` can still be used via feature flags
