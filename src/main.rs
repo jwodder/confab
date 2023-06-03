@@ -18,6 +18,18 @@ use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
 use tokio_util::either::Either;
 
+cfg_if::cfg_if! {
+    if #[cfg(feature = "rustls")] {
+        mod rustls;
+        use crate::rustls as tls;
+    } else if #[cfg(feature = "native")] {
+        mod native_tls;
+        use crate::native_tls as tls;
+    } else {
+        compile_error("confab requires feature \"rustls\" or \"native\" to be enabled")
+    }
+}
+
 mod build {
     include!(concat!(env!("OUT_DIR"), "/build_info.rs"));
 }
@@ -179,13 +191,7 @@ impl Runner {
         ))?;
         let conn = if self.tls {
             self.report(Event::tls_start())?;
-            let cx = tokio_native_tls::TlsConnector::from(
-                native_tls::TlsConnector::new().context("Error creating TLS connector")?,
-            );
-            let conn = cx
-                .connect(self.servername.as_ref().unwrap_or(&self.host), conn)
-                .await
-                .context("Error establishing TLS connection")?;
+            let conn = tls::connect(conn, self.servername.as_ref().unwrap_or(&self.host)).await?;
             self.report(Event::tls_finish())?;
             Either::Right(conn)
         } else {

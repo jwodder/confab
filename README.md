@@ -40,10 +40,24 @@ release of `confab` and install it in `~/.cargo/bin` by running:
 `confab` has the following Cargo features, selectable via the `--features
 <LIST>` option to `cargo install`:
 
+- `rustls` — Use [`rustls`](https://github.com/rustls/rustls) for TLS support.
+
+    - This feature is enabled by default, and it overrides any other features;
+      hence, in order to enable the `native` or `vendored-openssl` feature, the
+      `--no-default-features` option must be passed to `cargo install` in
+      addition to the `--features ...` option.
+
+    - The release assets are built with this feature enabled.
+
+- `native` — Use [`native-tls`](https://github.com/sfackler/rust-native-tls)
+  for TLS support.
+
 - `vendored-openssl` — Compile a vendored copy of OpenSSL into `confab` instead
   of using the platform's copy at runtime.  This makes it possible to build
   `confab` on one system and run it on another system that has a different
   version of OpenSSL.
+
+    - This feature implies the `native` feature.
 
     - This option is not meaningful on macOS or Windows, on which `confab` does
       not use OpenSSL for TLS connections.

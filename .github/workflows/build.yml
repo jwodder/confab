@@ -24,28 +24,24 @@ jobs:
             architecture: arm64
             suffix: ""
             use-cross: true
-            options: ""
           - target: x86_64-apple-darwin
             os: macos-latest
             os-name: macos
             architecture: x86_64
             suffix: ""
             use-cross: false
-            options: ""
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             os-name: windows
             architecture: x86_64
             suffix: ".exe"
             use-cross: false
-            options: ""
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             os-name: linux
             architecture: x86_64
             suffix: ""
             use-cross: false
-            options: --features vendored-openssl
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -68,11 +64,11 @@ jobs:
 
       - name: Build
         if: "!matrix.use-cross"
-        run: cargo build --release --target ${{ matrix.target }} --verbose ${{ matrix.options }}
+        run: cargo build --release --target ${{ matrix.target }} --verbose
 
       - name: Build w/cross
         if: matrix.use-cross
-        run: cross build --release --target ${{ matrix.target }} --verbose ${{ matrix.options }}
+        run: cross build --release --target ${{ matrix.target }} --verbose
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3

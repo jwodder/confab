@@ -12,6 +12,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -28,8 +32,10 @@ jobs:
         include:
           - os: macos-latest
             toolchain: stable
+            exclude: --exclude-features vendored-openssl
           - os: windows-latest
             toolchain: stable
+            exclude: --exclude-features vendored-openssl
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -57,11 +63,19 @@ jobs:
         if: github.actor != 'dependabot[bot]'
         uses: Swatinem/rust-cache@v2
 
+      - name: Install cargo-hack
+        uses: taiki-e/install-action@cargo-hack
+
       - name: Build crate
         run: cargo build --all-targets --verbose
 
       - name: Test crate
-        run: cargo test --verbose
+        run: |
+          cargo hack \
+            --each-feature \
+            --exclude-no-default-features \
+            --exclude-all-features ${{ matrix.exclude }} \
+            test --verbose
 
   coverage:
     # This is separate from the main tests because cargo-llvm-cov doesn't run
@@ -111,8 +125,16 @@ jobs:
         if: github.actor != 'dependabot[bot]'
         uses: Swatinem/rust-cache@v2
 
+      - name: Install cargo-hack
+        uses: taiki-e/install-action@cargo-hack
+
       - name: Check code
-        run: cargo clippy --all-features --all-targets -- -Dwarnings
+        run: |
+          cargo hack \
+            --each-feature \
+            --exclude-no-default-features \
+            --exclude-all-features \
+            clippy --all-targets -- -Dwarnings
 
       - name: Check formatting
         run: cargo fmt --check
