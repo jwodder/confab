@@ -162,6 +162,8 @@ jobs:
       - name: Check that third party licenses haven't changed
         run: |
           cargo bundle-licenses --check-previous \
-            -f toml -o CI.yaml -p THIRDPARTY.toml
+            -f toml -o CI.toml -p THIRDPARTY.toml
+        env:
+          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
 
 # vim:set et sts=2:
