@@ -1447,7 +1447,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.3.0"
+package_version = "4.3.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1683,7 +1683,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.3.0"
+package_version = "4.3.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1920,7 +1920,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_derive"
-package_version = "4.3.0"
+package_version = "4.3.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -7548,7 +7548,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.144"
+package_version = "0.2.145"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8770,7 +8770,7 @@ THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "mio"
-package_version = "0.8.7"
+package_version = "0.8.8"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -9271,7 +9271,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "once_cell"
-package_version = "1.17.1"
+package_version = "1.18.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -11580,10 +11580,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "ring"
 package_version = "0.16.20"
-license = "License specified in file ($CARGO_HOME/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/LICENSE)"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.16.20/LICENSE)"
 
 [[third_party_libraries.licenses]]
-license = "License specified in file ($CARGO_HOME/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/LICENSE)"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.16.20/LICENSE)"
 text = """
 Note that it is easy for this file to get out of sync with the licenses in the
 source code files. It's recommended to compare the licenses in the source code
@@ -13041,10 +13041,10 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "rustls-webpki"
 package_version = "0.100.1"
-license = "License specified in file ($CARGO_HOME/registry/src/github.com-1ecc6299db9ec823/rustls-webpki-0.100.1/LICENSE)"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.100.1/LICENSE)"
 
 [[third_party_libraries.licenses]]
-license = "License specified in file ($CARGO_HOME/registry/src/github.com-1ecc6299db9ec823/rustls-webpki-0.100.1/LICENSE)"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.100.1/LICENSE)"
 text = """
 Except as otherwise noted, this project is licensed under the following
 (ISC-style) terms:
