@@ -22,7 +22,7 @@ futures = "0.3.28"
 itertools = "0.10.5"
 native-tls = { version = "0.2.11", optional = true }
 openssl = { version = "0.10.54", optional = true }
-rustls-native-certs = { version = "0.6.2", optional = true }
+rustls-native-certs = { version = "0.6.3", optional = true }
 rustyline-async = "0.3.2"
 time = { version = "0.3.22", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
 tokio = { version = "1.28.2", features = ["macros", "net", "rt", "rt-multi-thread"] }
