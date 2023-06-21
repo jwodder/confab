@@ -16,12 +16,12 @@ exclude = ["/.*"]
 anyhow = "1.0.71"
 bytes = "1.4.0"
 cfg-if = "1.0.0"
-clap = { version = "4.3.4", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
+clap = { version = "4.3.5", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
 crossterm = "0.26.1"
 futures = "0.3.28"
 itertools = "0.10.5"
 native-tls = { version = "0.2.11", optional = true }
-openssl = { version = "0.10.54", optional = true }
+openssl = { version = "0.10.55", optional = true }
 rustls-native-certs = { version = "0.6.3", optional = true }
 rustyline-async = "0.3.2"
 time = { version = "0.3.22", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
