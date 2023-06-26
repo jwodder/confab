@@ -1447,7 +1447,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.3.5"
+package_version = "4.3.8"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1683,7 +1683,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.3.5"
+package_version = "4.3.8"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -6852,8 +6852,8 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "itertools"
-package_version = "0.10.5"
-license = "MIT/Apache-2.0"
+package_version = "0.11.0"
+license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
 license = "MIT"
@@ -7548,7 +7548,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.146"
+package_version = "0.2.147"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -11119,7 +11119,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.60"
+package_version = "1.0.63"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
