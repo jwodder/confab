@@ -16,7 +16,7 @@ exclude = ["/.*"]
 anyhow = "1.0.71"
 bytes = "1.4.0"
 cfg-if = "1.0.0"
-clap = { version = "4.3.10", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
+clap = { version = "4.3.11", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
 crossterm = "0.26.1"
 futures = "0.3.28"
 itertools = "0.11.0"
@@ -24,7 +24,7 @@ native-tls = { version = "0.2.11", optional = true }
 openssl = { version = "0.10.55", optional = true }
 rustls-native-certs = { version = "0.6.3", optional = true }
 rustyline-async = "0.3.2"
-time = { version = "0.3.22", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
+time = { version = "0.3.23", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
 tokio = { version = "1.29.1", features = ["macros", "net", "rt", "rt-multi-thread"] }
 tokio-native-tls = { version = "0.3.1", optional = true }
 tokio-rustls = { version = "0.24.1", optional = true }
@@ -33,13 +33,13 @@ unicode-general-category = "0.6.0"
 
 [dev-dependencies]
 assert_matches = "1.5.0"
-expectrl = { version = "0.7.0", features = ["async"] }
-rstest = { version = "0.17.0", default-features = false }
-serde = { version = "1.0.164", features = ["derive"] }
+expectrl = { version = "0.7.1", features = ["async"] }
+rstest = { version = "0.18.1", default-features = false }
+serde = { version = "1.0.171", features = ["derive"] }
 serde-jsonlines = "0.4.0"
-serde_json = "1.0.99"
+serde_json = "1.0.100"
 tempfile = "3.6.0"
-time = { version = "0.3.22", default-features = false, features = ["serde-human-readable"] }
+time = { version = "0.3.23", default-features = false, features = ["serde-human-readable"] }
 tokio = { version = "1.29.1", features = ["io-util", "sync", "time"] }
 tokio-stream = { version = "0.1.14", features = ["time"] }
 
@@ -68,4 +68,4 @@ include = ["THIRDPARTY.toml", "doc/confab.1"]
 anyhow = "1.0.71"
 cargo_metadata = "0.15.4"
 semver = "1.0.17"
-time = { version = "0.3.22", default-features = false, features = ["std", "formatting"] }
+time = { version = "0.3.23", default-features = false, features = ["std", "formatting"] }
