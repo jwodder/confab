@@ -13,7 +13,7 @@ categories = ["command-line-utilities", "network-programming"]
 exclude = ["/.*"]
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "1.0.75"
 bytes = "1.4.0"
 cfg-if = "1.0.0"
 clap = { version = "4.3.11", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
@@ -65,7 +65,7 @@ installers = ["shell", "powershell"]
 include = ["THIRDPARTY.toml", "doc/confab.1"]
 
 [build-dependencies]
-anyhow = "1.0.71"
+anyhow = "1.0.75"
 cargo_metadata = "0.15.4"
 semver = "1.0.17"
 time = { version = "0.3.23", default-features = false, features = ["std", "formatting"] }
