@@ -1,3 +1,7 @@
+v0.3.0 (in development)
+-----------------------
+- Increased MSRV to 1.70
+
 v0.2.0 (2023-06-03)
 -------------------
 - `confab` is now built using [`rustls`](https://github.com/rustls/rustls)
