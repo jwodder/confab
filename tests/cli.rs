@@ -247,7 +247,7 @@ async fn test_send_ctrl_d() {
 
 #[tokio::test]
 async fn test_show_times() {
-    static TIME_RGX: &str = r#"\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]"#;
+    static TIME_RGX: &str = r"\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]";
     let (mut p, _) = start_session(&["--show-times"]).await;
     sleep(Duration::from_secs(1)).await;
     p.expect(Regex(format!("{} < Ping 1", TIME_RGX)))
