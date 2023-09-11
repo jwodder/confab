@@ -7,7 +7,7 @@ use crate::util::{latin1ify, CharEncoding};
 use anyhow::Context as _;
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
-use rustyline_async::{Readline, ReadlineError, SharedWriter};
+use rustyline_async::{Readline, ReadlineError, ReadlineEvent, SharedWriter};
 use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::io::{self, Write};
@@ -207,7 +207,7 @@ impl Runner {
                     None => break,
                 },
                 input = self.rl.readline() => match input {
-                    Ok(mut line) => {
+                    Ok(ReadlineEvent::Line(mut line)) => {
                         self.rl.add_history_entry(line.clone());
                         if self.encoding == CharEncoding::Latin1 {
                             // We need to convert non-Latin-1 characters to '?'
@@ -224,8 +224,8 @@ impl Runner {
                         frame.send(&line).await.context("Error sending message")?;
                         Event::send(line)
                     }
-                    Err(ReadlineError::Eof) | Err(ReadlineError::Closed) => break,
-                    Err(ReadlineError::Interrupted) => {writeln!(self.stdout, "^C")?; continue; }
+                    Ok(ReadlineEvent::Eof) | Err(ReadlineError::Closed) => break,
+                    Ok(ReadlineEvent::Interrupted) => {writeln!(self.stdout, "^C")?; continue; }
                     Err(ReadlineError::IO(e)) => return Err(anyhow::Error::new(InterfaceError::Read(e))),
                 }
             };

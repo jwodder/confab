@@ -14997,7 +14997,7 @@ third-party/chromium/LICENSE.
 
 [[third_party_libraries]]
 package_name = "rustyline-async"
-package_version = "0.3.2"
+package_version = "0.4.0"
 license = "Unlicense"
 
 [[third_party_libraries.licenses]]

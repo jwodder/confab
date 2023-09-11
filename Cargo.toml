@@ -23,7 +23,7 @@ itertools = "0.11.0"
 native-tls = { version = "0.2.11", optional = true }
 openssl = { version = "0.10.57", optional = true }
 rustls-native-certs = { version = "0.6.3", optional = true }
-rustyline-async = "0.3.2"
+rustyline-async = "0.4.0"
 time = { version = "0.3.28", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
 tokio = { version = "1.32.0", features = ["macros", "net", "rt", "rt-multi-thread"] }
 tokio-native-tls = { version = "0.3.1", optional = true }
