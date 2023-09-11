@@ -499,7 +499,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "anstyle"
-package_version = "1.0.2"
+package_version = "1.0.3"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1190,7 +1190,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "base64"
-package_version = "0.21.3"
+package_version = "0.21.4"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2150,7 +2150,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "bytes"
-package_version = "1.4.0"
+package_version = "1.5.0"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -17753,7 +17753,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.31"
+package_version = "2.0.32"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
