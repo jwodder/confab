@@ -1909,8 +1909,8 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "bumpalo"
-package_version = "3.13.0"
-license = "MIT/Apache-2.0"
+package_version = "3.14.0"
+license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
 license = "MIT"
@@ -2426,7 +2426,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.4.2"
+package_version = "4.4.3"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8765,7 +8765,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.147"
+package_version = "0.2.148"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -12806,7 +12806,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.66"
+package_version = "1.0.67"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -14968,7 +14968,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-webpki"
-package_version = "0.101.4"
+package_version = "0.101.5"
 license = "ISC"
 
 [[third_party_libraries.licenses]]
@@ -17753,7 +17753,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.32"
+package_version = "2.0.37"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -20019,7 +20019,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "unicode-ident"
-package_version = "1.0.11"
+package_version = "1.0.12"
 license = "(MIT OR Apache-2.0) AND Unicode-DFS-2016"
 
 [[third_party_libraries.licenses]]
