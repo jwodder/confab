@@ -14968,7 +14968,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-webpki"
-package_version = "0.101.5"
+package_version = "0.101.6"
 license = "ISC"
 
 [[third_party_libraries.licenses]]
