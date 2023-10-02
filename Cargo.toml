@@ -16,7 +16,7 @@ exclude = ["/.*"]
 anyhow = "1.0.75"
 bytes = "1.5.0"
 cfg-if = "1.0.0"
-clap = { version = "4.4.4", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
+clap = { version = "4.4.6", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
 crossterm = "0.27.0"
 futures = "0.3.28"
 itertools = "0.11.0"
