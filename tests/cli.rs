@@ -187,15 +187,24 @@ impl Transcript {
 
     fn check(&self, addr: SocketAddr) {
         let mut events = json_lines::<Event, _>(&self.path).unwrap();
-        assert_matches!(events.next(), Some(Ok(Event::ConnectionStart {host, port, ..})) if host == addr.ip().to_string() && port == addr.port());
-        assert_matches!(events.next(), Some(Ok(Event::ConnectionComplete {peer_ip, ..})) if peer_ip == addr.ip());
+        assert_matches!(events.next(), Some(Ok(Event::ConnectionStart {host, port, ..})) => {
+            assert_eq!(host, addr.ip().to_string());
+            assert_eq!(port, addr.port());
+        });
+        assert_matches!(events.next(), Some(Ok(Event::ConnectionComplete {peer_ip, ..})) => {
+            assert_eq!(peer_ip, addr.ip());
+        });
         for msg in &self.messages {
             match msg {
                 Msg::Recv(s) => {
-                    assert_matches!(events.next(), Some(Ok(Event::Recv { data, .. })) if &data == s, "{:?}", s.as_ref())
+                    assert_matches!(events.next(), Some(Ok(Event::Recv { data, .. })) => {
+                        assert_eq!(&data, s, "{:?}", s.as_ref());
+                    });
                 }
                 Msg::Send(s) => {
-                    assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) if &data == s, "{:?}", s.as_ref())
+                    assert_matches!(events.next(), Some(Ok(Event::Send { data, .. })) => {
+                        assert_eq!(&data, s, "{:?}", s.as_ref());
+                    });
                 }
             }
         }
