@@ -4,7 +4,7 @@ mod util;
 use crate::codec::ConfabCodec;
 use crate::events::{now, Event, HMS_FMT};
 use crate::util::{latin1ify, CharEncoding};
-use anyhow::Context as _;
+use anyhow::Context;
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use rustyline_async::{Readline, ReadlineError, ReadlineEvent, SharedWriter};
