@@ -38,14 +38,14 @@ mod build {
 ///
 /// See <https://github.com/jwodder/confab> for more information
 #[derive(Clone, Debug, Eq, Parser, PartialEq)]
-#[clap(version)]
+#[command(version)]
 struct Arguments {
     /// Display a summary of build information & dependencies and exit
-    #[clap(long, exclusive = true)]
+    #[arg(long, exclusive = true)]
     build_info: bool,
 
     /// Terminate sent lines with CR LF instead of just LF
-    #[clap(long)]
+    #[arg(long)]
     crlf: bool,
 
     /// Set text encoding
@@ -53,7 +53,7 @@ struct Arguments {
     /// "utf8" converts invalid byte sequences to the replacement character.
     /// "utf8-latin1" handles invalid byte sequences by decoding the entire
     /// line as Latin-1.
-    #[clap(
+    #[arg(
         short = 'E',
         long,
         default_value = "utf8",
@@ -67,34 +67,34 @@ struct Arguments {
     /// newline), the first <LIMIT> bytes will be split off and treated as a
     /// whole line, with the remaining bytes treated as the start of a new
     /// line.
-    #[clap(long, default_value = "65535", value_name = "LIMIT")]
+    #[arg(long, default_value = "65535", value_name = "LIMIT")]
     max_line_length: NonZeroUsize,
 
     /// Use the given domain name for SNI and certificate hostname validation
     /// [default: the remote host name]
-    #[clap(long, value_name = "DOMAIN")]
+    #[arg(long, value_name = "DOMAIN")]
     servername: Option<String>,
 
     /// Prepend timestamps to output messages
-    #[clap(short = 't', long)]
+    #[arg(short = 't', long)]
     show_times: bool,
 
     /// Connect using SSL/TLS
-    #[clap(long)]
+    #[arg(long)]
     tls: bool,
 
     /// Append a transcript of events to the given file
-    #[clap(short = 'T', long, value_name = "FILE")]
+    #[arg(short = 'T', long, value_name = "FILE")]
     transcript: Option<PathBuf>,
 
     /// Remote host (domain name or IP address) to which to connect
-    #[clap(default_value = "localhost", required = true)]
+    #[arg(default_value = "localhost", required = true)]
     // The dummy default value is just there so that `--build-info` can be made
     // exclusive.
     host: String,
 
     /// Remote port (integer) to which to connect
-    #[clap(default_value_t = 80, required = true)]
+    #[arg(default_value_t = 80, required = true)]
     // The dummy default value is just there so that `--build-info` can be made
     // exclusive.
     port: u16,
