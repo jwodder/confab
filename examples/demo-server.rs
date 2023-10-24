@@ -17,10 +17,10 @@ use tokio_util::codec::{Framed, LinesCodec, LinesCodecError};
 
 #[derive(Parser)]
 struct Arguments {
-    #[clap(short, long, default_value = "127.0.0.1")]
+    #[arg(short, long, default_value = "127.0.0.1")]
     bind: IpAddr,
 
-    #[clap(default_value_t = 0)]
+    #[arg(default_value_t = 0)]
     port: u16,
 }
 
