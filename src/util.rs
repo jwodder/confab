@@ -23,9 +23,10 @@ impl JsonStrMap {
         if !std::mem::replace(&mut self.first, false) {
             self.buf.push_str(", ");
         }
-        write_json_str(key, &mut self.buf).unwrap();
+        write_json_str(key, &mut self.buf).expect("formatting a String should not fail");
         self.buf.push_str(": ");
-        write_json_str(&value.to_string(), &mut self.buf).unwrap();
+        write_json_str(&value.to_string(), &mut self.buf)
+            .expect("formatting a String should not fail");
         self
     }
 
@@ -33,7 +34,7 @@ impl JsonStrMap {
         if !std::mem::replace(&mut self.first, false) {
             self.buf.push_str(", ");
         }
-        write_json_str(key, &mut self.buf).unwrap();
+        write_json_str(key, &mut self.buf).expect("formatting a String should not fail");
         self.buf.push_str(": ");
         self.buf.push_str(value);
         self
@@ -175,7 +176,11 @@ fn needs_vis(c: char) -> bool {
 
 fn vis(c: char) -> String {
     if ('\x00'..' ').contains(&c) {
-        format!("^{}", char::from_u32((c as u32) | 0x40).unwrap())
+        format!(
+            "^{}",
+            char::from_u32((c as u32) | 0x40)
+                .expect("value should be less than 0x60 and thus fit in a u32")
+        )
     } else if c == '\x7F' {
         "^?".into()
     } else {

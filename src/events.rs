@@ -105,7 +105,9 @@ impl Event {
     }
 
     pub(crate) fn display_time(&self) -> String {
-        self.timestamp().format(&HMS_FMT).unwrap()
+        self.timestamp()
+            .format(&HMS_FMT)
+            .expect("formatting a datetime as HMS should not fail")
     }
 
     pub(crate) fn sigil(&self) -> char {
@@ -135,8 +137,13 @@ impl Event {
     }
 
     pub(crate) fn to_json(&self) -> String {
-        let json =
-            JsonStrMap::new().field("timestamp", &self.timestamp().format(&Rfc3339).unwrap());
+        let json = JsonStrMap::new().field(
+            "timestamp",
+            &self
+                .timestamp()
+                .format(&Rfc3339)
+                .expect("formatting a datetime as RFC3339 should not fail"),
+        );
         match self {
             Event::ConnectStart { host, port, .. } => json
                 .field("event", "connection-start")

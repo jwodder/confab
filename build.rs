@@ -22,7 +22,9 @@ fn main() -> anyhow::Result<()> {
     writeln!(
         &mut fp,
         "pub const BUILD_TIMESTAMP: &str = {:?};",
-        OffsetDateTime::now_utc().format(&Rfc3339).unwrap(),
+        OffsetDateTime::now_utc()
+            .format(&Rfc3339)
+            .expect("formatting a datetime as RFC3339 should not fail"),
     )?;
 
     let target = getenv("TARGET")?;
@@ -150,7 +152,10 @@ fn normal_dependencies<P: AsRef<Path>>(
     let mut dependencies = Vec::new();
     let mut queue = VecDeque::<&PackageId>::from([root_id]);
     let mut seen = HashSet::<&PackageId>::new();
-    let nodes = metadata.resolve.unwrap().nodes;
+    let nodes = metadata
+        .resolve
+        .expect("dependencies should be included in metadata")
+        .nodes;
     while let Some(pkgid) = queue.pop_front() {
         let n = node_by_id(&nodes, pkgid)?;
         for dep in &n.deps {

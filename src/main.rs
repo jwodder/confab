@@ -156,7 +156,13 @@ impl Runner {
             if let Err(e) = writeln!(fp, "{}", event.to_json()) {
                 let _ = self.transcript.take();
                 if self.show_times {
-                    write!(self.stdout, "[{}] ", now().format(&HMS_FMT).unwrap())?;
+                    write!(
+                        self.stdout,
+                        "[{}] ",
+                        now()
+                            .format(&HMS_FMT)
+                            .expect("formatting a datetime as HMS should not fail")
+                    )?;
                 }
                 writeln!(self.stdout, "! Error writing to transcript: {e}")?;
             }
