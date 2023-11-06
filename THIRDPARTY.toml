@@ -8030,7 +8030,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.149"
+package_version = "0.2.150"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17254,7 +17254,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.38"
+package_version = "2.0.39"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
