@@ -15523,7 +15523,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "serde"
-package_version = "1.0.190"
+package_version = "1.0.192"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -15737,7 +15737,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "serde_derive"
-package_version = "1.0.190"
+package_version = "1.0.192"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16950,7 +16950,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "socket2"
-package_version = "0.5.4"
+package_version = "0.5.5"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
