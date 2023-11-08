@@ -31,6 +31,12 @@ tokio-rustls = { version = "0.24.1", optional = true }
 tokio-util = { version = "0.7.10", features = ["codec"] }
 unicode-general-category = "0.6.0"
 
+[features]
+default = ["rustls"]
+rustls = ["dep:tokio-rustls", "dep:rustls-native-certs"]
+native = ["dep:native-tls", "dep:tokio-native-tls"]
+vendored-openssl = ["native", "openssl/vendored"]
+
 [dev-dependencies]
 assert_matches = "1.5.0"
 expectrl = { version = "0.7.1", features = ["async"] }
@@ -44,11 +50,11 @@ time = { version = "0.3.30", default-features = false, features = ["serde-human-
 tokio = { version = "1.33.0", features = ["io-util", "sync", "time"] }
 tokio-stream = { version = "0.1.14", features = ["time"] }
 
-[features]
-default = ["rustls"]
-rustls = ["dep:tokio-rustls", "dep:rustls-native-certs"]
-native = ["dep:native-tls", "dep:tokio-native-tls"]
-vendored-openssl = ["native", "openssl/vendored"]
+[build-dependencies]
+anyhow = "1.0.75"
+cargo_metadata = "0.18.1"
+semver = "1.0.20"
+time = { version = "0.3.30", default-features = false, features = ["std", "formatting"] }
 
 [profile.release]
 lto = true
@@ -58,15 +64,10 @@ strip = true
 inherits = "release"
 
 [workspace.metadata.dist]
-cargo-dist-version = "0.0.6"
-rust-toolchain-version = "stable"
+cargo-dist-version = "0.4.2"
 ci = ["github"]
-targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-pc-windows-msvc", "x86_64-unknown-linux-gnu"]
-installers = ["shell", "powershell"]
 include = ["THIRDPARTY.toml", "doc/confab.1"]
-
-[build-dependencies]
-anyhow = "1.0.75"
-cargo_metadata = "0.18.1"
-semver = "1.0.20"
-time = { version = "0.3.30", default-features = false, features = ["std", "formatting"] }
+installers = ["shell", "powershell"]
+pr-run-mode = "upload"
+rust-toolchain-version = "stable"
+targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-musl", "x86_64-pc-windows-msvc"]
