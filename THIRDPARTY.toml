@@ -2185,7 +2185,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.4.7"
+package_version = "4.4.8"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2421,7 +2421,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.4.7"
+package_version = "4.4.8"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -4184,7 +4184,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "errno"
-package_version = "0.3.5"
+package_version = "0.3.6"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -6612,7 +6612,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "getrandom"
-package_version = "0.2.10"
+package_version = "0.2.11"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -14208,7 +14208,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pemfile"
-package_version = "1.0.3"
+package_version = "1.0.4"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -16709,7 +16709,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "smallvec"
-package_version = "1.11.1"
+package_version = "1.11.2"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -18871,7 +18871,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "tokio"
-package_version = "1.33.0"
+package_version = "1.34.0"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -18906,7 +18906,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "tokio-macros"
-package_version = "2.1.0"
+package_version = "2.2.0"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
