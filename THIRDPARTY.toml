@@ -8246,7 +8246,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "linux-raw-sys"
-package_version = "0.4.10"
+package_version = "0.4.11"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13222,7 +13222,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "rustix"
-package_version = "0.38.21"
+package_version = "0.38.23"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
