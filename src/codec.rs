@@ -6,11 +6,15 @@
 //!   backwards if necessary so as not to break up any UTF-8 sequences) rather
 //!   than returning an error.  As a result, the error type is now
 //!   `std::io::Error` (unused) instead of the custom `LinesCodecError`.
+//!
 //! - The Decoder does not strip line endings from returned values.
+//!
 //! - The caller must append the line ending before passing the value to the
 //!   Encoder.
-//! - Decoder: max_length now includes the terminating newline.
-//! - Conversion between bytes & strings is handled by CharEncoding.
+//!
+//! - Decoder: `max_length` now includes the terminating newline.
+//!
+//! - Conversion between bytes & strings is handled by `CharEncoding`.
 //!
 //! [1]: https://github.com/tokio-rs/tokio/blob/a03e0420249d1740668f608a5a16f1fa614be2c7/tokio-util/src/codec/lines_codec.rs
 
@@ -70,7 +74,7 @@ impl ConfabCodec {
     /// # Note
     ///
     /// The returned `ConfabCodec` will not have an upper bound on the length
-    /// of a buffered line. See the documentation for [`new_with_max_length`]
+    /// of a buffered line. See the documentation for `new_with_max_length`
     /// for information on why this could be a potential security risk.
     pub(crate) fn new() -> ConfabCodec {
         ConfabCodec {

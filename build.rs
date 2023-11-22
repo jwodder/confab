@@ -21,17 +21,20 @@ fn main() -> anyhow::Result<()> {
 
     writeln!(
         &mut fp,
-        "pub const BUILD_TIMESTAMP: &str = {:?};",
+        "pub(crate) const BUILD_TIMESTAMP: &str = {:?};",
         OffsetDateTime::now_utc()
             .format(&Rfc3339)
             .expect("formatting a datetime as RFC3339 should not fail"),
     )?;
 
     let target = getenv("TARGET")?;
-    writeln!(&mut fp, "pub const TARGET_TRIPLE: &str = {target:?};")?;
     writeln!(
         &mut fp,
-        "pub const HOST_TRIPLE: &str = {:?};",
+        "pub(crate) const TARGET_TRIPLE: &str = {target:?};"
+    )?;
+    writeln!(
+        &mut fp,
+        "pub(crate) const HOST_TRIPLE: &str = {:?};",
         getenv("HOST")?
     )?;
 
@@ -44,7 +47,7 @@ fn main() -> anyhow::Result<()> {
     features.sort();
     writeln!(
         &mut fp,
-        "pub const FEATURES: &str = {:?};",
+        "pub(crate) const FEATURES: &str = {:?};",
         features.join(", ")
     )?;
 
@@ -57,7 +60,7 @@ fn main() -> anyhow::Result<()> {
     }
     let mut rv = String::from_utf8(rv.stdout).context("compiler version output was not UTF-8")?;
     chomp(&mut rv);
-    writeln!(&mut fp, "pub const RUSTC_VERSION: &str = {:?};", rv)?;
+    writeln!(&mut fp, "pub(crate) const RUSTC_VERSION: &str = {rv:?};")?;
 
     match Command::new("git")
         .arg("rev-parse")
@@ -86,18 +89,23 @@ fn main() -> anyhow::Result<()> {
             chomp(&mut revision);
             writeln!(
                 &mut fp,
-                "pub const GIT_COMMIT_HASH: Option<&str> = Some({:?});",
-                revision
+                "pub(crate) const GIT_COMMIT_HASH: Option<&str> = Some({revision:?});"
             )?;
         }
         Ok(_) => {
             // We are not in a Git repository
-            writeln!(&mut fp, "pub const GIT_COMMIT_HASH: Option<&str> = None;")?;
+            writeln!(
+                &mut fp,
+                "pub(crate) const GIT_COMMIT_HASH: Option<&str> = None;"
+            )?;
         }
         Err(e) if e.kind() == ErrorKind::NotFound => {
             // Git doesn't seem to be installed, so assume we're not in a Git
             // repository
-            writeln!(&mut fp, "pub const GIT_COMMIT_HASH: Option<&str> = None;")?;
+            writeln!(
+                &mut fp,
+                "pub(crate) const GIT_COMMIT_HASH: Option<&str> = None;"
+            )?;
         }
         Err(e) => return Err(e).context("failed to run `git rev-parse --git-dir`"),
     }
@@ -106,7 +114,7 @@ fn main() -> anyhow::Result<()> {
     let deps = normal_dependencies(manifest_dir, &package, &target, features)?;
     writeln!(
         &mut fp,
-        "pub const DEPENDENCIES: [(&str, &str); {}] = [",
+        "pub(crate) const DEPENDENCIES: [(&str, &str); {}] = [",
         deps.len()
     )?;
     for (name, version) in deps {

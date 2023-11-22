@@ -1,4 +1,5 @@
 // <https://github.com/zhiburt/expectrl/issues/52>
+#![cfg(test)]
 #![cfg(unix)]
 use assert_matches::assert_matches;
 use expectrl::session::{log, OsProcess, OsProcessStream, Session};
@@ -60,14 +61,12 @@ impl Tester {
         let (sender, receiver) = channel();
         tokio::spawn(async move { testing_server(sender).await });
         let addr = receiver.await.expect("Error receiving address from server");
-        let transcript = if self.transcript {
+        let transcript = self.transcript.then(|| {
             let transcript = Transcript::new();
             self.cmd.arg("--transcript");
             self.cmd.arg(&transcript.path);
-            Some(transcript)
-        } else {
-            None
-        };
+            transcript
+        });
         if self.show_times {
             self.cmd.arg("--show-times");
         }
@@ -117,7 +116,7 @@ impl Runner {
         }
     }
 
-    async fn expect<S: AsRef<str>>(&mut self, s: S) {
+    async fn expect<S: AsRef<str> + Send>(&mut self, s: S) {
         static TIME_RGX: &str = r"\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]";
         let s = s.as_ref();
         let r = if self.show_times {
@@ -132,14 +131,14 @@ impl Runner {
         }
     }
 
-    async fn enter<S: Into<Sent>>(&mut self, entry: S) {
+    async fn enter<S: Into<Sent> + Send>(&mut self, entry: S) {
         let entry = entry.into();
         self.p.send(entry.typed()).await.unwrap();
         self.expect(entry.printed()).await;
         self.transcribe(entry.transcription());
     }
 
-    async fn get<R: Into<Recv>>(&mut self, r: R) {
+    async fn get<R: Into<Recv> + Send>(&mut self, r: R) {
         let r = r.into();
         self.expect(r.printed()).await;
         self.transcribe(r.transcription());
@@ -230,9 +229,10 @@ impl Sent {
     }
 
     fn printed(&self) -> String {
-        match self.printed {
-            Some(s) => format!("> {s}"),
-            None => format!("> {}", self.typed),
+        if let Some(s) = self.printed {
+            format!("> {s}")
+        } else {
+            format!("> {}", self.typed)
         }
     }
 
@@ -359,15 +359,16 @@ async fn testing_server(sender: Sender<SocketAddr>) {
     let mut i: usize = 1;
     loop {
         tokio::select! {
-            _ = sleep(Duration::from_secs(1)) => {
+            () = sleep(Duration::from_secs(1)) => {
                 frame.send(format!("Ping {i}")).await.unwrap();
                 i += 1;
             },
             r = frame.next() => match r {
                 Some(Ok(line)) => {
-                    let repr = match std::str::from_utf8(line.as_ref()) {
-                        Ok(s) => format!("{s:?}"),
-                        Err(_) => format!("{line:?}"),
+                    let repr = if let Ok(s) = std::str::from_utf8(line.as_ref()) {
+                        format!("{s:?}")
+                    } else {
+                        format!("{line:?}")
                     };
                     frame.send(format!("You sent: {repr}")).await.unwrap();
                     let line = if line.ends_with(&b"\r"[..]) {
@@ -461,13 +462,6 @@ async fn test_piecemeal_line() {
 
 #[tokio::test]
 async fn test_long_line() {
-    let mut r = Tester::new()
-        .arg("--max-line-length")
-        .arg("42")
-        .transcript()
-        .build()
-        .await;
-
     fn unterminated(s: &'static str) -> Recv {
         Recv {
             printed: s,
@@ -475,6 +469,12 @@ async fn test_long_line() {
         }
     }
 
+    let mut r = Tester::new()
+        .arg("--max-line-length")
+        .arg("42")
+        .transcript()
+        .build()
+        .await;
     r.enter("long").await;
     r.get(r#"You sent: "long""#).await;
     r.get(unterminated("This is a very long line.  I'm not going t"))

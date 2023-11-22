@@ -134,7 +134,7 @@ impl Session {
             .await?;
         loop {
             tokio::select! {
-                _ = sleep(Duration::from_secs(1)) => {
+                () = sleep(Duration::from_secs(1)) => {
                     self.send(&format!("Ping {i}")).await?;
                     i += 1;
                 },
@@ -154,7 +154,7 @@ impl Session {
             .await?;
         loop {
             tokio::select! {
-                _ = sleep(Duration::from_secs(1)) => {
+                () = sleep(Duration::from_secs(1)) => {
                     self.send("Blah blah blah.").await?;
                 }
                 r = self.recv() => {
@@ -169,7 +169,7 @@ impl Session {
     }
 
     async fn ctrl(&mut self) -> Result<(), ServerError> {
-        self.blather([
+        self.blather(&[
             "Here are some special characters:",
             "NUL: <\x00>",
             "TAB: <\t>",
@@ -181,10 +181,7 @@ impl Session {
         .await
     }
 
-    async fn blather<I: IntoIterator<Item = &'static str>>(
-        &mut self,
-        lines: I,
-    ) -> Result<(), ServerError> {
+    async fn blather(&mut self, lines: &[&'static str]) -> Result<(), ServerError> {
         let mut stream = IntervalStream::new(interval(Duration::from_secs(1))).zip(iter(lines));
         loop {
             tokio::select! {
@@ -210,7 +207,7 @@ impl Session {
                     Some((_, ln)) => self.send_bytes(ln).await?,
                     None => return Ok(()),
                 },
-                _ = self.recv() => self.send_bytes("Not now, I'm sending stuff.\n".as_bytes()).await?,
+                _ = self.recv() => self.send_bytes(b"Not now, I'm sending stuff.\n").await?,
             }
         }
     }
@@ -224,7 +221,7 @@ enum ServerError {
 }
 
 impl fmt::Display for ServerError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ServerError::RecvError(e) => write!(f, "Error reading: {e}"),
             ServerError::SendError(e) => write!(f, "Error writing: {e}"),
@@ -245,8 +242,11 @@ impl error::Error for ServerError {
 
 fn hms_now() -> String {
     static HMS_FMT: &[FormatItem<'_>] = format_description!("[hour]:[minute]:[second]");
-    OffsetDateTime::now_local()
+    let Ok(s) = OffsetDateTime::now_local()
         .unwrap_or_else(|_| OffsetDateTime::now_utc())
         .format(&HMS_FMT)
-        .unwrap()
+    else {
+        unreachable!("Formatting a datetime into HMS should not fail");
+    };
+    s
 }

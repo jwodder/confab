@@ -64,7 +64,7 @@ struct Arguments {
     /// Set maximum length in bytes of lines read from remote server
     ///
     /// If the server sends a line longer than this (including the terminating
-    /// newline), the first <LIMIT> bytes will be split off and treated as a
+    /// newline), the first `<LIMIT>` bytes will be split off and treated as a
     /// whole line, with the remaining bytes treated as the start of a new
     /// line.
     #[arg(long, default_value = "65535", value_name = "LIMIT")]
@@ -254,13 +254,13 @@ enum InterfaceError {
 }
 
 impl fmt::Debug for InterfaceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(self, f)
     }
 }
 
 impl fmt::Display for InterfaceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             InterfaceError::Read(e) => write!(f, "Error reading user input: {e}"),
             InterfaceError::Write(e) => write!(f, "Error writing output: {e}"),
@@ -323,7 +323,7 @@ mod tests {
 
     #[test]
     fn validate_cli() {
-        Arguments::command().debug_assert()
+        Arguments::command().debug_assert();
     }
 
     #[test]

@@ -172,8 +172,8 @@ pub(crate) struct EventDisplay<'a> {
     time: bool,
 }
 
-impl<'a> fmt::Display for EventDisplay<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl fmt::Display for EventDisplay<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.time {
             write!(f, "[{}] ", self.event.display_time())?;
         }
