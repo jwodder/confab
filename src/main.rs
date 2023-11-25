@@ -203,7 +203,6 @@ impl Runner {
         } else {
             Either::Left(conn)
         };
-        tokio::pin!(conn);
         let mut frame = Framed::new(conn, self.codec());
         loop {
             let event = tokio::select! {
