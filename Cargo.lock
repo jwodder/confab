@@ -291,6 +291,7 @@ dependencies = [
  "serde-jsonlines",
  "serde_json",
  "tempfile",
+ "thiserror",
  "time",
  "tokio",
  "tokio-native-tls",

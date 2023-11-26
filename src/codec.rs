@@ -103,6 +103,10 @@ impl ConfabCodec {
     pub(crate) fn encoding(self, encoding: CharEncoding) -> ConfabCodec {
         ConfabCodec { encoding, ..self }
     }
+
+    pub(crate) fn get_encoding(&self) -> CharEncoding {
+        self.encoding
+    }
 }
 
 impl Decoder for ConfabCodec {

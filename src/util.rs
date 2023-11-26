@@ -2,8 +2,20 @@ use crossterm::style::{StyledContent, Stylize};
 use itertools::Itertools; // for group_by()
 use std::borrow::Cow;
 use std::fmt::{self, Display, Write};
+use std::io;
 use std::str::FromStr;
+use thiserror::Error;
 use unicode_general_category::{get_general_category, GeneralCategory};
+
+#[derive(Debug, Error)]
+pub(crate) enum InterfaceError {
+    #[error("error reading from startup script")]
+    ReadScript(#[source] io::Error),
+    #[error("error reading input from terminal")]
+    ReadLine(#[source] io::Error),
+    #[error("error writing output")]
+    Write(#[source] io::Error),
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct JsonStrMap {
