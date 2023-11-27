@@ -113,12 +113,18 @@ Options
 - `--servername <DOMAIN>` — (with `--tls`) Use the given domain name for SNI
   and certificate hostname validation; defaults to the remote host name
 
+- `--startup-interval-ms <INT>` — Specify the time to wait in milliseconds
+  between sending lines of the startup script
+
+- `-S <FILE>`, `--startup-script <FILE>` — On startup, send lines read from the
+  given file to the server before requesting user input
+
 - `-t`, `--show-times` — Prepend a timestamp of the form `[HH:MM:SS]` to each
   line printed to the terminal
 
 - `--tls` — Connect using SSL/TLS
 
-- `-T <file>`, `--transcript <file>` — Append a transcript of events to the
+- `-T <FILE>`, `--transcript <FILE>` — Append a transcript of events to the
   given file.  See [Transcript Format](#transcript-format) below for more
   information.
 
