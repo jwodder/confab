@@ -1,22 +1,23 @@
 mod codec;
 mod events;
+mod input;
 mod util;
 use crate::codec::ConfabCodec;
-use crate::events::{now, Event, HMS_FMT};
-use crate::util::{latin1ify, CharEncoding};
+use crate::events::Event;
+use crate::input::{readline_stream, Input, StartupScript};
+use crate::util::{latin1ify, now_hms, CharEncoding, InterfaceError};
 use anyhow::Context;
 use clap::Parser;
-use futures::{SinkExt, StreamExt};
-use rustyline_async::{Readline, ReadlineError, ReadlineEvent, SharedWriter};
-use std::fmt;
+use futures::{SinkExt, Stream, StreamExt};
+use rustyline_async::{Readline, SharedWriter};
 use std::fs::{File, OpenOptions};
 use std::io::{self, Write};
 use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::process::ExitCode;
-use tokio::net::TcpStream;
-use tokio_util::codec::Framed;
-use tokio_util::either::Either;
+use std::time::Duration;
+use tokio::{fs::File as TokioFile, io::BufReader, net::TcpStream};
+use tokio_util::{codec::Framed, either::Either};
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "rustls")] {
@@ -29,6 +30,8 @@ cfg_if::cfg_if! {
         compile_error("confab requires feature \"rustls\" or \"native\" to be enabled")
     }
 }
+
+type Connection = Framed<Either<TcpStream, tls::TlsStream>, ConfabCodec>;
 
 mod build {
     include!(concat!(env!("OUT_DIR"), "/build_info.rs"));
@@ -75,6 +78,16 @@ struct Arguments {
     #[arg(long, value_name = "DOMAIN")]
     servername: Option<String>,
 
+    /// Time to wait in milliseconds between sending lines of the startup
+    /// script
+    #[arg(long, default_value_t = 500, value_name = "INT")]
+    startup_interval_ms: u64,
+
+    /// On startup, send lines read from the given file to the server before
+    /// requesting user input
+    #[arg(short = 'S', long, value_name = "FILE")]
+    startup_script: Option<PathBuf>,
+
     /// Prepend timestamps to output messages
     #[arg(short = 't', long)]
     show_times: bool,
@@ -101,179 +114,222 @@ struct Arguments {
 }
 
 impl Arguments {
-    fn open(self) -> anyhow::Result<Runner> {
-        let (mut rl, stdout) =
-            Readline::new("confab> ".into()).context("Error constructing Readline object")?;
-        rl.should_print_line_on(false, false);
-        let transcript = match self.transcript {
-            Some(path) => Some(
+    async fn open(self) -> anyhow::Result<Runner> {
+        let transcript = self
+            .transcript
+            .map(|p| {
                 OpenOptions::new()
                     .append(true)
                     .create(true)
-                    .open(path)
-                    .context("Error opening transcript file")?,
-            ),
-            None => None,
+                    .open(p)
+                    .context("failed to open transcript file")
+            })
+            .transpose()?;
+        let startup_script = if let Some(path) = self.startup_script {
+            let fp = BufReader::new(
+                TokioFile::open(path)
+                    .await
+                    .context("failed to open startup script")?,
+            );
+            Some(StartupScript::new(
+                fp,
+                Duration::from_millis(self.startup_interval_ms),
+            ))
+        } else {
+            None
         };
         Ok(Runner {
-            rl,
-            stdout,
-            transcript,
+            startup_script,
+            reporter: Reporter {
+                writer: Box::new(io::stdout()),
+                transcript,
+                show_times: self.show_times,
+            },
             crlf: self.crlf,
-            encoding: self.encoding,
-            max_line_length: self.max_line_length,
-            tls: self.tls,
-            host: self.host,
-            port: self.port,
-            show_times: self.show_times,
-            servername: self.servername,
+            connector: Connector {
+                tls: self.tls,
+                host: self.host,
+                port: self.port,
+                servername: self.servername,
+                encoding: self.encoding,
+                max_line_length: self.max_line_length,
+            },
         })
     }
 }
 
-struct Runner {
-    rl: Readline,
-    stdout: SharedWriter,
+struct Reporter {
+    writer: Box<dyn Write + Send>,
     transcript: Option<File>,
-    crlf: bool,
-    encoding: CharEncoding,
-    max_line_length: NonZeroUsize,
-    tls: bool,
-    host: String,
-    port: u16,
-    servername: Option<String>,
     show_times: bool,
 }
 
-impl Runner {
+impl Reporter {
+    fn set_writer(&mut self, writer: Box<dyn Write + Send>) {
+        self.writer = writer;
+    }
+
     fn report(&mut self, event: Event) -> Result<(), InterfaceError> {
         self.report_inner(event).map_err(InterfaceError::Write)
     }
 
     fn report_inner(&mut self, event: Event) -> Result<(), io::Error> {
-        writeln!(self.stdout, "{}", event.to_message(self.show_times))?;
+        writeln!(self.writer, "{}", event.to_message(self.show_times))?;
         if let Some(fp) = self.transcript.as_mut() {
             if let Err(e) = writeln!(fp, "{}", event.to_json()) {
                 let _ = self.transcript.take();
                 if self.show_times {
-                    write!(
-                        self.stdout,
-                        "[{}] ",
-                        now()
-                            .format(&HMS_FMT)
-                            .expect("formatting a datetime as HMS should not fail")
-                    )?;
+                    write!(self.writer, "[{}] ", now_hms())?;
                 }
-                writeln!(self.stdout, "! Error writing to transcript: {e}")?;
+                writeln!(self.writer, "! Error writing to transcript: {e}")?;
             }
         }
         Ok(())
     }
 
-    fn codec(&self) -> ConfabCodec {
-        ConfabCodec::new_with_max_length(self.max_line_length.get()).encoding(self.encoding)
+    fn echo_ctrlc(&mut self) -> Result<(), InterfaceError> {
+        writeln!(self.writer, "^C").map_err(InterfaceError::Write)
     }
+}
 
-    async fn run(&mut self) -> Result<ExitCode, InterfaceError> {
-        match self.try_run().await {
-            Ok(()) => Ok(ExitCode::SUCCESS),
-            Err(e) => match e.downcast::<InterfaceError>() {
-                Ok(e) => Err(e),
-                Err(e) => {
-                    self.report(Event::error(e))?;
-                    Ok(ExitCode::FAILURE)
-                }
-            },
-        }
-    }
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct Connector {
+    tls: bool,
+    host: String,
+    port: u16,
+    servername: Option<String>,
+    encoding: CharEncoding,
+    max_line_length: NonZeroUsize,
+}
 
-    async fn try_run(&mut self) -> anyhow::Result<()> {
-        self.report(Event::connect_start(&self.host, self.port))?;
+impl Connector {
+    async fn connect(&self, reporter: &mut Reporter) -> anyhow::Result<Connection> {
+        reporter.report(Event::connect_start(&self.host, self.port))?;
         let conn = TcpStream::connect((self.host.clone(), self.port))
             .await
             .context("Error connecting to server")?;
-        self.report(Event::connect_finish(
+        reporter.report(Event::connect_finish(
             conn.peer_addr().context("Error getting peer address")?,
         ))?;
         let conn = if self.tls {
-            self.report(Event::tls_start())?;
+            reporter.report(Event::tls_start())?;
             let conn = tls::connect(conn, self.servername.as_ref().unwrap_or(&self.host)).await?;
-            self.report(Event::tls_finish())?;
+            reporter.report(Event::tls_finish())?;
             Either::Right(conn)
         } else {
             Either::Left(conn)
         };
-        let mut frame = Framed::new(conn, self.codec());
-        loop {
-            let event = tokio::select! {
-                r = frame.next() => match r {
-                    Some(Ok(msg)) => Event::recv(msg),
-                    Some(Err(e)) => return Err(e).context("Error reading from connection"),
-                    None => break,
-                },
-                input = self.rl.readline() => match input {
-                    Ok(ReadlineEvent::Line(mut line)) => {
-                        self.rl.add_history_entry(line.clone());
-                        if self.encoding == CharEncoding::Latin1 {
-                            // We need to convert non-Latin-1 characters to '?'
-                            // here rather than waiting for the codec to do it
-                            // so that the Event will reflect the actual
-                            // characters sent.
-                            line = latin1ify(line);
-                        }
-                        if self.crlf {
-                            line.push_str("\r\n");
-                        } else {
-                            line.push('\n');
-                        }
-                        frame.send(&line).await.context("Error sending message")?;
-                        Event::send(line)
+        Ok(Framed::new(conn, self.codec()))
+    }
+
+    fn codec(&self) -> ConfabCodec {
+        ConfabCodec::new_with_max_length(self.max_line_length.get()).encoding(self.encoding)
+    }
+}
+
+struct Runner {
+    startup_script: Option<StartupScript>,
+    reporter: Reporter,
+    crlf: bool,
+    connector: Connector,
+}
+
+impl Runner {
+    async fn run(mut self) -> anyhow::Result<ExitCode> {
+        match self.try_run().await {
+            Ok(()) => Ok(ExitCode::SUCCESS),
+            Err(e) if e.is::<InterfaceError>() => Err(e),
+            Err(e) => {
+                self.reporter.report(Event::error(e))?;
+                Ok(ExitCode::FAILURE)
+            }
+        }
+    }
+
+    async fn try_run(&mut self) -> anyhow::Result<()> {
+        let mut frame = self.connector.connect(&mut self.reporter).await?;
+        if let Some(script) = self.startup_script.take() {
+            ioloop(&mut frame, script, self.crlf, &mut self.reporter).await?;
+        }
+        let (mut rl, shared) = init_readline()?;
+        // Lines written to the SharedWriter are only output when
+        // Readline::readline() or Readline::flush() is called, so anything
+        // written before we start getting input from the user should be
+        // written directly to stdout instead.
+        self.reporter.set_writer(Box::new(shared));
+        let r = ioloop(
+            &mut frame,
+            readline_stream(&mut rl).await,
+            self.crlf,
+            &mut self.reporter,
+        )
+        .await;
+        // TODO: Should this event not be emitted if an error occurs above?
+        let r2 = self.reporter.report(Event::disconnect());
+        // Flush after the disconnect event so that we're guaranteed a line in
+        // the Readline buffer, leading to the prompt being cleared.
+        let _ = rl.flush();
+        drop(rl);
+        // Set the writer back to stdout so that errors reported by run() will
+        // show up without having to call rl.flush().
+        self.reporter.set_writer(Box::new(io::stdout()));
+        r.and(r2.map_err(Into::into))
+    }
+}
+
+async fn ioloop<S>(
+    frame: &mut Connection,
+    input: S,
+    crlf: bool,
+    reporter: &mut Reporter,
+) -> anyhow::Result<()>
+where
+    S: Stream<Item = Result<Input, InterfaceError>> + Send,
+{
+    tokio::pin!(input);
+    loop {
+        let event = tokio::select! {
+            r = frame.next() => match r {
+                Some(Ok(msg)) => Event::recv(msg),
+                Some(Err(e)) => return Err(e).context("Error reading from connection"),
+                None => break,
+            },
+            r = input.next() => match r {
+                Some(Ok(Input::Line(mut line))) => {
+                    if frame.codec().get_encoding() == CharEncoding::Latin1 {
+                        // We need to convert non-Latin-1 characters to '?'
+                        // here rather than waiting for the codec to do it so
+                        // that the Event will reflect the actual characters
+                        // sent.
+                        line = latin1ify(line);
                     }
-                    Ok(ReadlineEvent::Eof) | Err(ReadlineError::Closed) => break,
-                    Ok(ReadlineEvent::Interrupted) => {writeln!(self.stdout, "^C")?; continue; }
-                    Err(ReadlineError::IO(e)) => return Err(anyhow::Error::new(InterfaceError::Read(e))),
+                    if crlf {
+                        line.push_str("\r\n");
+                    } else {
+                        line.push('\n');
+                    }
+                    frame.send(&line).await.context("Error sending message")?;
+                    Event::send(line)
                 }
-            };
-            self.report(event)?;
-        }
-        self.report(Event::disconnect())?;
-        Ok(())
+                Some(Ok(Input::CtrlC)) => {
+                    reporter.echo_ctrlc()?;
+                    continue;
+                }
+                Some(Err(e)) => return Err(e.into()),
+                None => break,
+            }
+        };
+        reporter.report(event)?;
     }
+    Ok(())
 }
 
-impl Drop for Runner {
-    fn drop(&mut self) {
-        let _ = self.rl.flush();
-    }
-}
-
-enum InterfaceError {
-    Read(io::Error),
-    Write(io::Error),
-}
-
-impl fmt::Debug for InterfaceError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(self, f)
-    }
-}
-
-impl fmt::Display for InterfaceError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            InterfaceError::Read(e) => write!(f, "Error reading user input: {e}"),
-            InterfaceError::Write(e) => write!(f, "Error writing output: {e}"),
-        }
-    }
-}
-
-impl std::error::Error for InterfaceError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            InterfaceError::Read(e) => Some(e),
-            InterfaceError::Write(e) => Some(e),
-        }
-    }
+fn init_readline() -> anyhow::Result<(Readline, SharedWriter)> {
+    // TODO: Should this be an InterfaceError?
+    let (mut rl, shared) =
+        Readline::new(String::from("confab> ")).context("Error constructing Readline object")?;
+    rl.should_print_line_on(false, false);
+    Ok((rl, shared))
 }
 
 #[tokio::main]
@@ -283,7 +339,7 @@ async fn main() -> anyhow::Result<ExitCode> {
         build_info();
         Ok(ExitCode::SUCCESS)
     } else {
-        Ok(args.open()?.run().await?)
+        Ok(args.open().await?.run().await?)
     }
 }
 

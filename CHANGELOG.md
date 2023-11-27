@@ -1,6 +1,7 @@
 v0.3.0 (in development)
 -----------------------
 - Increased MSRV to 1.70
+- Added `--startup-script` and `--startup-interval-ms` options
 
 v0.2.0 (2023-06-03)
 -------------------
