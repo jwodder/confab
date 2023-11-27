@@ -266,8 +266,8 @@ impl Runner {
         // Set the writer back to stdout so that errors reported by run() will
         // show up
         self.reporter.set_writer(Box::new(io::stdout()));
-        self.reporter.report(Event::disconnect())?;
-        r
+        let r2 = self.reporter.report(Event::disconnect());
+        r.and(r2.map_err(Into::into))
     }
 }
 
