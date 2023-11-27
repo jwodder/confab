@@ -8,8 +8,7 @@ use crate::input::{readline_stream, StartupScript};
 use crate::util::{latin1ify, now_hms, CharEncoding, InterfaceError};
 use anyhow::Context;
 use clap::Parser;
-use futures::stream::Stream;
-use futures::{SinkExt, StreamExt};
+use futures::{SinkExt, Stream, StreamExt};
 use rustyline_async::{Readline, SharedWriter};
 use std::fs::{File, OpenOptions};
 use std::io::{self, Write};
@@ -17,9 +16,7 @@ use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::process::ExitCode;
 use std::time::Duration;
-use tokio::fs::File as TokioFile;
-use tokio::io::BufReader;
-use tokio::net::TcpStream;
+use tokio::{fs::File as TokioFile, io::BufReader, net::TcpStream};
 use tokio_util::{codec::Framed, either::Either};
 
 cfg_if::cfg_if! {
@@ -235,8 +232,6 @@ impl Runner {
             Ok(()) => Ok(ExitCode::SUCCESS),
             Err(e) if e.is::<InterfaceError>() => Err(e),
             Err(e) => {
-                // TODO: This won't be written if reporter.writer is
-                // SharedWriter
                 self.reporter.report(Event::error(e))?;
                 Ok(ExitCode::FAILURE)
             }
@@ -266,6 +261,10 @@ impl Runner {
         // Set the writer back to stdout so that errors reported by run() will
         // show up
         self.reporter.set_writer(Box::new(io::stdout()));
+        // TODO: Emit a `disconnect` event if a disconnect occurs during the
+        // startup script ioloop
+        // TODO: Should this event not be emitted if an error occurs during
+        // I/O?
         let r2 = self.reporter.report(Event::disconnect());
         r.and(r2.map_err(Into::into))
     }
@@ -292,9 +291,9 @@ where
                 Some(Ok(mut line)) => {
                     if frame.codec().get_encoding() == CharEncoding::Latin1 {
                         // We need to convert non-Latin-1 characters to '?'
-                        // here rather than waiting for the codec to do it
-                        // so that the Event will reflect the actual
-                        // characters sent.
+                        // here rather than waiting for the codec to do it so
+                        // that the Event will reflect the actual characters
+                        // sent.
                         line = latin1ify(line);
                     }
                     if crlf {
@@ -315,6 +314,7 @@ where
 }
 
 fn init_readline() -> anyhow::Result<(Readline, SharedWriter)> {
+    // TODO: Should this be an InterfaceError?
     let (mut rl, shared) =
         Readline::new(String::from("confab> ")).context("Error constructing Readline object")?;
     rl.should_print_line_on(false, false);
