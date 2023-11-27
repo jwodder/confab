@@ -4,7 +4,7 @@ mod input;
 mod util;
 use crate::codec::ConfabCodec;
 use crate::events::Event;
-use crate::input::{readline_stream, StartupScript};
+use crate::input::{readline_stream, Input, StartupScript};
 use crate::util::{latin1ify, now_hms, CharEncoding, InterfaceError};
 use anyhow::Context;
 use clap::Parser;
@@ -182,6 +182,10 @@ impl Reporter {
         }
         Ok(())
     }
+
+    fn echo_ctrlc(&mut self) -> Result<(), InterfaceError> {
+        writeln!(self.writer, "^C").map_err(InterfaceError::Write)
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -276,7 +280,7 @@ async fn ioloop<S>(
     reporter: &mut Reporter,
 ) -> anyhow::Result<()>
 where
-    S: Stream<Item = Result<String, InterfaceError>> + Send,
+    S: Stream<Item = Result<Input, InterfaceError>> + Send,
 {
     tokio::pin!(input);
     loop {
@@ -287,7 +291,7 @@ where
                 None => break,
             },
             r = input.next() => match r {
-                Some(Ok(mut line)) => {
+                Some(Ok(Input::Line(mut line))) => {
                     if frame.codec().get_encoding() == CharEncoding::Latin1 {
                         // We need to convert non-Latin-1 characters to '?'
                         // here rather than waiting for the codec to do it so
@@ -302,6 +306,10 @@ where
                     }
                     frame.send(&line).await.context("Error sending message")?;
                     Event::send(line)
+                }
+                Some(Ok(Input::CtrlC)) => {
+                    reporter.echo_ctrlc()?;
+                    continue;
                 }
                 Some(Err(e)) => return Err(e.into()),
                 None => break,
