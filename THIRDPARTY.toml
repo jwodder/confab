@@ -6854,7 +6854,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "gimli"
-package_version = "0.28.0"
+package_version = "0.28.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -12307,7 +12307,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.69"
+package_version = "1.0.70"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -15523,7 +15523,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "serde"
-package_version = "1.0.192"
+package_version = "1.0.193"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -15737,7 +15737,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "serde_derive"
-package_version = "1.0.192"
+package_version = "1.0.193"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
