@@ -24,7 +24,7 @@ struct Arguments {
     port: u16,
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
     let listener = TcpListener::bind((args.bind, args.port))

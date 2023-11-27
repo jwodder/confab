@@ -332,7 +332,7 @@ fn init_readline() -> anyhow::Result<(Readline, SharedWriter)> {
     Ok((rl, shared))
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<ExitCode> {
     let args = Arguments::parse();
     if args.build_info {
