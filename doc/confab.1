@@ -70,6 +70,14 @@ The default value is 65535.
 Use the given domain name for SNI and certificate hostname validation;
 defaults to the remote host name
 .TP
+\fB\-\-startup\-interval\-ms \fIint\fR
+Specify the time to wait in milliseconds between sending lines of the startup
+script
+.TP
+\fB\-S\fR \fIfile\fR, \fB\-\-startup\-script\fR \fIfile\fR
+On startup, send lines read from the given file to the server before requesting
+user input
+.TP
 .BR \-t ", " \-\-show\-times
 Prepend a timestamp of the form [HH:MM:SS] to each line printed to the terminal
 .TP
