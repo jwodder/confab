@@ -245,9 +245,9 @@ impl Runner {
         }
         let (mut rl, shared) = init_readline()?;
         // Lines written to the SharedWriter are only output when
-        // Readline::readline() is called, so anything written before we start
-        // getting input from the user should be written directly to stdout
-        // instead.
+        // Readline::readline() or Readline::flush() is called, so anything
+        // written before we start getting input from the user should be
+        // written directly to stdout instead.
         self.reporter.set_writer(Box::new(shared));
         let r = ioloop(
             &mut frame,
@@ -256,16 +256,15 @@ impl Runner {
             &mut self.reporter,
         )
         .await;
+        // TODO: Should this event not be emitted if an error occurs above?
+        let r2 = self.reporter.report(Event::disconnect());
+        // Flush after the disconnect event so that we're guaranteed a line in
+        // the Readline buffer, leading to the prompt being cleared.
         let _ = rl.flush();
         drop(rl);
         // Set the writer back to stdout so that errors reported by run() will
-        // show up
+        // show up without having to call rl.flush().
         self.reporter.set_writer(Box::new(io::stdout()));
-        // TODO: Emit a `disconnect` event if a disconnect occurs during the
-        // startup script ioloop
-        // TODO: Should this event not be emitted if an error occurs during
-        // I/O?
-        let r2 = self.reporter.report(Event::disconnect());
         r.and(r2.map_err(Into::into))
     }
 }
