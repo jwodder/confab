@@ -5,7 +5,12 @@ use std::fmt::{self, Display, Write};
 use std::io;
 use std::str::FromStr;
 use thiserror::Error;
+use time::format_description::FormatItem;
+use time::macros::format_description;
+use time::OffsetDateTime;
 use unicode_general_category::{get_general_category, GeneralCategory};
+
+pub(crate) static HMS_FMT: &[FormatItem<'_>] = format_description!("[hour]:[minute]:[second]");
 
 #[derive(Debug, Error)]
 pub(crate) enum InterfaceError {
@@ -202,6 +207,16 @@ fn vis(c: char) -> String {
 
 fn decode_latin1(bs: Vec<u8>) -> String {
     bs.into_iter().map(char::from).collect()
+}
+
+pub(crate) fn now() -> OffsetDateTime {
+    OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc())
+}
+
+pub(crate) fn now_hms() -> String {
+    now()
+        .format(&HMS_FMT)
+        .expect("formatting a datetime as HMS should not fail")
 }
 
 #[cfg(test)]

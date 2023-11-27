@@ -1,13 +1,9 @@
-use crate::util::{chomp, display_vis, JsonStrMap};
+use crate::util::{chomp, display_vis, now, JsonStrMap, HMS_FMT};
 use crossterm::style::{StyledContent, Stylize};
 use std::fmt;
 use std::net::SocketAddr;
 use time::format_description::well_known::Rfc3339;
-use time::format_description::FormatItem;
-use time::macros::format_description;
 use time::OffsetDateTime;
-
-pub(crate) static HMS_FMT: &[FormatItem<'_>] = format_description!("[hour]:[minute]:[second]");
 
 pub(crate) enum Event {
     ConnectStart {
@@ -183,8 +179,4 @@ impl fmt::Display for EventDisplay<'_> {
         }
         Ok(())
     }
-}
-
-pub(crate) fn now() -> OffsetDateTime {
-    OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc())
 }
