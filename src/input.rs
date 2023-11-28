@@ -1,4 +1,4 @@
-use crate::util::InterfaceError;
+use crate::errors::InterfaceError;
 use async_stream::stream;
 use futures::stream::Stream;
 use pin_project_lite::pin_project;

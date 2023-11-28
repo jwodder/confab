@@ -303,7 +303,6 @@ dependencies = [
  "expectrl",
  "futures",
  "itertools",
- "native-tls",
  "openssl",
  "pin-project-lite",
  "regex",

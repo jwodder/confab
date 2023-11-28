@@ -1,11 +1,14 @@
 mod codec;
+mod errors;
 mod events;
 mod input;
+mod tls;
 mod util;
 use crate::codec::ConfabCodec;
+use crate::errors::{InetError, InterfaceError, IoError};
 use crate::events::Event;
 use crate::input::{readline_stream, Input, StartupScript};
-use crate::util::{latin1ify, now_hms, CharEncoding, InterfaceError};
+use crate::util::{latin1ify, now_hms, CharEncoding};
 use anyhow::Context;
 use clap::Parser;
 use futures::{SinkExt, Stream, StreamExt};
@@ -18,18 +21,6 @@ use std::process::ExitCode;
 use std::time::Duration;
 use tokio::{fs::File as TokioFile, io::BufReader, net::TcpStream};
 use tokio_util::{codec::Framed, either::Either};
-
-cfg_if::cfg_if! {
-    if #[cfg(feature = "rustls")] {
-        mod rustls;
-        use crate::rustls as tls;
-    } else if #[cfg(feature = "native")] {
-        mod native_tls;
-        use crate::native_tls as tls;
-    } else {
-        compile_error("confab requires feature \"rustls\" or \"native\" to be enabled")
-    }
-}
 
 type Connection = Framed<Either<TcpStream, tls::TlsStream>, ConfabCodec>;
 
@@ -203,17 +194,19 @@ struct Connector {
 }
 
 impl Connector {
-    async fn connect(&self, reporter: &mut Reporter) -> anyhow::Result<Connection> {
+    async fn connect(&self, reporter: &mut Reporter) -> Result<Connection, IoError> {
         reporter.report(Event::connect_start(&self.host, self.port))?;
         let conn = TcpStream::connect((self.host.clone(), self.port))
             .await
-            .context("Error connecting to server")?;
+            .map_err(InetError::Connect)?;
         reporter.report(Event::connect_finish(
-            conn.peer_addr().context("Error getting peer address")?,
+            conn.peer_addr().map_err(InetError::PeerAddr)?,
         ))?;
         let conn = if self.tls {
             reporter.report(Event::tls_start())?;
-            let conn = tls::connect(conn, self.servername.as_ref().unwrap_or(&self.host)).await?;
+            let conn = tls::connect(conn, self.servername.as_ref().unwrap_or(&self.host))
+                .await
+                .map_err(InetError::Tls)?;
             reporter.report(Event::tls_finish())?;
             Either::Right(conn)
         } else {
@@ -235,18 +228,18 @@ struct Runner {
 }
 
 impl Runner {
-    async fn run(mut self) -> anyhow::Result<ExitCode> {
+    async fn run(mut self) -> Result<ExitCode, InterfaceError> {
         match self.try_run().await {
             Ok(()) => Ok(ExitCode::SUCCESS),
-            Err(e) if e.is::<InterfaceError>() => Err(e),
-            Err(e) => {
-                self.reporter.report(Event::error(e))?;
+            Err(IoError::Interface(e)) => Err(e),
+            Err(IoError::Inet(e)) => {
+                self.reporter.report(Event::error(anyhow::Error::new(e)))?;
                 Ok(ExitCode::FAILURE)
             }
         }
     }
 
-    async fn try_run(&mut self) -> anyhow::Result<()> {
+    async fn try_run(&mut self) -> Result<(), IoError> {
         let mut frame = self.connector.connect(&mut self.reporter).await?;
         if let Some(script) = self.startup_script.take() {
             ioloop(&mut frame, script, self.crlf, &mut self.reporter).await?;
@@ -273,7 +266,7 @@ impl Runner {
         // Set the writer back to stdout so that errors reported by run() will
         // show up without having to call rl.flush().
         self.reporter.set_writer(Box::new(io::stdout()));
-        r.and(r2.map_err(Into::into))
+        r.map_err(Into::into).and(r2.map_err(Into::into))
     }
 }
 
@@ -282,7 +275,7 @@ async fn ioloop<S>(
     input: S,
     crlf: bool,
     reporter: &mut Reporter,
-) -> anyhow::Result<()>
+) -> Result<(), IoError>
 where
     S: Stream<Item = Result<Input, InterfaceError>> + Send,
 {
@@ -291,7 +284,7 @@ where
         let event = tokio::select! {
             r = frame.next() => match r {
                 Some(Ok(msg)) => Event::recv(msg),
-                Some(Err(e)) => return Err(e).context("Error reading from connection"),
+                Some(Err(e)) => return Err(IoError::Inet(InetError::Recv(e))),
                 None => break,
             },
             r = input.next() => match r {
@@ -308,7 +301,7 @@ where
                     } else {
                         line.push('\n');
                     }
-                    frame.send(&line).await.context("Error sending message")?;
+                    frame.send(&line).await.map_err(InetError::Send)?;
                     Event::send(line)
                 }
                 Some(Ok(Input::CtrlC)) => {
@@ -324,10 +317,8 @@ where
     Ok(())
 }
 
-fn init_readline() -> anyhow::Result<(Readline, SharedWriter)> {
-    // TODO: Should this be an InterfaceError?
-    let (mut rl, shared) =
-        Readline::new(String::from("confab> ")).context("Error constructing Readline object")?;
+fn init_readline() -> Result<(Readline, SharedWriter), InterfaceError> {
+    let (mut rl, shared) = Readline::new(String::from("confab> ")).map_err(InterfaceError::Init)?;
     rl.should_print_line_on(false, false);
     Ok((rl, shared))
 }

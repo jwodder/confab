@@ -2,7 +2,6 @@ use crossterm::style::{StyledContent, Stylize};
 use itertools::Itertools; // for group_by()
 use std::borrow::Cow;
 use std::fmt::{self, Display, Write};
-use std::io;
 use std::str::FromStr;
 use thiserror::Error;
 use time::format_description::FormatItem;
@@ -11,16 +10,6 @@ use time::OffsetDateTime;
 use unicode_general_category::{get_general_category, GeneralCategory};
 
 pub(crate) static HMS_FMT: &[FormatItem<'_>] = format_description!("[hour]:[minute]:[second]");
-
-#[derive(Debug, Error)]
-pub(crate) enum InterfaceError {
-    #[error("error reading from startup script")]
-    ReadScript(#[source] io::Error),
-    #[error("error reading input from terminal")]
-    ReadLine(#[source] io::Error),
-    #[error("error writing output")]
-    Write(#[source] io::Error),
-}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct JsonStrMap {
@@ -144,16 +133,9 @@ impl FromStr for CharEncoding {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Error, PartialEq)]
+#[error("invalid character encoding name")]
 pub(crate) struct CharEncodingLookupError;
-
-impl Display for CharEncodingLookupError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "invalid character encoding name")
-    }
-}
-
-impl std::error::Error for CharEncodingLookupError {}
 
 pub(crate) fn chomp(s: &str) -> &str {
     let s = s.strip_suffix('\n').unwrap_or(s);
