@@ -15,6 +15,12 @@ use tokio_util::{codec::Framed, either::Either};
 
 type Connection = Framed<Either<TcpStream, tls::TlsStream>, ConfabCodec>;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ConnectState {
+    Open,
+    Closed,
+}
+
 pub(crate) struct Runner {
     pub(crate) startup_script: Option<StartupScript>,
     pub(crate) reporter: Reporter,
@@ -36,7 +42,11 @@ impl Runner {
     async fn try_run(&mut self) -> Result<(), IoError> {
         let mut frame = self.connector.connect(&mut self.reporter).await?;
         if let Some(script) = self.startup_script.take() {
-            ioloop(&mut frame, script, &mut self.reporter).await?;
+            let cs = ioloop(&mut frame, script, &mut self.reporter).await?;
+            if cs == ConnectState::Closed {
+                self.reporter.report(Event::disconnect())?;
+                return Ok(());
+            }
         }
         let (mut rl, shared) = init_readline()?;
         // Lines written to the SharedWriter are only output when
@@ -133,7 +143,11 @@ impl Connector {
     }
 }
 
-async fn ioloop<S>(frame: &mut Connection, input: S, reporter: &mut Reporter) -> Result<(), IoError>
+async fn ioloop<S>(
+    frame: &mut Connection,
+    input: S,
+    reporter: &mut Reporter,
+) -> Result<ConnectState, IoError>
 where
     S: Stream<Item = Result<Input, InterfaceError>> + Send,
 {
@@ -143,7 +157,7 @@ where
             r = frame.next() => match r {
                 Some(Ok(msg)) => reporter.report(Event::recv(msg))?,
                 Some(Err(e)) => return Err(IoError::Inet(InetError::Recv(e))),
-                None => break,
+                None => return Ok(ConnectState::Closed),
             },
             r = input.next() => match r {
                 Some(Ok(Input::Line(line))) => {
@@ -153,11 +167,10 @@ where
                 }
                 Some(Ok(Input::CtrlC)) => reporter.echo_ctrlc()?,
                 Some(Err(e)) => return Err(e.into()),
-                None => break,
+                None => return Ok(ConnectState::Open),
             }
         }
     }
-    Ok(())
 }
 
 fn init_readline() -> Result<(Readline, SharedWriter), InterfaceError> {
