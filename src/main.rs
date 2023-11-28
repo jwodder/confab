@@ -277,9 +277,9 @@ where
 {
     tokio::pin!(input);
     loop {
-        let event = tokio::select! {
+        tokio::select! {
             r = frame.next() => match r {
-                Some(Ok(msg)) => Event::recv(msg),
+                Some(Ok(msg)) => reporter.report(Event::recv(msg))?,
                 Some(Err(e)) => return Err(IoError::Inet(InetError::Recv(e))),
                 None => break,
             },
@@ -287,17 +287,13 @@ where
                 Some(Ok(Input::Line(line))) => {
                     let line = frame.codec().prepare_line(line);
                     frame.send(&line).await.map_err(InetError::Send)?;
-                    Event::send(line)
+                    reporter.report(Event::send(line))?;
                 }
-                Some(Ok(Input::CtrlC)) => {
-                    reporter.echo_ctrlc()?;
-                    continue;
-                }
+                Some(Ok(Input::CtrlC)) => reporter.echo_ctrlc()?,
                 Some(Err(e)) => return Err(e.into()),
                 None => break,
             }
-        };
-        reporter.report(event)?;
+        }
     }
     Ok(())
 }
