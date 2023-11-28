@@ -197,7 +197,7 @@ struct Connector {
 impl Connector {
     async fn connect(&self, reporter: &mut Reporter) -> Result<Connection, IoError> {
         reporter.report(Event::connect_start(&self.host, self.port))?;
-        let conn = TcpStream::connect((self.host.clone(), self.port))
+        let conn = TcpStream::connect((&*self.host, self.port))
             .await
             .map_err(InetError::Connect)?;
         reporter.report(Event::connect_finish(
