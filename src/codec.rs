@@ -44,7 +44,7 @@
 // IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-use crate::util::CharEncoding;
+use crate::util::{latin1ify, CharEncoding};
 use bytes::{BufMut, BytesMut};
 use std::{cmp, io};
 use tokio_util::codec::{Decoder, Encoder};
@@ -66,6 +66,9 @@ pub(crate) struct ConfabCodec {
 
     /// Character encoding for converting between strings and bytes
     encoding: CharEncoding,
+
+    /// Whether prepared lines should end in CR LF (true) or LF (false)
+    crlf: bool,
 }
 
 impl ConfabCodec {
@@ -81,6 +84,7 @@ impl ConfabCodec {
             next_index: 0,
             max_length: usize::MAX,
             encoding: CharEncoding::Utf8,
+            crlf: false,
         }
     }
 
@@ -104,8 +108,27 @@ impl ConfabCodec {
         ConfabCodec { encoding, ..self }
     }
 
-    pub(crate) fn get_encoding(&self) -> CharEncoding {
-        self.encoding
+    pub(crate) fn crlf(self, crlf: bool) -> ConfabCodec {
+        ConfabCodec { crlf, ..self }
+    }
+
+    /// Prepare a line that is about to be sent through the codec.  If
+    /// `encoding` is `CharEncoding::Latin`, non-Latin-1 characters are
+    /// converted to question marks.  A line ending — either LF or CR LF,
+    /// depending on the value of `crlf` — is then appended to the line.
+    ///
+    /// These conversions need to be done outside of encoding proper so that
+    /// they can be reflected in reported events.
+    pub(crate) fn prepare_line(&self, mut line: String) -> String {
+        if self.encoding == CharEncoding::Latin1 {
+            line = latin1ify(line);
+        }
+        if self.crlf {
+            line.push_str("\r\n");
+        } else {
+            line.push('\n');
+        }
+        line
     }
 }
 

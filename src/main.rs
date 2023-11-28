@@ -8,7 +8,7 @@ use crate::codec::ConfabCodec;
 use crate::errors::{InetError, InterfaceError, IoError};
 use crate::events::Event;
 use crate::input::{readline_stream, Input, StartupScript};
-use crate::util::{latin1ify, now_hms, CharEncoding};
+use crate::util::{now_hms, CharEncoding};
 use anyhow::Context;
 use clap::Parser;
 use futures::{SinkExt, Stream, StreamExt};
@@ -136,7 +136,6 @@ impl Arguments {
                 transcript,
                 show_times: self.show_times,
             },
-            crlf: self.crlf,
             connector: Connector {
                 tls: self.tls,
                 host: self.host,
@@ -144,6 +143,7 @@ impl Arguments {
                 servername: self.servername,
                 encoding: self.encoding,
                 max_line_length: self.max_line_length,
+                crlf: self.crlf,
             },
         })
     }
@@ -191,6 +191,7 @@ struct Connector {
     servername: Option<String>,
     encoding: CharEncoding,
     max_line_length: NonZeroUsize,
+    crlf: bool,
 }
 
 impl Connector {
@@ -216,14 +217,15 @@ impl Connector {
     }
 
     fn codec(&self) -> ConfabCodec {
-        ConfabCodec::new_with_max_length(self.max_line_length.get()).encoding(self.encoding)
+        ConfabCodec::new_with_max_length(self.max_line_length.get())
+            .encoding(self.encoding)
+            .crlf(self.crlf)
     }
 }
 
 struct Runner {
     startup_script: Option<StartupScript>,
     reporter: Reporter,
-    crlf: bool,
     connector: Connector,
 }
 
@@ -242,7 +244,7 @@ impl Runner {
     async fn try_run(&mut self) -> Result<(), IoError> {
         let mut frame = self.connector.connect(&mut self.reporter).await?;
         if let Some(script) = self.startup_script.take() {
-            ioloop(&mut frame, script, self.crlf, &mut self.reporter).await?;
+            ioloop(&mut frame, script, &mut self.reporter).await?;
         }
         let (mut rl, shared) = init_readline()?;
         // Lines written to the SharedWriter are only output when
@@ -253,7 +255,6 @@ impl Runner {
         let r = ioloop(
             &mut frame,
             readline_stream(&mut rl).await,
-            self.crlf,
             &mut self.reporter,
         )
         .await;
@@ -270,12 +271,7 @@ impl Runner {
     }
 }
 
-async fn ioloop<S>(
-    frame: &mut Connection,
-    input: S,
-    crlf: bool,
-    reporter: &mut Reporter,
-) -> Result<(), IoError>
+async fn ioloop<S>(frame: &mut Connection, input: S, reporter: &mut Reporter) -> Result<(), IoError>
 where
     S: Stream<Item = Result<Input, InterfaceError>> + Send,
 {
@@ -288,19 +284,8 @@ where
                 None => break,
             },
             r = input.next() => match r {
-                Some(Ok(Input::Line(mut line))) => {
-                    if frame.codec().get_encoding() == CharEncoding::Latin1 {
-                        // We need to convert non-Latin-1 characters to '?'
-                        // here rather than waiting for the codec to do it so
-                        // that the Event will reflect the actual characters
-                        // sent.
-                        line = latin1ify(line);
-                    }
-                    if crlf {
-                        line.push_str("\r\n");
-                    } else {
-                        line.push('\n');
-                    }
+                Some(Ok(Input::Line(line))) => {
+                    let line = frame.codec().prepare_line(line);
                     frame.send(&line).await.map_err(InetError::Send)?;
                     Event::send(line)
                 }
