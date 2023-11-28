@@ -59,8 +59,7 @@ impl Stream for StartupScript {
     }
 }
 
-#[allow(clippy::needless_pass_by_ref_mut)] // False positive
-pub(crate) async fn readline_stream(
+pub(crate) fn readline_stream(
     rl: &mut Readline,
 ) -> impl Stream<Item = Result<Input, InterfaceError>> + Send + '_ {
     stream! {

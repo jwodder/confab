@@ -44,13 +44,9 @@ impl Runner {
         // written before we start getting input from the user should be
         // written directly to stdout instead.
         self.reporter.set_writer(Box::new(shared));
-        let r = ioloop(
-            &mut frame,
-            readline_stream(&mut rl).await,
-            &mut self.reporter,
-        )
-        .await;
-        // TODO: Should this event not be emitted if an error occurs above?
+        let r = ioloop(&mut frame, readline_stream(&mut rl), &mut self.reporter).await;
+        // TODO: Don't emit this event if an error occurs above (Blocked by
+        // <https://github.com/zyansheep/rustyline-async/issues/21>)
         let r2 = self.reporter.report(Event::disconnect());
         // Flush after the disconnect event so that we're guaranteed a line in
         // the Readline buffer, leading to the prompt being cleared.
