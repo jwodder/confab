@@ -62,10 +62,10 @@ struct Arguments {
     #[arg(long, value_name = "DOMAIN")]
     servername: Option<String>,
 
-    /// Time to wait in milliseconds between sending lines of the startup
+    /// Time to wait in milliseconds before sending each line of the startup
     /// script
     #[arg(long, default_value_t = 500, value_name = "INT")]
-    startup_interval_ms: u64,
+    startup_wait_ms: u64,
 
     /// On startup, send lines read from the given file to the server before
     /// requesting user input
@@ -117,7 +117,7 @@ impl Arguments {
             );
             Some(StartupScript::new(
                 fp,
-                Duration::from_millis(self.startup_interval_ms),
+                Duration::from_millis(self.startup_wait_ms),
             ))
         } else {
             None

@@ -10,11 +10,12 @@ use serde::Deserialize;
 use serde_jsonlines::json_lines;
 use std::borrow::Cow;
 use std::ffi::OsStr;
+use std::io::{Seek, Write};
 use std::net::{IpAddr, SocketAddr};
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
-use tempfile::{tempdir, TempDir};
+use tempfile::{tempdir, NamedTempFile, TempDir};
 use time::OffsetDateTime;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
@@ -86,7 +87,6 @@ impl Tester {
         };
         runner.connect().await;
         runner.get("Welcome to the confab Test Server!").await;
-        runner.p.expect("confab> ").await.unwrap();
         runner
     }
 }
@@ -133,7 +133,14 @@ impl Runner {
 
     async fn enter<S: Into<Sent> + Send>(&mut self, entry: S) {
         let entry = entry.into();
+        self.p.expect("confab> ").await.unwrap();
         self.p.send(entry.typed()).await.unwrap();
+        self.expect(entry.printed()).await;
+        self.transcribe(entry.transcription());
+    }
+
+    async fn script_enter<S: Into<Sent> + Send>(&mut self, entry: S) {
+        let entry = entry.into();
         self.expect(entry.printed()).await;
         self.transcribe(entry.transcription());
     }
@@ -599,4 +606,58 @@ async fn test_no_crlf_recv_crlf() {
     })
     .await;
     r.quit().await;
+}
+
+#[tokio::test]
+async fn startup_script() {
+    let mut scriptfile = NamedTempFile::new().unwrap();
+    writeln!(scriptfile, "Hello!").unwrap();
+    writeln!(scriptfile, "This is from a startup script.").unwrap();
+    scriptfile.flush().unwrap();
+    scriptfile.rewind().unwrap();
+
+    let mut r = Tester::new()
+        .arg("--startup-script")
+        .arg(scriptfile.path())
+        .transcript()
+        .build()
+        .await;
+
+    sleep(Duration::from_millis(500)).await;
+    r.script_enter("Hello!").await;
+    r.get(r#"You sent: "Hello!""#).await;
+    sleep(Duration::from_millis(500)).await;
+    r.script_enter("This is from a startup script.").await;
+    r.get(r#"You sent: "This is from a startup script.""#).await;
+
+    r.enter("Hello again!").await;
+    r.get(r#"You sent: "Hello again!""#).await;
+    r.enter("This is from the prompt.").await;
+    r.get(r#"You sent: "This is from the prompt.""#).await;
+
+    r.quit().await;
+}
+
+#[tokio::test]
+async fn quit_from_startup_script() {
+    let mut scriptfile = NamedTempFile::new().unwrap();
+    writeln!(scriptfile, "Hello!").unwrap();
+    writeln!(scriptfile, "quit").unwrap();
+    writeln!(scriptfile, "wait no-").unwrap();
+    scriptfile.flush().unwrap();
+    scriptfile.rewind().unwrap();
+    let mut r = Tester::new()
+        .arg("--startup-script")
+        .arg(scriptfile.path())
+        .transcript()
+        .build()
+        .await;
+    sleep(Duration::from_millis(500)).await;
+    r.script_enter("Hello!").await;
+    r.get(r#"You sent: "Hello!""#).await;
+    sleep(Duration::from_millis(500)).await;
+    r.script_enter("quit").await;
+    r.get(r#"You sent: "quit""#).await;
+    r.get("Goodbye.").await;
+    r.finish().await;
 }

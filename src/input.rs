@@ -24,6 +24,7 @@ pin_project! {
         lines: Lines<BufReader<TokioFile>>,
         #[pin]
         nap: Option<Sleep>,
+        next_line: Option<Input>,
         delay: Duration,
     }
 }
@@ -32,7 +33,8 @@ impl StartupScript {
     pub(crate) fn new(reader: BufReader<TokioFile>, delay: Duration) -> StartupScript {
         StartupScript {
             lines: reader.lines(),
-            nap: None,
+            nap: Some(sleep(delay)),
+            next_line: None,
             delay,
         }
     }
@@ -43,19 +45,21 @@ impl Stream for StartupScript {
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let mut this = self.project();
+        if this.next_line.is_none() {
+            match ready!(this.lines.as_mut().poll_next_line(cx)) {
+                Ok(Some(line)) => {
+                    *this.next_line = Some(Input::Line(line));
+                    this.nap.set(Some(sleep(*this.delay)));
+                }
+                Ok(None) => return None.into(),
+                Err(e) => return Some(Err(InterfaceError::ReadScript(e))).into(),
+            }
+        }
         if let Some(nap) = this.nap.as_mut().as_pin_mut() {
             ready!(nap.poll(cx));
             this.nap.set(None);
         }
-        let r = match ready!(this.lines.as_mut().poll_next_line(cx)) {
-            Ok(Some(line)) => Some(Ok(Input::Line(line))),
-            Ok(None) => None,
-            Err(e) => Some(Err(InterfaceError::ReadScript(e))),
-        };
-        // TODO: Should the stream be forcibly fused when we're about to return
-        // None?
-        this.nap.set(Some(sleep(*this.delay)));
-        r.into()
+        this.next_line.take().map(Ok).into()
     }
 }
 

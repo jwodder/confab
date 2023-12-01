@@ -113,8 +113,8 @@ Options
 - `--servername <DOMAIN>` — (with `--tls`) Use the given domain name for SNI
   and certificate hostname validation; defaults to the remote host name
 
-- `--startup-interval-ms <INT>` — Specify the time to wait in milliseconds
-  between sending lines of the startup script
+- `--startup-wait-ms <INT>` — Specify the time to wait in milliseconds
+  before sending each line of the startup script [default value: 500]
 
 - `-S <FILE>`, `--startup-script <FILE>` — On startup, send lines read from the
   given file to the server before requesting user input
