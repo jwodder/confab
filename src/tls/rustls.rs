@@ -24,8 +24,8 @@ pub(crate) async fn connect(conn: TcpStream, servername: &str) -> Result<TlsStre
     let system_certs = rustls_native_certs::load_native_certs()
         .map_err(TlsError::LoadStore)?
         .into_iter()
-        .map(|cert| cert.0)
-        .collect::<Vec<_>>();
+        .map(|cert| cert.to_vec())
+        .collect::<Vec<Vec<u8>>>();
     let (good, bad) = root_cert_store.add_parsable_certificates(&system_certs);
     if good == 0 {
         return Err(TlsError::AddCerts { bad });
