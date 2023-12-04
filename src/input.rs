@@ -1,6 +1,6 @@
 use crate::errors::InterfaceError;
 use async_stream::stream;
-use futures::stream::Stream;
+use futures_util::Stream;
 use pin_project_lite::pin_project;
 use rustyline_async::{Readline, ReadlineError, ReadlineEvent};
 use std::future::Future;

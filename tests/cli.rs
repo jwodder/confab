@@ -5,7 +5,7 @@ use assert_matches::assert_matches;
 use expectrl::session::{log, OsProcess, OsProcessStream, Session};
 use expectrl::stream::log::LogStream;
 use expectrl::{ControlCode, Eof, Regex};
-use futures::{SinkExt, StreamExt};
+use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
 use serde_jsonlines::json_lines;
 use std::borrow::Cow;

@@ -4,7 +4,7 @@ use crate::events::Event;
 use crate::input::{readline_stream, Input, StartupScript};
 use crate::tls;
 use crate::util::{now_hms, CharEncoding};
-use futures::{SinkExt, Stream, StreamExt};
+use futures_util::{SinkExt, Stream, StreamExt};
 use rustyline_async::{Readline, SharedWriter};
 use std::fs::File;
 use std::io::{self, Write};

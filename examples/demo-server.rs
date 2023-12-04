@@ -1,7 +1,6 @@
 use anyhow::Context;
 use clap::Parser;
-use futures::stream::iter;
-use futures::{SinkExt, StreamExt};
+use futures_util::{stream::iter, SinkExt, StreamExt};
 use std::error;
 use std::fmt;
 use std::net::{IpAddr, SocketAddr};
