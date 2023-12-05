@@ -1,9 +1,12 @@
+use rustls_pki_types::{InvalidDnsNameError, ServerName};
 use std::io;
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::net::TcpStream;
-use tokio_rustls::rustls::{client::InvalidDnsNameError, ClientConfig, RootCertStore, ServerName};
-use tokio_rustls::TlsConnector;
+use tokio_rustls::{
+    rustls::{ClientConfig, RootCertStore},
+    TlsConnector,
+};
 
 pub(crate) type TlsStream = tokio_rustls::client::TlsStream<TcpStream>;
 
@@ -21,23 +24,18 @@ pub(crate) enum TlsError {
 
 pub(crate) async fn connect(conn: TcpStream, servername: &str) -> Result<TlsStream, TlsError> {
     let mut root_cert_store = RootCertStore::empty();
-    let system_certs = rustls_native_certs::load_native_certs()
-        .map_err(TlsError::LoadStore)?
-        .into_iter()
-        .map(|cert| cert.to_vec())
-        .collect::<Vec<Vec<u8>>>();
-    let (good, bad) = root_cert_store.add_parsable_certificates(&system_certs);
+    let system_certs = rustls_native_certs::load_native_certs().map_err(TlsError::LoadStore)?;
+    let (good, bad) = root_cert_store.add_parsable_certificates(system_certs);
     if good == 0 {
         return Err(TlsError::AddCerts { bad });
     }
     let config = ClientConfig::builder()
-        .with_safe_defaults()
         .with_root_certificates(root_cert_store)
         .with_no_client_auth();
     // Note to self: To make use of client certs, replace
-    // with_no_client_auth() with with_single_cert(...).
+    // with_no_client_auth() with with_client_auth_cert(...).
     let connector = TlsConnector::from(Arc::new(config));
-    let dnsname = ServerName::try_from(servername)?;
+    let dnsname = ServerName::try_from(servername)?.to_owned();
     connector
         .connect(dnsname, conn)
         .await
