@@ -7699,7 +7699,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "itoa"
-package_version = "1.0.9"
+package_version = "1.0.10"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -7913,7 +7913,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.150"
+package_version = "0.2.151"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -9364,7 +9364,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "mio"
-package_version = "0.8.9"
+package_version = "0.8.10"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -9870,7 +9870,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "once_cell"
-package_version = "1.18.0"
+package_version = "1.19.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -12414,11 +12414,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "ring"
-package_version = "0.17.6"
-license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.6/LICENSE)"
+package_version = "0.17.7"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/LICENSE)"
 
 [[third_party_libraries.licenses]]
-license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.6/LICENSE)"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/LICENSE)"
 text = """
 Note that it is easy for this file to get out of sync with the licenses in the
 source code files. It's recommended to compare the licenses in the source code
@@ -13333,7 +13333,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls"
-package_version = "0.22.0"
+package_version = "0.22.1"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -14116,7 +14116,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
-package_version = "1.0.0"
+package_version = "1.0.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16919,7 +16919,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.39"
+package_version = "2.0.40"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -18536,7 +18536,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "tokio"
-package_version = "1.34.0"
+package_version = "1.35.0"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
