@@ -12869,7 +12869,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "rustix"
-package_version = "0.38.26"
+package_version = "0.38.28"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
