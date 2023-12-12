@@ -1,5 +1,5 @@
-v0.3.0 (in development)
------------------------
+v0.3.0 (2023-12-12)
+-------------------
 - Increased MSRV to 1.70
 - Added `--startup-script` and `--startup-wait-ms` options
 
