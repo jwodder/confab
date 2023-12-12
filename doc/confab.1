@@ -76,8 +76,10 @@ startup script.
 The default value is 500.
 .TP
 \fB\-S\fR \fIfile\fR, \fB\-\-startup\-script\fR \fIfile\fR
-On startup, send lines read from the given file to the server before requesting
-user input
+On startup, read lines from the given file and send them to the server one at a
+time.
+The user will not be prompted for input until after the end of the file is
+reached.
 .TP
 .BR \-t ", " \-\-show\-times
 Prepend a timestamp of the form [HH:MM:SS] to each line printed to the terminal

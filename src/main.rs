@@ -67,8 +67,11 @@ struct Arguments {
     #[arg(long, default_value_t = 500, value_name = "INT")]
     startup_wait_ms: u64,
 
-    /// On startup, send lines read from the given file to the server before
-    /// requesting user input
+    /// On startup, read lines from the given file and send them to the server
+    /// one at a time.
+    ///
+    /// The user will not be prompted for input until after the end of the file
+    /// is reached.
     #[arg(short = 'S', long, value_name = "FILE")]
     startup_script: Option<PathBuf>,
 

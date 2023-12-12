@@ -69,10 +69,10 @@ Usage
     confab [<options>] <host> <port>
 
 Open a TCP connection to the given host and port.  Lines entered by the user at
-the confab prompt are sent to the remote server and echoed locally with a "`>`"
-prefix, while lines received from the remote server are printed out above the
-prompt with a "`<`" prefix.  Communication stops when the remote server closes
-the connection or when the user presses Ctrl-D.
+the `confab` prompt are sent to the remote server and echoed locally with a
+"`>`" prefix, while lines received from the remote server are printed out above
+the prompt with a "`<`" prefix.  Communication stops when the remote server
+closes the connection or when the user presses Ctrl-D.
 
 `confab` relies on
 [`rustyline-async`](https://github.com/zyansheep/rustyline-async) for its
@@ -116,8 +116,9 @@ Options
 - `--startup-wait-ms <INT>` — Specify the time to wait in milliseconds
   before sending each line of the startup script [default value: 500]
 
-- `-S <FILE>`, `--startup-script <FILE>` — On startup, send lines read from the
-  given file to the server before requesting user input
+- `-S <FILE>`, `--startup-script <FILE>` — On startup, read lines from the
+  given file and send them to the server one at a time.  The user will not be
+  prompted for input until after the end of the file is reached.
 
 - `-t`, `--show-times` — Prepend a timestamp of the form `[HH:MM:SS]` to each
   line printed to the terminal
