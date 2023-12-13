@@ -1,5 +1,5 @@
-v0.3.1 (in development)
------------------------
+v0.3.1 (2023-12-13)
+-------------------
 - A "Disconnect" event is no longer emitted if an I/O error occurs
 
 v0.3.0 (2023-12-12)
