@@ -16883,7 +16883,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "thiserror"
-package_version = "1.0.50"
+package_version = "1.0.51"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17097,7 +17097,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "thiserror-impl"
-package_version = "1.0.50"
+package_version = "1.0.51"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
