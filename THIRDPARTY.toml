@@ -735,7 +735,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "anyhow"
-package_version = "1.0.75"
+package_version = "1.0.76"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -4516,7 +4516,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-channel"
-package_version = "0.3.29"
+package_version = "0.3.30"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -4759,7 +4759,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-core"
-package_version = "0.3.29"
+package_version = "0.3.30"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5002,7 +5002,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-io"
-package_version = "0.3.29"
+package_version = "0.3.30"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5245,7 +5245,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-macro"
-package_version = "0.3.29"
+package_version = "0.3.30"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5488,7 +5488,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-sink"
-package_version = "0.3.29"
+package_version = "0.3.30"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5731,7 +5731,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-task"
-package_version = "0.3.29"
+package_version = "0.3.30"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5974,7 +5974,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-util"
-package_version = "0.3.29"
+package_version = "0.3.30"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -9112,7 +9112,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "object"
-package_version = "0.32.1"
+package_version = "0.32.2"
 license = "Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -11437,7 +11437,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.70"
+package_version = "1.0.71"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -13599,7 +13599,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
-package_version = "1.0.1"
+package_version = "1.1.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16402,7 +16402,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.41"
+package_version = "2.0.43"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17311,7 +17311,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "time"
-package_version = "0.3.30"
+package_version = "0.3.31"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17783,7 +17783,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "time-macros"
-package_version = "0.2.15"
+package_version = "0.2.16"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -18019,7 +18019,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "tokio"
-package_version = "1.35.0"
+package_version = "1.35.1"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
