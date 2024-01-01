@@ -735,7 +735,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "anyhow"
-package_version = "1.0.76"
+package_version = "1.0.78"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2307,7 +2307,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.4.11"
+package_version = "4.4.12"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2543,7 +2543,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.4.11"
+package_version = "4.4.12"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -3798,7 +3798,7 @@ SOFTWARE.\r
 
 [[third_party_libraries]]
 package_name = "deranged"
-package_version = "0.3.10"
+package_version = "0.3.11"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8558,7 +8558,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "memchr"
-package_version = "2.6.4"
+package_version = "2.7.1"
 license = "Unlicense OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -11437,7 +11437,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.71"
+package_version = "1.0.73"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -11651,7 +11651,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "quote"
-package_version = "1.0.33"
+package_version = "1.0.34"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -13903,7 +13903,7 @@ For more information, please refer to <https://unlicense.org>
 
 [[third_party_libraries]]
 package_name = "schannel"
-package_version = "0.1.22"
+package_version = "0.1.23"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -16402,7 +16402,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.43"
+package_version = "2.0.44"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16883,7 +16883,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "thiserror"
-package_version = "1.0.51"
+package_version = "1.0.53"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17097,7 +17097,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "thiserror-impl"
-package_version = "1.0.51"
+package_version = "1.0.53"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
