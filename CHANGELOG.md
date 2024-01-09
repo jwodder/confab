@@ -1,3 +1,7 @@
+v0.4.0 (in development)
+-----------------------
+- Remove unintended "openssl" feature
+
 v0.3.1 (2023-12-13)
 -------------------
 - A "Disconnect" event is no longer emitted if an I/O error occurs
