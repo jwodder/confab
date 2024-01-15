@@ -1312,7 +1312,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "base64"
-package_version = "0.21.5"
+package_version = "0.21.7"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2307,7 +2307,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.4.13"
+package_version = "4.4.16"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2543,7 +2543,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.4.12"
+package_version = "4.4.16"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -6217,13 +6217,13 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "getrandom"
-package_version = "0.2.11"
+package_version = "0.2.12"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
 license = "MIT"
 text = """
-Copyright 2018 Developers of the Rand project
+Copyright (c) 2018-2024 The rust-random Project Developers
 Copyright (c) 2014 The Rust Project Developers
 
 Permission is hereby granted, free of charge, to any
@@ -12816,7 +12816,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls"
-package_version = "0.22.1"
+package_version = "0.22.2"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -15819,7 +15819,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "smallvec"
-package_version = "1.11.2"
+package_version = "1.12.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
