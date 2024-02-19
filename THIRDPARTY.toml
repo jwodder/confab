@@ -735,7 +735,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "anyhow"
-package_version = "1.0.79"
+package_version = "1.0.80"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2307,7 +2307,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.5.0"
+package_version = "4.5.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2543,7 +2543,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.5.0"
+package_version = "4.5.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -9112,7 +9112,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "num_threads"
-package_version = "0.1.6"
+package_version = "0.1.7"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -12133,11 +12133,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "ring"
-package_version = "0.17.7"
-license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/LICENSE)"
+package_version = "0.17.8"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/LICENSE)"
 
 [[third_party_libraries.licenses]]
-license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/LICENSE)"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/LICENSE)"
 text = """
 Note that it is easy for this file to get out of sync with the licenses in the
 source code files. It's recommended to compare the licenses in the source code
@@ -13574,7 +13574,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pemfile"
-package_version = "2.0.0"
+package_version = "2.1.0"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13835,7 +13835,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
-package_version = "1.2.0"
+package_version = "1.3.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16638,7 +16638,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.48"
+package_version = "2.0.49"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
