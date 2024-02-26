@@ -14869,7 +14869,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "serde"
-package_version = "1.0.196"
+package_version = "1.0.197"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -15083,7 +15083,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "serde_derive"
-package_version = "1.0.196"
+package_version = "1.0.197"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16638,7 +16638,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.49"
+package_version = "2.0.51"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
