@@ -8317,7 +8317,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "log"
-package_version = "0.4.20"
+package_version = "0.4.21"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8847,7 +8847,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "mio"
-package_version = "0.8.10"
+package_version = "0.8.11"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -13574,7 +13574,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pemfile"
-package_version = "2.1.0"
+package_version = "2.1.1"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13835,7 +13835,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
-package_version = "1.3.0"
+package_version = "1.3.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16638,7 +16638,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.51"
+package_version = "2.0.52"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
