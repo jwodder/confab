@@ -735,7 +735,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "anyhow"
-package_version = "1.0.80"
+package_version = "1.0.81"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2307,7 +2307,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.5.2"
+package_version = "4.5.3"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2780,7 +2780,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_derive"
-package_version = "4.5.0"
+package_version = "4.5.3"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -6700,7 +6700,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "heck"
-package_version = "0.4.1"
+package_version = "0.5.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -11673,7 +11673,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.78"
+package_version = "1.0.79"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16638,7 +16638,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.52"
+package_version = "2.0.53"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17119,7 +17119,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "thiserror"
-package_version = "1.0.57"
+package_version = "1.0.58"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17333,7 +17333,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "thiserror-impl"
-package_version = "1.0.57"
+package_version = "1.0.58"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
