@@ -29,7 +29,7 @@ thiserror = "1.0.58"
 time = { version = "0.3.34", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
 tokio = { version = "1.36.0", features = ["fs", "io-util", "macros", "net", "rt", "time"] }
 tokio-native-tls = { version = "0.3.1", optional = true }
-tokio-rustls = { version = "0.26.0", optional = true }
+tokio-rustls = { version = "0.26.0", optional = true, default-features = false, features = ["ring", "tls12"] }
 tokio-util = { version = "0.7.10", features = ["codec"] }
 unicode-general-category = "0.6.0"
 
