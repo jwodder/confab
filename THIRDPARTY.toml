@@ -2307,7 +2307,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.5.3"
+package_version = "4.5.4"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2780,7 +2780,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_derive"
-package_version = "4.5.3"
+package_version = "4.5.4"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -7182,7 +7182,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "itoa"
-package_version = "1.0.10"
+package_version = "1.0.11"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8558,7 +8558,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "memchr"
-package_version = "2.7.1"
+package_version = "2.7.2"
 license = "Unlicense OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -10981,7 +10981,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "pin-project-lite"
-package_version = "0.2.13"
+package_version = "0.2.14"
 license = "Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13052,7 +13052,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls"
-package_version = "0.23.3"
+package_version = "0.23.4"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13835,7 +13835,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
-package_version = "1.4.0"
+package_version = "1.4.1"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -14633,7 +14633,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "security-framework-sys"
-package_version = "2.9.1"
+package_version = "2.10.0"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16638,7 +16638,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.55"
+package_version = "2.0.57"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -18255,7 +18255,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "tokio"
-package_version = "1.36.0"
+package_version = "1.37.0"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
