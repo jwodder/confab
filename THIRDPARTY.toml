@@ -3,6 +3,7 @@ root_name = "confab"
 [[third_party_libraries]]
 package_name = "addr2line"
 package_version = "0.21.0"
+repository = "https://github.com/gimli-rs/addr2line"
 license = "Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -244,6 +245,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "adler"
 package_version = "1.0.2"
+repository = "https://github.com/jonas-schievink/adler.git"
 license = "0BSD OR MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -500,6 +502,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "anstyle"
 package_version = "1.0.6"
+repository = "https://github.com/rust-cli/anstyle.git"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -736,6 +739,7 @@ text = """
 [[third_party_libraries]]
 package_name = "anyhow"
 package_version = "1.0.81"
+repository = "https://github.com/dtolnay/anyhow"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -950,6 +954,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "async-stream"
 package_version = "0.3.5"
+repository = "https://github.com/tokio-rs/async-stream"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -1011,6 +1016,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "async-stream-impl"
 package_version = "0.3.5"
+repository = "https://github.com/tokio-rs/async-stream"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -1072,6 +1078,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "backtrace"
 package_version = "0.3.71"
+repository = "https://github.com/rust-lang/backtrace-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1313,6 +1320,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "base64"
 package_version = "0.21.7"
+repository = "https://github.com/marshallpierce/rust-base64"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1550,6 +1558,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "bitflags"
 package_version = "1.3.2"
+repository = "https://github.com/bitflags/bitflags"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -1791,6 +1800,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "bitflags"
 package_version = "2.4.1"
+repository = "https://github.com/bitflags/bitflags"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2032,6 +2042,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "bytes"
 package_version = "1.6.0"
+repository = "https://github.com/tokio-rs/bytes"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -2067,6 +2078,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "cfg-if"
 package_version = "1.0.0"
+repository = "https://github.com/alexcrichton/cfg-if"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2308,6 +2320,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "clap"
 package_version = "4.5.4"
+repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2544,6 +2557,7 @@ text = """
 [[third_party_libraries]]
 package_name = "clap_builder"
 package_version = "4.5.2"
+repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -2781,6 +2795,7 @@ text = """
 [[third_party_libraries]]
 package_name = "clap_derive"
 package_version = "4.5.4"
+repository = "https://github.com/clap-rs/clap/tree/master/clap_derive"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -3018,6 +3033,7 @@ text = """
 [[third_party_libraries]]
 package_name = "clap_lex"
 package_version = "0.7.0"
+repository = "https://github.com/clap-rs/clap/tree/master/clap_lex"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -3255,6 +3271,7 @@ text = """
 [[third_party_libraries]]
 package_name = "core-foundation"
 package_version = "0.9.4"
+repository = "https://github.com/servo/core-foundation-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -3496,6 +3513,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "core-foundation-sys"
 package_version = "0.8.6"
+repository = "https://github.com/servo/core-foundation-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -3737,6 +3755,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "crossterm"
 package_version = "0.27.0"
+repository = "https://github.com/crossterm-rs/crossterm"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -3768,6 +3787,7 @@ SOFTWARE.\r
 [[third_party_libraries]]
 package_name = "crossterm_winapi"
 package_version = "0.9.1"
+repository = "https://github.com/crossterm-rs/crossterm-winapi"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -3799,6 +3819,7 @@ SOFTWARE.\r
 [[third_party_libraries]]
 package_name = "deranged"
 package_version = "0.3.11"
+repository = "https://github.com/jhpratt/deranged"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -4035,6 +4056,7 @@ text = """
 [[third_party_libraries]]
 package_name = "either"
 package_version = "1.10.0"
+repository = "https://github.com/rayon-rs/either"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -4276,6 +4298,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "errno"
 package_version = "0.3.8"
+repository = "https://github.com/lambda-fairy/rust-errno"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -4517,6 +4540,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "futures-channel"
 package_version = "0.3.30"
+repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -4760,6 +4784,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "futures-core"
 package_version = "0.3.30"
+repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5003,6 +5028,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "futures-io"
 package_version = "0.3.30"
+repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5246,6 +5272,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "futures-macro"
 package_version = "0.3.30"
+repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5489,6 +5516,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "futures-sink"
 package_version = "0.3.30"
+repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5732,6 +5760,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "futures-task"
 package_version = "0.3.30"
+repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -5975,6 +6004,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "futures-util"
 package_version = "0.3.30"
+repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -6218,6 +6248,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "getrandom"
 package_version = "0.2.12"
+repository = "https://github.com/rust-random/getrandom"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -6460,6 +6491,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "gimli"
 package_version = "0.28.1"
+repository = "https://github.com/gimli-rs/gimli"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -6701,6 +6733,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "heck"
 package_version = "0.5.0"
+repository = "https://github.com/withoutboats/heck"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -6942,6 +6975,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "itertools"
 package_version = "0.12.1"
+repository = "https://github.com/rust-itertools/itertools"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -7183,6 +7217,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "itoa"
 package_version = "1.0.11"
+repository = "https://github.com/dtolnay/itoa"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -7397,6 +7432,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "libc"
 package_version = "0.2.153"
+repository = "https://github.com/rust-lang/libc"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -7613,6 +7649,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "linux-raw-sys"
 package_version = "0.4.12"
+repository = "https://github.com/sunfishcode/linux-raw-sys"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -8077,6 +8114,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "lock_api"
 package_version = "0.4.11"
+repository = "https://github.com/Amanieu/parking_lot"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8318,6 +8356,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "log"
 package_version = "0.4.21"
+repository = "https://github.com/rust-lang/log"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8559,6 +8598,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "memchr"
 package_version = "2.7.2"
+repository = "https://github.com/BurntSushi/memchr"
 license = "Unlicense OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -8619,6 +8659,7 @@ THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "miniz_oxide"
 package_version = "0.7.2"
+repository = "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide"
 license = "MIT OR Zlib OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -8848,6 +8889,7 @@ text = """
 [[third_party_libraries]]
 package_name = "mio"
 package_version = "0.8.11"
+repository = "https://github.com/tokio-rs/mio"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -8877,6 +8919,7 @@ THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "num-conv"
 package_version = "0.1.0"
+repository = "https://github.com/jhpratt/num-conv"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -9113,6 +9156,7 @@ text = """
 [[third_party_libraries]]
 package_name = "num_threads"
 package_version = "0.1.7"
+repository = "https://github.com/jhpratt/num_threads"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -9349,6 +9393,7 @@ text = """
 [[third_party_libraries]]
 package_name = "object"
 package_version = "0.32.2"
+repository = "https://github.com/gimli-rs/object"
 license = "Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -9590,6 +9635,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "once_cell"
 package_version = "1.19.0"
+repository = "https://github.com/matklad/once_cell"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -9829,6 +9875,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "openssl-probe"
 package_version = "0.1.5"
+repository = "https://github.com/alexcrichton/openssl-probe"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -10070,6 +10117,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "parking_lot"
 package_version = "0.12.1"
+repository = "https://github.com/Amanieu/parking_lot"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -10311,6 +10359,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "parking_lot_core"
 package_version = "0.9.9"
+repository = "https://github.com/Amanieu/parking_lot"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -10552,6 +10601,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "pin-project"
 package_version = "1.1.5"
+repository = "https://github.com/taiki-e/pin-project"
 license = "Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -10767,6 +10817,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "pin-project-internal"
 package_version = "1.1.5"
+repository = "https://github.com/taiki-e/pin-project"
 license = "Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -10982,6 +11033,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "pin-project-lite"
 package_version = "0.2.14"
+repository = "https://github.com/taiki-e/pin-project-lite"
 license = "Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -11197,6 +11249,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "pin-utils"
 package_version = "0.1.0"
+repository = "https://github.com/rust-lang-nursery/pin-utils"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -11438,6 +11491,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "powerfmt"
 package_version = "0.2.0"
+repository = "https://github.com/jhpratt/powerfmt"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -11674,6 +11728,7 @@ text = """
 [[third_party_libraries]]
 package_name = "proc-macro2"
 package_version = "1.0.79"
+repository = "https://github.com/dtolnay/proc-macro2"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -11888,6 +11943,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "quote"
 package_version = "1.0.35"
+repository = "https://github.com/dtolnay/quote"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -12102,6 +12158,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "redox_syscall"
 package_version = "0.4.1"
+repository = "https://gitlab.redox-os.org/redox-os/syscall"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -12134,6 +12191,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "ring"
 package_version = "0.17.8"
+repository = "https://github.com/briansmith/ring"
 license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/LICENSE)"
 
 [[third_party_libraries.licenses]]
@@ -12348,6 +12406,7 @@ SOFTWARE.
 [[third_party_libraries]]
 package_name = "rustc-demangle"
 package_version = "0.1.23"
+repository = "https://github.com/alexcrichton/rustc-demangle"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -12589,6 +12648,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "rustix"
 package_version = "0.38.31"
+repository = "https://github.com/bytecodealliance/rustix"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13053,6 +13113,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "rustls"
 package_version = "0.23.4"
+repository = "https://github.com/rustls/rustls"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13314,6 +13375,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "rustls-native-certs"
 package_version = "0.7.0"
+repository = "https://github.com/rustls/rustls-native-certs"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13575,6 +13637,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "rustls-pemfile"
 package_version = "2.1.1"
+repository = "https://github.com/rustls/pemfile"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -13836,6 +13899,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
 package_version = "1.4.1"
+repository = "https://github.com/rustls/pki-types"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -14077,6 +14141,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "rustls-webpki"
 package_version = "0.102.2"
+repository = "https://github.com/rustls/webpki"
 license = "ISC"
 
 [[third_party_libraries.licenses]]
@@ -14106,6 +14171,7 @@ third-party/chromium/LICENSE.
 [[third_party_libraries]]
 package_name = "rustyline-async"
 package_version = "0.4.2"
+repository = "https://github.com/zyansheep/rustyline-async"
 license = "Unlicense"
 
 [[third_party_libraries.licenses]]
@@ -14140,6 +14206,7 @@ For more information, please refer to <https://unlicense.org>
 [[third_party_libraries]]
 package_name = "schannel"
 package_version = "0.1.23"
+repository = "https://github.com/steffengy/schannel-rs"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -14157,6 +14224,7 @@ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 [[third_party_libraries]]
 package_name = "scopeguard"
 package_version = "1.2.0"
+repository = "https://github.com/bluss/scopeguard"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -14398,6 +14466,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "security-framework"
 package_version = "2.9.2"
+repository = "https://github.com/kornelski/rust-security-framework"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -14634,6 +14703,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "security-framework-sys"
 package_version = "2.10.0"
+repository = "https://github.com/kornelski/rust-security-framework"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -14870,6 +14940,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "serde"
 package_version = "1.0.197"
+repository = "https://github.com/serde-rs/serde"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -15084,6 +15155,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "serde_derive"
 package_version = "1.0.197"
+repository = "https://github.com/serde-rs/serde"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -15298,6 +15370,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "signal-hook"
 package_version = "0.3.17"
+repository = "https://github.com/vorner/signal-hook"
 license = "Apache-2.0/MIT"
 
 [[third_party_libraries.licenses]]
@@ -15539,6 +15612,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "signal-hook-mio"
 package_version = "0.2.3"
+repository = "https://github.com/vorner/signal-hook"
 license = "Apache-2.0/MIT"
 
 [[third_party_libraries.licenses]]
@@ -15780,6 +15854,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "signal-hook-registry"
 package_version = "1.4.1"
+repository = "https://github.com/vorner/signal-hook"
 license = "Apache-2.0/MIT"
 
 [[third_party_libraries.licenses]]
@@ -16021,6 +16096,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "slab"
 package_version = "0.4.9"
+repository = "https://github.com/tokio-rs/slab"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -16056,6 +16132,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "smallvec"
 package_version = "1.13.2"
+repository = "https://github.com/servo/rust-smallvec"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16297,6 +16374,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "socket2"
 package_version = "0.5.5"
+repository = "https://github.com/rust-lang/socket2"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16538,6 +16616,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "spin"
 package_version = "0.9.8"
+repository = "https://github.com/mvdnes/spin-rs.git"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -16568,6 +16647,7 @@ SOFTWARE."""
 [[third_party_libraries]]
 package_name = "strsim"
 package_version = "0.11.0"
+repository = "https://github.com/rapidfuzz/strsim-rs"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -16601,6 +16681,7 @@ SOFTWARE.
 [[third_party_libraries]]
 package_name = "subtle"
 package_version = "2.5.0"
+repository = "https://github.com/dalek-cryptography/subtle"
 license = "BSD-3-Clause"
 
 [[third_party_libraries.licenses]]
@@ -16639,6 +16720,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 [[third_party_libraries]]
 package_name = "syn"
 package_version = "2.0.57"
+repository = "https://github.com/dtolnay/syn"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -16853,6 +16935,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "terminal_size"
 package_version = "0.3.0"
+repository = "https://github.com/eminence/terminal-size"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17089,6 +17172,7 @@ text = """
 [[third_party_libraries]]
 package_name = "thingbuf"
 package_version = "0.1.4"
+repository = "https://github.com/hawkw/thingbuf"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -17120,6 +17204,7 @@ SOFTWARE.
 [[third_party_libraries]]
 package_name = "thiserror"
 package_version = "1.0.58"
+repository = "https://github.com/dtolnay/thiserror"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17334,6 +17419,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "thiserror-impl"
 package_version = "1.0.58"
+repository = "https://github.com/dtolnay/thiserror"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17548,6 +17634,7 @@ END OF TERMS AND CONDITIONS
 [[third_party_libraries]]
 package_name = "time"
 package_version = "0.3.34"
+repository = "https://github.com/time-rs/time"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -17784,6 +17871,7 @@ text = """
 [[third_party_libraries]]
 package_name = "time-core"
 package_version = "0.1.2"
+repository = "https://github.com/time-rs/time"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -18020,6 +18108,7 @@ text = """
 [[third_party_libraries]]
 package_name = "time-macros"
 package_version = "0.2.17"
+repository = "https://github.com/time-rs/time"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -18256,6 +18345,7 @@ text = """
 [[third_party_libraries]]
 package_name = "tokio"
 package_version = "1.37.0"
+repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -18291,6 +18381,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "tokio-macros"
 package_version = "2.2.0"
+repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -18348,6 +18439,7 @@ SOFTWARE.
 [[third_party_libraries]]
 package_name = "tokio-rustls"
 package_version = "0.26.0"
+repository = "https://github.com/rustls/tokio-rustls"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -18589,6 +18681,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "tokio-util"
 package_version = "0.7.10"
+repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -18624,6 +18717,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "tracing"
 package_version = "0.1.40"
+repository = "https://github.com/tokio-rs/tracing"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -18659,6 +18753,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "tracing-core"
 package_version = "0.1.32"
+repository = "https://github.com/tokio-rs/tracing"
 license = "MIT"
 
 [[third_party_libraries.licenses]]
@@ -18694,6 +18789,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "unicode-general-category"
 package_version = "0.6.0"
+repository = "https://github.com/yeslogic/unicode-general-category"
 license = "Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -18905,6 +19001,7 @@ text = """
 [[third_party_libraries]]
 package_name = "unicode-ident"
 package_version = "1.0.12"
+repository = "https://github.com/dtolnay/unicode-ident"
 license = "(MIT OR Apache-2.0) AND Unicode-DFS-2016"
 
 [[third_party_libraries.licenses]]
@@ -19170,6 +19267,7 @@ written authorization of the copyright holder.
 [[third_party_libraries]]
 package_name = "unicode-segmentation"
 package_version = "1.11.0"
+repository = "https://github.com/unicode-rs/unicode-segmentation"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -19411,6 +19509,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "unicode-width"
 package_version = "0.1.11"
+repository = "https://github.com/unicode-rs/unicode-width"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -19652,6 +19751,7 @@ limitations under the License.
 [[third_party_libraries]]
 package_name = "untrusted"
 package_version = "0.9.0"
+repository = "https://github.com/briansmith/untrusted"
 license = "ISC"
 
 [[third_party_libraries.licenses]]
@@ -19675,6 +19775,7 @@ text = """
 [[third_party_libraries]]
 package_name = "wasi"
 package_version = "0.11.0+wasi-snapshot-preview1"
+repository = "https://github.com/bytecodealliance/wasi"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
@@ -20139,6 +20240,7 @@ DEALINGS IN THE SOFTWARE.
 [[third_party_libraries]]
 package_name = "winapi"
 package_version = "0.3.9"
+repository = "https://github.com/retep998/winapi-rs"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -20374,6 +20476,7 @@ text = """
 [[third_party_libraries]]
 package_name = "winapi-i686-pc-windows-gnu"
 package_version = "0.4.0"
+repository = "https://github.com/retep998/winapi-rs"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -20609,6 +20712,7 @@ text = """
 [[third_party_libraries]]
 package_name = "winapi-x86_64-pc-windows-gnu"
 package_version = "0.4.0"
+repository = "https://github.com/retep998/winapi-rs"
 license = "MIT/Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -20844,6 +20948,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows-sys"
 package_version = "0.48.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -21081,6 +21186,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows-sys"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -21318,6 +21424,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows-targets"
 package_version = "0.48.5"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -21555,6 +21662,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows-targets"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -21792,6 +21900,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_aarch64_gnullvm"
 package_version = "0.48.5"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -22029,6 +22138,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_aarch64_gnullvm"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -22266,6 +22376,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_aarch64_msvc"
 package_version = "0.48.5"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -22503,6 +22614,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_aarch64_msvc"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -22740,6 +22852,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_i686_gnu"
 package_version = "0.48.5"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -22977,6 +23090,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_i686_gnu"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -23214,6 +23328,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_i686_msvc"
 package_version = "0.48.5"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -23451,6 +23566,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_i686_msvc"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -23688,6 +23804,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_x86_64_gnu"
 package_version = "0.48.5"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -23925,6 +24042,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_x86_64_gnu"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -24162,6 +24280,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_x86_64_gnullvm"
 package_version = "0.48.5"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -24399,6 +24518,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_x86_64_gnullvm"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -24636,6 +24756,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_x86_64_msvc"
 package_version = "0.48.5"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -24873,6 +24994,7 @@ text = """
 [[third_party_libraries]]
 package_name = "windows_x86_64_msvc"
 package_version = "0.52.0"
+repository = "https://github.com/microsoft/windows-rs"
 license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
@@ -25110,6 +25232,7 @@ text = """
 [[third_party_libraries]]
 package_name = "zeroize"
 package_version = "1.7.0"
+repository = "https://github.com/RustCrypto/utils/tree/master/zeroize"
 license = "Apache-2.0 OR MIT"
 
 [[third_party_libraries.licenses]]
