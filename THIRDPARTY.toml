@@ -1319,7 +1319,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "base64"
-package_version = "0.21.7"
+package_version = "0.22.0"
 repository = "https://github.com/marshallpierce/rust-base64"
 license = "MIT OR Apache-2.0"
 
@@ -6247,7 +6247,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "getrandom"
-package_version = "0.2.12"
+package_version = "0.2.13"
 repository = "https://github.com/rust-random/getrandom"
 license = "MIT OR Apache-2.0"
 
@@ -13636,7 +13636,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pemfile"
-package_version = "2.1.1"
+package_version = "2.1.2"
 repository = "https://github.com/rustls/pemfile"
 license = "Apache-2.0 OR ISC OR MIT"
 
@@ -14465,7 +14465,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "security-framework"
-package_version = "2.9.2"
+package_version = "2.10.0"
 repository = "https://github.com/kornelski/rust-security-framework"
 license = "MIT OR Apache-2.0"
 
@@ -16646,7 +16646,7 @@ SOFTWARE."""
 
 [[third_party_libraries]]
 package_name = "strsim"
-package_version = "0.11.0"
+package_version = "0.11.1"
 repository = "https://github.com/rapidfuzz/strsim-rs"
 license = "MIT"
 
@@ -16719,7 +16719,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.57"
+package_version = "2.0.58"
 repository = "https://github.com/dtolnay/syn"
 license = "MIT OR Apache-2.0"
 
@@ -17171,7 +17171,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "thingbuf"
-package_version = "0.1.4"
+package_version = "0.1.5"
 repository = "https://github.com/hawkw/thingbuf"
 license = "MIT"
 
