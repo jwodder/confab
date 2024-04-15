@@ -738,7 +738,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "anyhow"
-package_version = "1.0.81"
+package_version = "1.0.82"
 repository = "https://github.com/dtolnay/anyhow"
 license = "MIT OR Apache-2.0"
 
@@ -4055,7 +4055,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "either"
-package_version = "1.10.0"
+package_version = "1.11.0"
 repository = "https://github.com/rayon-rs/either"
 license = "MIT OR Apache-2.0"
 
@@ -6247,7 +6247,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "getrandom"
-package_version = "0.2.13"
+package_version = "0.2.14"
 repository = "https://github.com/rust-random/getrandom"
 license = "MIT OR Apache-2.0"
 
@@ -11727,7 +11727,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.79"
+package_version = "1.0.80"
 repository = "https://github.com/dtolnay/proc-macro2"
 license = "MIT OR Apache-2.0"
 
@@ -11942,7 +11942,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "quote"
-package_version = "1.0.35"
+package_version = "1.0.36"
 repository = "https://github.com/dtolnay/quote"
 license = "MIT OR Apache-2.0"
 
@@ -16719,7 +16719,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.58"
+package_version = "2.0.59"
 repository = "https://github.com/dtolnay/syn"
 license = "MIT OR Apache-2.0"
 
@@ -17633,7 +17633,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "time"
-package_version = "0.3.34"
+package_version = "0.3.36"
 repository = "https://github.com/time-rs/time"
 license = "MIT OR Apache-2.0"
 
@@ -18107,7 +18107,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "time-macros"
-package_version = "0.2.17"
+package_version = "0.2.18"
 repository = "https://github.com/time-rs/time"
 license = "MIT OR Apache-2.0"
 
