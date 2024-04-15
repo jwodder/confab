@@ -13,7 +13,7 @@ categories = ["command-line-utilities", "network-programming"]
 exclude = ["/.*"]
 
 [dependencies]
-anyhow = "1.0.81"
+anyhow = "1.0.82"
 async-stream = "0.3.5"
 bytes = "1.6.0"
 cfg-if = "1.0.0"
@@ -26,7 +26,7 @@ rustls-native-certs = { version = "0.7.0", optional = true }
 rustls-pki-types = { version = "1.4.1", optional = true }
 rustyline-async = "0.4.2"
 thiserror = "1.0.58"
-time = { version = "0.3.34", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
+time = { version = "0.3.36", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
 tokio = { version = "1.37.0", features = ["fs", "io-util", "macros", "net", "rt", "time"] }
 tokio-native-tls = { version = "0.3.1", optional = true }
 tokio-rustls = { version = "0.26.0", optional = true, default-features = false, features = ["ring", "tls12"] }
@@ -37,20 +37,20 @@ unicode-general-category = "0.6.0"
 assert_matches = "1.5.0"
 expectrl = { version = "0.7.1", features = ["async"] }
 regex = "1.10.4"
-rstest = { version = "0.18.2", default-features = false }
+rstest = { version = "0.19.0", default-features = false }
 serde = { version = "1.0.197", features = ["derive"] }
 serde-jsonlines = "0.5.0"
 serde_json = "1.0.115"
 tempfile = "3.10.1"
-time = { version = "0.3.34", default-features = false, features = ["serde", "parsing"] }
+time = { version = "0.3.36", default-features = false, features = ["serde", "parsing"] }
 tokio = { version = "1.37.0", features = ["sync"] }
 tokio-stream = { version = "0.1.15", features = ["time"] }
 
 [build-dependencies]
-anyhow = "1.0.81"
+anyhow = "1.0.82"
 cargo_metadata = "0.18.1"
 semver = "1.0.22"
-time = { version = "0.3.34", default-features = false, features = ["std", "formatting"] }
+time = { version = "0.3.36", default-features = false, features = ["std", "formatting"] }
 
 [features]
 default = ["rustls"]
