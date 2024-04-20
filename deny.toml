@@ -1,3 +1,4 @@
+[graph]
 targets = []
 all-features = true
 no-default-features = false
