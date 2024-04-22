@@ -15853,7 +15853,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "signal-hook-registry"
-package_version = "1.4.1"
+package_version = "1.4.2"
 repository = "https://github.com/vorner/signal-hook"
 license = "Apache-2.0/MIT"
 
@@ -17203,7 +17203,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "thiserror"
-package_version = "1.0.58"
+package_version = "1.0.59"
 repository = "https://github.com/dtolnay/thiserror"
 license = "MIT OR Apache-2.0"
 
@@ -17418,7 +17418,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "thiserror-impl"
-package_version = "1.0.58"
+package_version = "1.0.59"
 repository = "https://github.com/dtolnay/thiserror"
 license = "MIT OR Apache-2.0"
 
