@@ -8113,7 +8113,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "lock_api"
-package_version = "0.4.11"
+package_version = "0.4.12"
 repository = "https://github.com/Amanieu/parking_lot"
 license = "MIT OR Apache-2.0"
 
@@ -10116,7 +10116,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "parking_lot"
-package_version = "0.12.1"
+package_version = "0.12.2"
 repository = "https://github.com/Amanieu/parking_lot"
 license = "MIT OR Apache-2.0"
 
@@ -10358,7 +10358,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "parking_lot_core"
-package_version = "0.9.9"
+package_version = "0.9.10"
 repository = "https://github.com/Amanieu/parking_lot"
 license = "MIT OR Apache-2.0"
 
@@ -12157,7 +12157,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "redox_syscall"
-package_version = "0.4.1"
+package_version = "0.5.1"
 repository = "https://gitlab.redox-os.org/redox-os/syscall"
 license = "MIT"
 
@@ -13898,7 +13898,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
-package_version = "1.4.1"
+package_version = "1.5.0"
 repository = "https://github.com/rustls/pki-types"
 license = "MIT OR Apache-2.0"
 
@@ -14140,7 +14140,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "rustls-webpki"
-package_version = "0.102.2"
+package_version = "0.102.3"
 repository = "https://github.com/rustls/webpki"
 license = "ISC"
 
@@ -14939,7 +14939,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "serde"
-package_version = "1.0.198"
+package_version = "1.0.199"
 repository = "https://github.com/serde-rs/serde"
 license = "MIT OR Apache-2.0"
 
@@ -15154,7 +15154,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "serde_derive"
-package_version = "1.0.198"
+package_version = "1.0.199"
 repository = "https://github.com/serde-rs/serde"
 license = "MIT OR Apache-2.0"
 
@@ -19508,9 +19508,9 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "unicode-width"
-package_version = "0.1.11"
+package_version = "0.1.12"
 repository = "https://github.com/unicode-rs/unicode-width"
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 
 [[third_party_libraries.licenses]]
 license = "MIT"
