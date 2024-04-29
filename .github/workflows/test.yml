@@ -156,7 +156,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install cargo-bundle-licenses
-        uses: taiki-e/cache-cargo-install-action@v1
+        uses: taiki-e/cache-cargo-install-action@v2
         with:
           tool: cargo-bundle-licenses
 
