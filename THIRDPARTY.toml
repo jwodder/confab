@@ -501,7 +501,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "anstyle"
-package_version = "1.0.6"
+package_version = "1.0.7"
 repository = "https://github.com/rust-cli/anstyle.git"
 license = "MIT OR Apache-2.0"
 
@@ -1319,7 +1319,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "base64"
-package_version = "0.22.0"
+package_version = "0.22.1"
 repository = "https://github.com/marshallpierce/rust-base64"
 license = "MIT OR Apache-2.0"
 
@@ -7431,7 +7431,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.153"
+package_version = "0.2.154"
 repository = "https://github.com/rust-lang/libc"
 license = "MIT OR Apache-2.0"
 
@@ -14702,7 +14702,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "security-framework-sys"
-package_version = "2.10.0"
+package_version = "2.11.0"
 repository = "https://github.com/kornelski/rust-security-framework"
 license = "MIT OR Apache-2.0"
 
@@ -14939,7 +14939,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "serde"
-package_version = "1.0.199"
+package_version = "1.0.200"
 repository = "https://github.com/serde-rs/serde"
 license = "MIT OR Apache-2.0"
 
@@ -15154,7 +15154,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "serde_derive"
-package_version = "1.0.199"
+package_version = "1.0.200"
 repository = "https://github.com/serde-rs/serde"
 license = "MIT OR Apache-2.0"
 
@@ -18680,7 +18680,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "tokio-util"
-package_version = "0.7.10"
+package_version = "0.7.11"
 repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
@@ -18688,78 +18688,6 @@ license = "MIT"
 license = "MIT"
 text = """
 Copyright (c) 2023 Tokio Contributors
-
-Permission is hereby granted, free of charge, to any
-person obtaining a copy of this software and associated
-documentation files (the \"Software\"), to deal in the
-Software without restriction, including without
-limitation the rights to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software
-is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice
-shall be included in all copies or substantial portions
-of the Software.
-
-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF
-ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
-
-[[third_party_libraries]]
-package_name = "tracing"
-package_version = "0.1.40"
-repository = "https://github.com/tokio-rs/tracing"
-license = "MIT"
-
-[[third_party_libraries.licenses]]
-license = "MIT"
-text = """
-Copyright (c) 2019 Tokio Contributors
-
-Permission is hereby granted, free of charge, to any
-person obtaining a copy of this software and associated
-documentation files (the \"Software\"), to deal in the
-Software without restriction, including without
-limitation the rights to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software
-is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice
-shall be included in all copies or substantial portions
-of the Software.
-
-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF
-ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
-
-[[third_party_libraries]]
-package_name = "tracing-core"
-package_version = "0.1.32"
-repository = "https://github.com/tokio-rs/tracing"
-license = "MIT"
-
-[[third_party_libraries.licenses]]
-license = "MIT"
-text = """
-Copyright (c) 2019 Tokio Contributors
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
