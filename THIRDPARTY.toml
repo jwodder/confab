@@ -7431,7 +7431,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.154"
+package_version = "0.2.153"
 repository = "https://github.com/rust-lang/libc"
 license = "MIT OR Apache-2.0"
 
