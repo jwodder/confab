@@ -4,10 +4,7 @@ all-features = true
 no-default-features = false
 
 [advisories]
-db-path = "~/.cargo/advisory-db"
-notice = "warn"
-unmaintained = "warn"
-vulnerability = "deny"
+version = 2
 yanked = "deny"
 
 [bans]
@@ -15,11 +12,18 @@ multiple-versions = "allow"
 wildcards = "allow"
 
 [licenses]
-allow = []
-allow-osi-fsf-free = "either"
-copyleft = "deny"
-default = "deny"
-unlicensed = "deny"
+version = 2
+allow = [
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "OpenSSL",
+    "Unicode-DFS-2016",
+    "Unlicense",
+]
+unused-allowed-license = "allow"
 
 [[licenses.clarify]]
 name = "ring"
