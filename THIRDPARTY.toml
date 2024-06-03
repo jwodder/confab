@@ -6974,7 +6974,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "itertools"
-package_version = "0.12.1"
+package_version = "0.13.0"
 repository = "https://github.com/rust-itertools/itertools"
 license = "MIT OR Apache-2.0"
 
