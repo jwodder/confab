@@ -1,5 +1,5 @@
 use crossterm::style::{StyledContent, Stylize};
-use itertools::Itertools; // for group_by()
+use itertools::Itertools; // for chunk_by()
 use std::borrow::Cow;
 use std::fmt::{self, Display, Write};
 use std::str::FromStr;
@@ -149,7 +149,7 @@ pub(crate) fn latin1ify(s: String) -> String {
 
 pub(crate) fn display_vis(s: &str) -> Vec<StyledContent<String>> {
     s.chars()
-        .group_by(|c| needs_vis(*c))
+        .chunk_by(|c| needs_vis(*c))
         .into_iter()
         .map(|(v, cs)| {
             if v {
