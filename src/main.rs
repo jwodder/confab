@@ -156,6 +156,7 @@ async fn main() -> anyhow::Result<ExitCode> {
     }
 }
 
+#[allow(clippy::const_is_empty)] // Shut clippy up about FEATURES.is_empty()
 fn build_info() {
     use build::*;
     println!(
