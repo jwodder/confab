@@ -11915,7 +11915,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "redox_syscall"
-package_version = "0.5.2"
+package_version = "0.5.3"
 repository = "https://gitlab.redox-os.org/redox-os/syscall"
 license = "MIT"
 
@@ -14223,7 +14223,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "security-framework"
-package_version = "2.11.0"
+package_version = "2.11.1"
 repository = "https://github.com/kornelski/rust-security-framework"
 license = "MIT OR Apache-2.0"
 
@@ -14460,7 +14460,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "security-framework-sys"
-package_version = "2.11.0"
+package_version = "2.11.1"
 repository = "https://github.com/kornelski/rust-security-framework"
 license = "MIT OR Apache-2.0"
 
@@ -16478,7 +16478,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.71"
+package_version = "2.0.72"
 repository = "https://github.com/dtolnay/syn"
 license = "MIT OR Apache-2.0"
 
@@ -16962,7 +16962,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "thiserror"
-package_version = "1.0.62"
+package_version = "1.0.63"
 repository = "https://github.com/dtolnay/thiserror"
 license = "MIT OR Apache-2.0"
 
@@ -17177,7 +17177,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "thiserror-impl"
-package_version = "1.0.62"
+package_version = "1.0.63"
 repository = "https://github.com/dtolnay/thiserror"
 license = "MIT OR Apache-2.0"
 
@@ -18103,7 +18103,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "tokio"
-package_version = "1.38.0"
+package_version = "1.38.1"
 repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
