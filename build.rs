@@ -146,7 +146,7 @@ fn normal_dependencies<P: AsRef<Path>>(
     features: Vec<String>,
 ) -> anyhow::Result<Vec<(String, Version)>> {
     let metadata = MetadataCommand::new()
-        .manifest_path(&manifest_dir.as_ref().join("Cargo.toml"))
+        .manifest_path(manifest_dir.as_ref().join("Cargo.toml"))
         .features(CargoOpt::NoDefaultFeatures)
         .features(CargoOpt::SomeFeatures(features))
         .other_options(vec![format!("--filter-platform={target}")])
