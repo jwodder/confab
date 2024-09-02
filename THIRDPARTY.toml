@@ -13372,7 +13372,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-native-certs"
-package_version = "0.7.3"
+package_version = "0.8.0"
 repository = "https://github.com/rustls/rustls-native-certs"
 license = "Apache-2.0 OR ISC OR MIT"
 
