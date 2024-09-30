@@ -16718,7 +16718,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.77"
+package_version = "2.0.79"
 repository = "https://github.com/dtolnay/syn"
 license = "MIT OR Apache-2.0"
 
@@ -18898,7 +18898,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "unicode-ident"
-package_version = "1.0.12"
+package_version = "1.0.13"
 repository = "https://github.com/dtolnay/unicode-ident"
 license = "(MIT OR Apache-2.0) AND Unicode-DFS-2016"
 
