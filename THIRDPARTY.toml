@@ -4303,7 +4303,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-core"
-package_version = "0.3.30"
+package_version = "0.3.31"
 repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
@@ -4547,7 +4547,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-io"
-package_version = "0.3.30"
+package_version = "0.3.31"
 repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
@@ -4791,7 +4791,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-macro"
-package_version = "0.3.30"
+package_version = "0.3.31"
 repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
@@ -5035,7 +5035,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-sink"
-package_version = "0.3.30"
+package_version = "0.3.31"
 repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
@@ -5279,7 +5279,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-task"
-package_version = "0.3.30"
+package_version = "0.3.31"
 repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
@@ -5523,7 +5523,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "futures-util"
-package_version = "0.3.30"
+package_version = "0.3.31"
 repository = "https://github.com/rust-lang/futures-rs"
 license = "MIT OR Apache-2.0"
 
