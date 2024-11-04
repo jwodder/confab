@@ -31,7 +31,7 @@ tokio = { version = "1.37.0", features = ["fs", "io-util", "macros", "net", "rt"
 tokio-native-tls = { version = "0.3.1", optional = true }
 tokio-rustls = { version = "0.26.0", optional = true, default-features = false, features = ["ring", "tls12"] }
 tokio-util = { version = "0.7.11", features = ["codec"] }
-unicode-general-category = "0.6.0"
+unicode-general-category = "1.0.0"
 
 [dev-dependencies]
 assert_matches = "1.5.0"
