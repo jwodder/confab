@@ -18444,7 +18444,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "unicode-general-category"
-package_version = "0.6.0"
+package_version = "1.0.0"
 repository = "https://github.com/yeslogic/unicode-general-category"
 license = "Apache-2.0"
 
