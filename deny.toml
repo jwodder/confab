@@ -6,7 +6,10 @@ no-default-features = false
 [advisories]
 version = 2
 yanked = "deny"
-ignore = ["RUSTSEC-2024-0384"]  # Can't do anything about this
+ignore = [  # Can't do anything about these
+    "RUSTSEC-2024-0384",
+    "RUSTSEC-2024-0399",
+]
 
 [bans]
 multiple-versions = "allow"
