@@ -1,7 +1,7 @@
 v0.4.0 (in development)
 -----------------------
 - Remove unintended "openssl" feature
-- Increased MSRV to 1.74
+- Increased MSRV to 1.78
 
 v0.3.1 (2023-12-13)
 -------------------
