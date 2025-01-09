@@ -153,7 +153,7 @@ fn normal_dependencies<P: AsRef<Path>>(
         .exec()
         .context("failed to get Cargo metadata")?;
     let Some(root_id) = metadata.workspace_members.iter().find(|pkgid| {
-        package_by_id(&metadata.packages, pkgid).map_or(false, |pkg| pkg.name == package)
+        package_by_id(&metadata.packages, pkgid).is_ok_and(|pkg| pkg.name == package)
     }) else {
         bail!("Package {package} not found in metadata");
     };
