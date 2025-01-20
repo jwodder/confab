@@ -39,7 +39,7 @@ expectrl = { version = "0.7.1", features = ["async"] }
 regex = "1.10.6"
 rstest = { version = "0.24.0", default-features = false }
 serde = { version = "1.0.200", features = ["derive"] }
-serde-jsonlines = "0.6.0"
+serde-jsonlines = "0.7.0"
 serde_json = "1.0.118"
 tempfile = "3.10.1"
 time = { version = "0.3.36", default-features = false, features = ["serde", "parsing"] }
