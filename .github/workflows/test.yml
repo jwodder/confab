@@ -67,11 +67,18 @@ jobs:
         uses: taiki-e/install-action@cargo-hack
 
       - name: Build crate
-        run: cargo build --all-targets --verbose
+        run: |
+          cargo hack \
+            --workspace \
+            --each-feature \
+            --exclude-no-default-features \
+            --exclude-all-features ${{ matrix.exclude }} \
+            build --all-targets --verbose
 
       - name: Test crate
         run: |
           cargo hack \
+            --workspace \
             --each-feature \
             --exclude-no-default-features \
             --exclude-all-features ${{ matrix.exclude }} \
@@ -101,12 +108,19 @@ jobs:
         with:
           tool: cargo-hack,cargo-minimal-versions
 
-      - name: Build crate
-        run: cargo minimal-versions --direct build --all-targets --verbose
+      - name: Test crate
+        run: |
+          cargo minimal-versions --direct \
+            --workspace \
+            --each-feature \
+            --exclude-no-default-features \
+            --exclude-all-features \
+            build --all-targets --verbose
 
       - name: Test crate
         run: |
           cargo minimal-versions --direct \
+            --workspace \
             --each-feature \
             --exclude-no-default-features \
             --exclude-all-features \
@@ -136,7 +150,7 @@ jobs:
           tool: cargo-llvm-cov
 
       - name: Test with coverage
-        run: cargo llvm-cov --all-features --lcov --output-path lcov.info
+        run: cargo llvm-cov --workspace --all-features --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -167,13 +181,23 @@ jobs:
       - name: Check code
         run: |
           cargo hack \
+            --workspace \
             --each-feature \
             --exclude-no-default-features \
             --exclude-all-features \
-            clippy --all-targets -- -Dwarnings
+            clippy -- -Dwarnings
+
+      - name: Check tests & examples
+        run: |
+          cargo hack \
+            --workspace \
+            --each-feature \
+            --exclude-no-default-features \
+            --exclude-all-features \
+            clippy --tests --examples -- -Dwarnings
 
       - name: Check formatting
-        run: cargo fmt --check
+        run: cargo fmt --all --check
 
   deny:
     runs-on: ubuntu-latest
