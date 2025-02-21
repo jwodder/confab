@@ -56,7 +56,6 @@ impl Runner {
         self.reporter.set_writer(Box::new(shared));
         let r = ioloop(&mut frame, readline_stream(&mut rl), &mut self.reporter)
             .await
-            .map_err(IoError::from)
             .and_then(|_| {
                 self.reporter
                     .report(Event::disconnect())
