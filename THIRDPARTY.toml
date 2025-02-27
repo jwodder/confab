@@ -11468,10 +11468,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package_name = "ring"
 package_version = "0.17.8"
 repository = "https://github.com/briansmith/ring"
-license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/LICENSE)"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-1949cf8c6b5b557f/ring-0.17.8/LICENSE)"
 
 [[third_party_libraries.licenses]]
-license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/LICENSE)"
+license = "License specified in file ($CARGO_HOME/registry/src/index.crates.io-1949cf8c6b5b557f/ring-0.17.8/LICENSE)"
 text = """
 Note that it is easy for this file to get out of sync with the licenses in the
 source code files. It's recommended to compare the licenses in the source code
