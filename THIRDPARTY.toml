@@ -3338,7 +3338,7 @@ SOFTWARE.\r
 
 [[third_party_libraries]]
 package_name = "deranged"
-package_version = "0.4.1"
+package_version = "0.4.0"
 repository = "https://github.com/jhpratt/deranged"
 license = "MIT OR Apache-2.0"
 
