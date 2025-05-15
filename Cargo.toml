@@ -18,7 +18,7 @@ async-stream = "0.3.5"
 bytes = "1.6.0"
 cfg-if = "1.0.0"
 clap = { version = "4.5.4", default-features = false, features = ["derive", "error-context", "help", "std", "suggestions", "usage", "wrap_help"] }
-crossterm = "0.28.1"
+crossterm = "0.29.0"
 futures-util = { version = "0.3.31", default-features = false, features = ["sink"] }
 itertools = "0.14.0"
 pin-project-lite = "0.2.14"
