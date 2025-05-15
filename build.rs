@@ -11,9 +11,9 @@ use time::format_description::well_known::Rfc3339;
 use time::OffsetDateTime;
 
 fn main() -> anyhow::Result<()> {
-    println!("cargo:rerun-if-changed=Cargo.lock");
-    println!("cargo:rerun-if-changed=.git/HEAD");
-    println!("cargo:rerun-if-changed=.git/refs");
+    println!("cargo::rerun-if-changed=Cargo.lock");
+    println!("cargo::rerun-if-changed=.git/HEAD");
+    println!("cargo::rerun-if-changed=.git/refs");
 
     let manifest_dir = getenv("CARGO_MANIFEST_DIR")?;
     let out_dir = getenv("OUT_DIR")?;
