@@ -738,7 +738,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "anyhow"
-package_version = "1.0.97"
+package_version = "1.0.98"
 repository = "https://github.com/dtolnay/anyhow"
 license = "MIT OR Apache-2.0"
 
@@ -1077,7 +1077,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "backtrace"
-package_version = "0.3.74"
+package_version = "0.3.75"
 repository = "https://github.com/rust-lang/backtrace-rs"
 license = "MIT OR Apache-2.0"
 
@@ -1319,7 +1319,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "bitflags"
-package_version = "2.9.0"
+package_version = "2.9.1"
 repository = "https://github.com/bitflags/bitflags"
 license = "MIT OR Apache-2.0"
 
@@ -1839,7 +1839,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.5.34"
+package_version = "4.5.38"
 repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
@@ -2076,7 +2076,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.5.34"
+package_version = "4.5.38"
 repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
@@ -4020,7 +4020,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "errno"
-package_version = "0.3.10"
+package_version = "0.3.12"
 repository = "https://github.com/lambda-fairy/rust-errno"
 license = "MIT OR Apache-2.0"
 
@@ -5726,7 +5726,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "getrandom"
-package_version = "0.2.15"
+package_version = "0.2.16"
 repository = "https://github.com/rust-random/getrandom"
 license = "MIT OR Apache-2.0"
 
@@ -6910,7 +6910,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.171"
+package_version = "0.2.172"
 repository = "https://github.com/rust-lang/libc"
 license = "MIT OR Apache-2.0"
 
@@ -7127,7 +7127,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "linux-raw-sys"
-package_version = "0.9.3"
+package_version = "0.9.4"
 repository = "https://github.com/sunfishcode/linux-raw-sys"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
@@ -8354,7 +8354,7 @@ THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "miniz_oxide"
-package_version = "0.8.5"
+package_version = "0.8.8"
 repository = "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide"
 license = "MIT OR Zlib OR Apache-2.0"
 
@@ -11429,7 +11429,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "proc-macro2"
-package_version = "1.0.94"
+package_version = "1.0.95"
 repository = "https://github.com/dtolnay/proc-macro2"
 license = "MIT OR Apache-2.0"
 
@@ -11859,7 +11859,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "redox_syscall"
-package_version = "0.5.10"
+package_version = "0.5.12"
 repository = "https://gitlab.redox-os.org/redox-os/syscall"
 license = "MIT"
 
@@ -12168,7 +12168,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "rustix"
-package_version = "1.0.3"
+package_version = "1.0.7"
 repository = "https://github.com/bytecodealliance/rustix"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
@@ -12633,7 +12633,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls"
-package_version = "0.23.25"
+package_version = "0.23.27"
 repository = "https://github.com/rustls/rustls"
 license = "Apache-2.0 OR ISC OR MIT"
 
@@ -13157,7 +13157,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
-package_version = "1.11.0"
+package_version = "1.12.0"
 repository = "https://github.com/rustls/pki-types"
 license = "MIT OR Apache-2.0"
 
@@ -13399,7 +13399,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "rustls-webpki"
-package_version = "0.103.1"
+package_version = "0.103.3"
 repository = "https://github.com/rustls/webpki"
 license = "ISC"
 
@@ -14628,7 +14628,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "signal-hook"
-package_version = "0.3.17"
+package_version = "0.3.18"
 repository = "https://github.com/vorner/signal-hook"
 license = "Apache-2.0/MIT"
 
@@ -15112,7 +15112,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "signal-hook-registry"
-package_version = "1.4.2"
+package_version = "1.4.5"
 repository = "https://github.com/vorner/signal-hook"
 license = "Apache-2.0/MIT"
 
@@ -15390,7 +15390,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "smallvec"
-package_version = "1.14.0"
+package_version = "1.15.0"
 repository = "https://github.com/servo/rust-smallvec"
 license = "MIT OR Apache-2.0"
 
@@ -15948,7 +15948,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "2.0.100"
+package_version = "2.0.101"
 repository = "https://github.com/dtolnay/syn"
 license = "MIT OR Apache-2.0"
 
@@ -17498,7 +17498,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "tokio"
-package_version = "1.44.2"
+package_version = "1.45.0"
 repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
@@ -17805,7 +17805,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "tokio-util"
-package_version = "0.7.14"
+package_version = "0.7.15"
 repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
