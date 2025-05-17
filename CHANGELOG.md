@@ -1,5 +1,5 @@
-v0.3.2 (in development)
------------------------
+v0.3.2 (2025-05-17)
+-------------------
 - Remove unintended "openssl" feature
 - Increased MSRV to 1.80
 - Linux release artifacts are now built on Ubuntu 22.04 (up from Ubuntu 20.04),
