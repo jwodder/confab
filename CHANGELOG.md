@@ -6,6 +6,7 @@ v0.3.2 (in development)
   which may result in a more recent glibc being required
 - The sending halves of TCP connections are now explicitly shut down when
   disconnecting
+- Provide release assets for aarch64-unknown-linux-gnu
 
 v0.3.1 (2023-12-13)
 -------------------
