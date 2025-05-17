@@ -44,6 +44,9 @@ impl Runner {
         if let Some(script) = self.startup_script.take() {
             let cs = ioloop(&mut frame, script, &mut self.reporter).await?;
             if cs == ConnectState::Closed {
+                SinkExt::<&str>::close(&mut frame)
+                    .await
+                    .map_err(InetError::Close)?;
                 self.reporter.report(Event::disconnect())?;
                 return Ok(());
             }
@@ -61,6 +64,9 @@ impl Runner {
                     .report(Event::disconnect())
                     .map_err(IoError::from)
             });
+        SinkExt::<&str>::close(&mut frame)
+            .await
+            .map_err(InetError::Close)?;
         let _ = rl.flush();
         // Set the writer back to stdout so that errors reported by run() will
         // show up without having to call rl.flush().
