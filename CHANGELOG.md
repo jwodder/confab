@@ -1,9 +1,11 @@
-v0.4.0 (in development)
+v0.3.2 (in development)
 -----------------------
 - Remove unintended "openssl" feature
 - Increased MSRV to 1.80
 - Linux release artifacts are now built on Ubuntu 22.04 (up from Ubuntu 20.04),
   which may result in a more recent glibc being required
+- The sending halves of TCP connections are now explicitly shut down when
+  disconnecting
 
 v0.3.1 (2023-12-13)
 -------------------
