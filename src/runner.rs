@@ -13,8 +13,6 @@ use std::process::ExitCode;
 use tokio::net::TcpStream;
 use tokio_util::{codec::Framed, either::Either};
 
-type Connection = Framed<Either<TcpStream, tls::TlsStream>, ConfabCodec>;
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum ConnectState {
     Open,
@@ -42,8 +40,14 @@ impl Runner {
     async fn try_run(&mut self) -> Result<(), IoError> {
         let mut frame = self.connector.connect(&mut self.reporter).await?;
         if let Some(script) = self.startup_script.take() {
-            let cs = ioloop(&mut frame, script, &mut self.reporter).await?;
-            if cs == ConnectState::Closed {
+            let r = ioloop(&mut frame, script, &mut self.reporter).await;
+            if let Err(e) = r {
+                // Don't bother to report closing errors if ioloop errored (but
+                // still close anyway)
+                let _ = frame.close().await;
+                return Err(e);
+            } else if r.is_ok_and(|cs| cs == ConnectState::Closed) {
+                frame.close().await?;
                 self.reporter.report(Event::disconnect())?;
                 return Ok(());
             }
@@ -54,13 +58,21 @@ impl Runner {
         // written before we start getting input from the user should be
         // written directly to stdout instead.
         self.reporter.set_writer(Box::new(shared));
-        let r = ioloop(&mut frame, readline_stream(&mut rl), &mut self.reporter)
+        let mut r = ioloop(&mut frame, readline_stream(&mut rl), &mut self.reporter)
             .await
-            .and_then(|_| {
-                self.reporter
-                    .report(Event::disconnect())
-                    .map_err(IoError::from)
-            });
+            .map(|_| ());
+        // Don't bother to report closing errors if ioloop errored (but still
+        // close anyway)
+        let r2 = frame.close().await.map_err(IoError::from);
+        if r.is_ok() {
+            r = r2;
+        }
+        if r.is_ok() {
+            r = self
+                .reporter
+                .report(Event::disconnect())
+                .map_err(IoError::from);
+        }
         let _ = rl.flush();
         // Set the writer back to stdout so that errors reported by run() will
         // show up without having to call rl.flush().
@@ -133,13 +145,34 @@ impl Connector {
         } else {
             Either::Left(conn)
         };
-        Ok(Framed::new(conn, self.codec()))
+        Ok(Connection(Framed::new(conn, self.codec())))
     }
 
     fn codec(&self) -> ConfabCodec {
         ConfabCodec::new_with_max_length(self.max_line_length.get())
             .encoding(self.encoding)
             .crlf(self.crlf)
+    }
+}
+
+#[derive(Debug)]
+struct Connection(Framed<Either<TcpStream, tls::TlsStream>, ConfabCodec>);
+
+impl Connection {
+    async fn recv(&mut self) -> Option<Result<String, InetError>> {
+        self.0.next().await.map(|r| r.map_err(InetError::Recv))
+    }
+
+    async fn send(&mut self, line: String) -> Result<String, InetError> {
+        let line = self.0.codec().prepare_line(line);
+        self.0.send(&line).await.map_err(InetError::Send)?;
+        Ok(line)
+    }
+
+    async fn close(&mut self) -> Result<(), InetError> {
+        SinkExt::<&str>::close(&mut self.0)
+            .await
+            .map_err(InetError::Close)
     }
 }
 
@@ -154,15 +187,14 @@ where
     tokio::pin!(input);
     loop {
         tokio::select! {
-            r = frame.next() => match r {
+            r = frame.recv() => match r {
                 Some(Ok(msg)) => reporter.report(Event::recv(msg))?,
-                Some(Err(e)) => return Err(IoError::Inet(InetError::Recv(e))),
+                Some(Err(e)) => return Err(e.into()),
                 None => return Ok(ConnectState::Closed),
             },
             r = input.next() => match r {
                 Some(Ok(Input::Line(line))) => {
-                    let line = frame.codec().prepare_line(line);
-                    frame.send(&line).await.map_err(InetError::Send)?;
+                    let line = frame.send(line).await?;
                     reporter.report(Event::send(line))?;
                 }
                 Some(Ok(Input::CtrlC)) => reporter.echo_ctrlc()?,

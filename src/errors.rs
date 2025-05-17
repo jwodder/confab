@@ -33,4 +33,6 @@ pub(crate) enum InetError {
     Send(#[source] io::Error),
     #[error("failed to receive line from server")]
     Recv(#[source] io::Error),
+    #[error("erroring closing connection")]
+    Close(#[source] io::Error),
 }
