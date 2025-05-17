@@ -40,8 +40,13 @@ impl Runner {
     async fn try_run(&mut self) -> Result<(), IoError> {
         let mut frame = self.connector.connect(&mut self.reporter).await?;
         if let Some(script) = self.startup_script.take() {
-            let cs = ioloop(&mut frame, script, &mut self.reporter).await?;
-            if cs == ConnectState::Closed {
+            let r = ioloop(&mut frame, script, &mut self.reporter).await;
+            if let Err(e) = r {
+                // Don't bother to report closing errors if ioloop errored (but
+                // still close anyway)
+                let _ = frame.close().await;
+                return Err(e);
+            } else if r.is_ok_and(|cs| cs == ConnectState::Closed) {
                 frame.close().await?;
                 self.reporter.report(Event::disconnect())?;
                 return Ok(());
@@ -53,14 +58,21 @@ impl Runner {
         // written before we start getting input from the user should be
         // written directly to stdout instead.
         self.reporter.set_writer(Box::new(shared));
-        let r = ioloop(&mut frame, readline_stream(&mut rl), &mut self.reporter)
+        let mut r = ioloop(&mut frame, readline_stream(&mut rl), &mut self.reporter)
             .await
-            .and_then(|_| {
-                self.reporter
-                    .report(Event::disconnect())
-                    .map_err(IoError::from)
-            });
-        frame.close().await?;
+            .map(|_| ());
+        // Don't bother to report closing errors if ioloop errored (but still
+        // close anyway)
+        let r2 = frame.close().await.map_err(IoError::from);
+        if r.is_ok() {
+            r = r2;
+        }
+        if r.is_ok() {
+            r = self
+                .reporter
+                .report(Event::disconnect())
+                .map_err(IoError::from);
+        }
         let _ = rl.flush();
         // Set the writer back to stdout so that errors reported by run() will
         // show up without having to call rl.flush().
