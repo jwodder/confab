@@ -11,6 +11,8 @@ support.  Use it to connect to a TCP server, and you'll be able to send
 messages line by line while lines received from the remote server are printed
 above the prompt.
 
+![Recording of an example session](https://github.com/jwodder/confab/raw/master/example.gif)
+
 Installation
 ============
 
