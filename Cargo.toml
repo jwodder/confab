@@ -1,8 +1,8 @@
 [package]
 name = "confab"
-version = "0.3.2"
+version = "0.4.0-dev"
 edition = "2021"
-rust-version = "1.80"
+rust-version = "1.82"
 description = "Asynchronous line-oriented interactive TCP client"
 authors = ["John Thorvald Wodder II <confab@varonathe.org>"]
 repository = "https://github.com/jwodder/confab"
@@ -38,7 +38,7 @@ assert_matches = "1.5.0"
 expectrl = { version = "0.7.1", features = ["async"] }
 regex = "1.10.6"
 rstest = { version = "0.25.0", default-features = false }
-serde = { version = "1.0.200", features = ["derive"] }
+serde = { version = "1.0.204", features = ["derive"] }
 serde-jsonlines = "0.7.0"
 serde_json = "1.0.118"
 tempfile = "3.10.1"
@@ -48,7 +48,7 @@ tokio-stream = { version = "0.1.15", features = ["time"] }
 
 [build-dependencies]
 anyhow = "1.0.82"
-cargo_metadata = "0.19.0"
+cargo_metadata = "0.20.0"
 semver = "1.0.22"
 time = { version = "0.3.36", default-features = false, features = ["std", "formatting"] }
 

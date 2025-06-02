@@ -1,7 +1,7 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![CI Status](https://github.com/jwodder/confab/actions/workflows/test.yml/badge.svg)](https://github.com/jwodder/confab/actions/workflows/test.yml)
 [![codecov.io](https://codecov.io/gh/jwodder/confab/branch/master/graph/badge.svg)](https://codecov.io/gh/jwodder/confab)
-[![Minimum Supported Rust Version](https://img.shields.io/badge/MSRV-1.80-orange)](https://www.rust-lang.org)
+[![Minimum Supported Rust Version](https://img.shields.io/badge/MSRV-1.82-orange)](https://www.rust-lang.org)
 [![MIT License](https://img.shields.io/github/license/jwodder/confab.svg)](https://opensource.org/licenses/MIT)
 
 [GitHub](https://github.com/jwodder/confab) | [crates.io](https://crates.io/crates/confab) | [Issues](https://github.com/jwodder/confab/issues) | [Changelog](https://github.com/jwodder/confab/blob/master/CHANGELOG.md)
