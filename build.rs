@@ -153,7 +153,7 @@ fn normal_dependencies<P: AsRef<Path>>(
         .exec()
         .context("failed to get Cargo metadata")?;
     let Some(root_id) = metadata.workspace_members.iter().find(|pkgid| {
-        package_by_id(&metadata.packages, pkgid).is_ok_and(|pkg| pkg.name == package)
+        package_by_id(&metadata.packages, pkgid).is_ok_and(|pkg| pkg.name.as_ref() == package)
     }) else {
         bail!("Package {package} not found in metadata");
     };
@@ -175,7 +175,7 @@ fn normal_dependencies<P: AsRef<Path>>(
             {
                 queue.push_back(&dep.pkg);
                 let pkg = package_by_id(&metadata.packages, &dep.pkg)?;
-                dependencies.push((pkg.name.clone(), pkg.version.clone()));
+                dependencies.push((pkg.name.clone().into_inner(), pkg.version.clone()));
             }
         }
     }
