@@ -1,6 +1,7 @@
 use anyhow::{bail, Context};
-use cargo_metadata::{CargoOpt, DependencyKind, MetadataCommand, Node, Package, PackageId};
-use semver::Version;
+use cargo_metadata::{
+    semver::Version, CargoOpt, DependencyKind, MetadataCommand, Node, Package, PackageId,
+};
 use std::collections::{HashSet, VecDeque};
 use std::env;
 use std::fs::File;
