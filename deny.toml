@@ -11,8 +11,9 @@ ignore = [
 ]
 
 [bans]
+deny = ["serde_yaml"]
 multiple-versions = "allow"
-wildcards = "allow"
+wildcards = "deny"
 
 [licenses]
 version = 2
