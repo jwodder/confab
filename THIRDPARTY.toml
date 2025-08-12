@@ -15608,7 +15608,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "slab"
-package_version = "0.4.10"
+package_version = "0.4.11"
 repository = "https://github.com/tokio-rs/slab"
 license = "MIT"
 
