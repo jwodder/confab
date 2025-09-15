@@ -110,6 +110,7 @@ impl Runner {
     async fn finish(mut self) {
         self.expect("* Disconnected").await;
         self.p.expect(Eof).await.unwrap();
+        sleep(Duration::from_millis(500)).await;
         #[cfg(unix)]
         assert_eq!(
             self.p.get_status().unwrap(),
