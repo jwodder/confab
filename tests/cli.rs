@@ -2,9 +2,12 @@
 #![cfg(test)]
 #![cfg(unix)]
 use assert_matches::assert_matches;
-use expectrl::session::{log, OsProcess, OsProcessStream, Session};
-use expectrl::stream::log::LogStream;
-use expectrl::{ControlCode, Eof, Regex};
+use expectrl::{
+    process::Healthcheck,
+    session::{log, OsProcess, OsStream, Session},
+    stream::log::LogStream,
+    AsyncExpect, ControlCode, Eof, Regex,
+};
 use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
 use serde_jsonlines::json_lines;
@@ -24,9 +27,9 @@ use tokio::time::sleep;
 use tokio_util::codec::{AnyDelimiterCodec, Framed};
 
 #[cfg(unix)]
-use expectrl::WaitStatus;
+use expectrl::process::unix::WaitStatus;
 
-type ExpectrlSession = Session<OsProcess, LogStream<OsProcessStream, std::io::Stdout>>;
+type ExpectrlSession = Session<OsProcess, LogStream<OsStream, std::io::Stdout>>;
 
 struct Tester {
     cmd: Command,
@@ -108,9 +111,12 @@ impl Runner {
         self.expect("* Disconnected").await;
         self.p.expect(Eof).await.unwrap();
         #[cfg(unix)]
-        assert_eq!(self.p.wait().unwrap(), WaitStatus::Exited(self.p.pid(), 0));
+        assert_eq!(
+            self.p.get_status().unwrap(),
+            WaitStatus::Exited(self.p.get_process().pid(), 0)
+        );
         #[cfg(windows)]
-        assert_eq!(self.p.wait(None).unwrap(), 0);
+        assert_eq!(self.p.get_status(None).unwrap(), 0);
         if let Some(xscript) = self.transcript {
             xscript.check(self.addr);
         }
