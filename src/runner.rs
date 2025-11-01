@@ -1,9 +1,9 @@
 use crate::codec::ConfabCodec;
 use crate::errors::{InetError, InterfaceError, IoError};
 use crate::events::Event;
-use crate::input::{readline_stream, Input, StartupScript};
+use crate::input::{Input, StartupScript, readline_stream};
 use crate::tls;
-use crate::util::{now_hms, CharEncoding};
+use crate::util::{CharEncoding, now_hms};
 use futures_util::{SinkExt, Stream, StreamExt};
 use rustyline_async::{Readline, SharedWriter};
 use std::fs::File;
