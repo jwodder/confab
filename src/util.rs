@@ -4,10 +4,10 @@ use std::borrow::Cow;
 use std::fmt::{self, Display, Write};
 use std::str::FromStr;
 use thiserror::Error;
+use time::OffsetDateTime;
 use time::format_description::FormatItem;
 use time::macros::format_description;
-use time::OffsetDateTime;
-use unicode_general_category::{get_general_category, GeneralCategory};
+use unicode_general_category::{GeneralCategory, get_general_category};
 
 pub(crate) static HMS_FMT: &[FormatItem<'_>] = format_description!("[hour]:[minute]:[second]");
 
@@ -139,8 +139,7 @@ pub(crate) struct CharEncodingLookupError;
 
 pub(crate) fn chomp(s: &str) -> &str {
     let s = s.strip_suffix('\n').unwrap_or(s);
-    let s = s.strip_suffix('\r').unwrap_or(s);
-    s
+    s.strip_suffix('\r').unwrap_or(s)
 }
 
 pub(crate) fn latin1ify(s: String) -> String {

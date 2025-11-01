@@ -44,7 +44,7 @@
 // IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-use crate::util::{latin1ify, CharEncoding};
+use crate::util::{CharEncoding, latin1ify};
 use bytes::{BufMut, BytesMut};
 use std::{cmp, io};
 use tokio_util::codec::{Decoder, Encoder};

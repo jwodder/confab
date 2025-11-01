@@ -3,10 +3,10 @@
 #![cfg(unix)]
 use assert_matches::assert_matches;
 use expectrl::{
-    process::Healthcheck,
-    session::{log, OsProcess, OsStream, Session},
-    stream::log::LogStream,
     AsyncExpect, ControlCode, Eof, Regex,
+    process::Healthcheck,
+    session::{OsProcess, OsStream, Session, log},
+    stream::log::LogStream,
 };
 use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
@@ -18,11 +18,11 @@ use std::net::{IpAddr, SocketAddr};
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
-use tempfile::{tempdir, NamedTempFile, TempDir};
+use tempfile::{NamedTempFile, TempDir, tempdir};
 use time::OffsetDateTime;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
-use tokio::sync::oneshot::{channel, Sender};
+use tokio::sync::oneshot::{Sender, channel};
 use tokio::time::sleep;
 use tokio_util::codec::{AnyDelimiterCodec, Framed};
 

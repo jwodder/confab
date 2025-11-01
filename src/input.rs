@@ -5,11 +5,11 @@ use pin_project_lite::pin_project;
 use rustyline_async::{Readline, ReadlineError, ReadlineEvent};
 use std::future::Future;
 use std::pin::Pin;
-use std::task::{ready, Context, Poll};
+use std::task::{Context, Poll, ready};
 use std::time::Duration;
 use tokio::fs::File as TokioFile;
 use tokio::io::{AsyncBufReadExt, BufReader, Lines};
-use tokio::time::{sleep, Sleep};
+use tokio::time::{Sleep, sleep};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum Input {

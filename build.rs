@@ -1,6 +1,6 @@
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 use cargo_metadata::{
-    semver::Version, CargoOpt, DependencyKind, MetadataCommand, Node, Package, PackageId,
+    CargoOpt, DependencyKind, MetadataCommand, Node, Package, PackageId, semver::Version,
 };
 use std::collections::{HashSet, VecDeque};
 use std::env;
@@ -8,8 +8,8 @@ use std::fs::File;
 use std::io::{BufWriter, ErrorKind, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
-use time::format_description::well_known::Rfc3339;
 use time::OffsetDateTime;
+use time::format_description::well_known::Rfc3339;
 
 fn main() -> anyhow::Result<()> {
     println!("cargo::rerun-if-changed=Cargo.lock");

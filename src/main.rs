@@ -187,8 +187,8 @@ fn build_info() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use clap::error::ErrorKind;
     use clap::CommandFactory;
+    use clap::error::ErrorKind;
 
     #[test]
     fn validate_cli() {
