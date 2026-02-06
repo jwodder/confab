@@ -98,14 +98,14 @@ impl Reporter {
 
     fn report_inner(&mut self, event: Event) -> Result<(), io::Error> {
         writeln!(self.writer, "{}", event.to_message(self.show_times))?;
-        if let Some(fp) = self.transcript.as_mut() {
-            if let Err(e) = writeln!(fp, "{}", event.to_json()) {
-                let _ = self.transcript.take();
-                if self.show_times {
-                    write!(self.writer, "[{}] ", now_hms())?;
-                }
-                writeln!(self.writer, "! Error writing to transcript: {e}")?;
+        if let Some(fp) = self.transcript.as_mut()
+            && let Err(e) = writeln!(fp, "{}", event.to_json())
+        {
+            let _ = self.transcript.take();
+            if self.show_times {
+                write!(self.writer, "[{}] ", now_hms())?;
             }
+            writeln!(self.writer, "! Error writing to transcript: {e}")?;
         }
         Ok(())
     }
