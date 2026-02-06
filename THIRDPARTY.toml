@@ -7430,7 +7430,7 @@ THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "num-conv"
-package_version = "0.1.0"
+package_version = "0.2.0"
 repository = "https://github.com/jhpratt/num-conv"
 license = "MIT OR Apache-2.0"
 
@@ -15188,7 +15188,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "time"
-package_version = "0.3.45"
+package_version = "0.3.47"
 repository = "https://github.com/time-rs/time"
 license = "MIT OR Apache-2.0"
 
@@ -15400,7 +15400,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "time-core"
-package_version = "0.1.7"
+package_version = "0.1.8"
 repository = "https://github.com/time-rs/time"
 license = "MIT OR Apache-2.0"
 
@@ -15612,7 +15612,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "time-macros"
-package_version = "0.2.25"
+package_version = "0.2.27"
 repository = "https://github.com/time-rs/time"
 license = "MIT OR Apache-2.0"
 
