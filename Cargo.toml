@@ -22,14 +22,13 @@ crossterm = "0.29.0"
 futures-util = { version = "0.3.31", default-features = false, features = ["sink"] }
 itertools = "0.14.0"
 pin-project-lite = "0.2.14"
-rustls-native-certs = { version = "0.8.0", optional = true }
-rustls-pki-types = { version = "1.5.0", optional = true }
+rustls-native-certs = "0.8.0"
+rustls-pki-types = "1.5.0"
 rustyline-async = "0.4.6"
 thiserror = "2.0.12"
 time = { version = "0.3.36", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
 tokio = { version = "1.37.0", features = ["fs", "io-util", "macros", "net", "rt", "time"] }
-tokio-native-tls = { version = "0.3.1", optional = true }
-tokio-rustls = { version = "0.26.0", optional = true, default-features = false, features = ["ring", "tls12"] }
+tokio-rustls = { version = "0.26.0", default-features = false, features = ["ring", "tls12"] }
 tokio-util = { version = "0.7.11", features = ["codec"] }
 unicode-general-category = "1.0.0"
 
@@ -50,12 +49,6 @@ tokio-stream = { version = "0.1.15", features = ["time"] }
 anyhow = "1.0.82"
 cargo_metadata = "0.23.0"
 time = { version = "0.3.36", default-features = false, features = ["std", "formatting"] }
-
-[features]
-default = ["rustls"]
-rustls = ["dep:tokio-rustls", "dep:rustls-native-certs", "dep:rustls-pki-types"]
-native = ["dep:tokio-native-tls"]
-vendored-openssl = ["native", "tokio-native-tls?/vendored"]
 
 [profile.release]
 lto = true
