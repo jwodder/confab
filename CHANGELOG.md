@@ -1,6 +1,7 @@
 v0.4.0 (in development)
 -----------------------
 - Increased MSRV to 1.88
+- Removed TLS implementation features.  The program now always uses rustls.
 
 v0.3.2 (2025-05-17)
 -------------------
