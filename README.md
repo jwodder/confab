@@ -64,7 +64,7 @@ Options
 - `--crlf` — Append CR LF (`"\r\n"`) to each line sent to the remote server
   instead of just LF (`"\n"`)
 
-- `-E <encoding>`, `--encoding <encoding>` — Set the text encoding for the
+- `-E ENCODING`, `--encoding ENCODING` — Set the text encoding for the
   connection.  The available options are:
 
     - `utf8` *(default)* — Use UTF-8.  If a line received from the remote
@@ -81,17 +81,17 @@ Options
 
 - `-h`, `--help` — Display a summary of the command-line options and exit
 
-- `--max-line-length <LIMIT>` — Set the maximum length in bytes of each line
-  read from the remote server (including the terminating newline).  If the
-  server sends a line longer than this, the first `<LIMIT>` bytes will be split
-  off and treated as a whole line, with the remaining bytes treated as the
-  start of a new line.  [default value: 65535]
+- `--max-line-length LIMIT` — Set the maximum length in bytes of each line read
+  from the remote server (including the terminating newline).  If the server
+  sends a line longer than this, the first `LIMIT` bytes will be split off and
+  treated as a whole line, with the remaining bytes treated as the start of a
+  new line.  [default value: 65535]
 
-- `--servername <DOMAIN>` — (with `--tls`) Use the given domain name for SNI
-  and certificate hostname validation; defaults to the remote host name
+- `--servername DOMAIN` — (with `--tls`) Use the given domain name for SNI and
+  certificate hostname validation; defaults to the remote host name
 
-- `--startup-wait-ms <INT>` — Specify the time to wait in milliseconds
-  before sending each line of the startup script [default value: 500]
+- `--startup-wait-ms INT` — Specify the time to wait in milliseconds before
+  sending each line of the startup script [default value: 500]
 
 - `-S <FILE>`, `--startup-script <FILE>` — On startup, read lines from the
   given file and send them to the server one at a time.  The user will not be
@@ -102,8 +102,8 @@ Options
 
 - `--tls` — Connect using SSL/TLS
 
-- `-T <FILE>`, `--transcript <FILE>` — Append a transcript of events to the
-  given file.  See [Transcript Format](#transcript-format) below for more
+- `-T FILE`, `--transcript FILE` — Append a transcript of events to the given
+  file.  See [Transcript Format](#transcript-format) below for more
   information.
 
 - `-V`, `--version` — Show the program version and exit
