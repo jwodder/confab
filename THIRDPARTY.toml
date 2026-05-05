@@ -610,7 +610,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "bitflags"
-package_version = "2.11.0"
+package_version = "2.11.1"
 repository = "https://github.com/bitflags/bitflags"
 license = "MIT OR Apache-2.0"
 
@@ -1130,7 +1130,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.6.0"
+package_version = "4.6.1"
 repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
@@ -1604,7 +1604,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_derive"
-package_version = "4.6.0"
+package_version = "4.6.1"
 repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
@@ -5956,7 +5956,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "libc"
-package_version = "0.2.183"
+package_version = "0.2.186"
 repository = "https://github.com/rust-lang/libc"
 license = "MIT OR Apache-2.0"
 
@@ -8845,7 +8845,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "pin-project"
-package_version = "1.1.11"
+package_version = "1.1.12"
 repository = "https://github.com/taiki-e/pin-project"
 license = "Apache-2.0 OR MIT"
 
@@ -9061,7 +9061,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "pin-project-internal"
-package_version = "1.1.11"
+package_version = "1.1.12"
 repository = "https://github.com/taiki-e/pin-project"
 license = "Apache-2.0 OR MIT"
 
@@ -10692,7 +10692,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls"
-package_version = "0.23.37"
+package_version = "0.23.40"
 repository = "https://github.com/rustls/rustls"
 license = "Apache-2.0 OR ISC OR MIT"
 
@@ -11216,7 +11216,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "rustls-pki-types"
-package_version = "1.14.0"
+package_version = "1.14.1"
 repository = "https://github.com/rustls/pki-types"
 license = "MIT OR Apache-2.0"
 
@@ -15557,7 +15557,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "tokio"
-package_version = "1.50.0"
+package_version = "1.52.2"
 repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
@@ -15589,7 +15589,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "tokio-macros"
-package_version = "2.6.1"
+package_version = "2.7.0"
 repository = "https://github.com/tokio-rs/tokio"
 license = "MIT"
 
