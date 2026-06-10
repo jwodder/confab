@@ -5,8 +5,7 @@ use assert_matches::assert_matches;
 use expectrl::{
     AsyncExpect, ControlCode, Eof, Regex,
     process::Healthcheck,
-    session::{OsProcess, OsStream, Session, log},
-    stream::log::LogStream,
+    session::{OsProcess, OsStream, Session},
 };
 use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
@@ -29,7 +28,7 @@ use tokio_util::codec::{AnyDelimiterCodec, Framed};
 #[cfg(unix)]
 use expectrl::process::unix::WaitStatus;
 
-type ExpectrlSession = Session<OsProcess, LogStream<OsStream, std::io::Stdout>>;
+type ExpectrlSession = Session<OsProcess, OsStream>;
 
 struct Tester {
     cmd: Command,
@@ -76,11 +75,7 @@ impl Tester {
         }
         self.cmd.arg(addr.ip().to_string());
         self.cmd.arg(addr.port().to_string());
-        let mut p = log(
-            Session::spawn(self.cmd).expect("Error spawning command"),
-            std::io::stdout(),
-        )
-        .unwrap();
+        let mut p = Session::spawn(self.cmd).expect("Error spawning command");
         p.set_expect_timeout(Some(Duration::from_millis(500)));
         let mut runner = Runner {
             p,
