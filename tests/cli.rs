@@ -243,11 +243,7 @@ impl Sent {
     }
 
     fn printed(&self) -> String {
-        if let Some(s) = self.printed {
-            format!("> {s}")
-        } else {
-            format!("> {}", self.typed)
-        }
+        format!("> {}", self.printed.unwrap_or(self.typed))
     }
 
     fn transcription(&self) -> Msg {
