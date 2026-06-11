@@ -1,13 +1,9 @@
-// <https://github.com/zhiburt/expectrl/issues/52>
 #![cfg(test)]
 #![cfg(unix)]
 use assert_matches::assert_matches;
-use expectrl::{
-    AsyncExpect, ControlCode, Eof, Regex,
-    process::Healthcheck,
-    session::{OsProcess, OsStream, Session},
-};
+use bstr::ByteSlice;
 use futures_util::{SinkExt, StreamExt};
+use pty_process::{Command, Pty};
 use serde::Deserialize;
 use serde_jsonlines::json_lines;
 use std::borrow::Cow;
@@ -15,20 +11,58 @@ use std::ffi::OsStr;
 use std::io::{Seek, Write};
 use std::net::{IpAddr, SocketAddr};
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::ExitStatus;
 use std::time::Duration;
 use tempfile::{NamedTempFile, TempDir, tempdir};
 use time::OffsetDateTime;
-use tokio::io::AsyncWriteExt;
-use tokio::net::TcpListener;
-use tokio::sync::oneshot::{Sender, channel};
-use tokio::time::sleep;
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpListener,
+    process::Child,
+    sync::oneshot::{Sender, channel},
+    time::{Instant, sleep, timeout, timeout_at},
+};
 use tokio_util::codec::{AnyDelimiterCodec, Framed};
 
-#[cfg(unix)]
-use expectrl::process::unix::WaitStatus;
+const EXPECT_TIMEOUT: Duration = Duration::from_millis(500);
 
-type ExpectrlSession = Session<OsProcess, OsStream>;
+trait StrMatcher: std::fmt::Debug {
+    // Returns the index of `s` at which the match ends
+    fn matches(&self, s: &[u8]) -> Option<usize>;
+}
+
+impl StrMatcher for &str {
+    fn matches(&self, s: &[u8]) -> Option<usize> {
+        s.find(self).map(|i| i + self.len())
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct Timestamped<'a>(&'a str);
+
+impl StrMatcher for Timestamped<'_> {
+    fn matches(&self, s: &[u8]) -> Option<usize> {
+        // Timestamp format: [dd:dd:dd]
+        for i in s.find_iter(b"[") {
+            let mut iter = s[(i + 1)..].bytes();
+            if iter.next().is_some_and(|c| char::from(c).is_ascii_digit())
+                && iter.next().is_some_and(|c| char::from(c).is_ascii_digit())
+                && iter.next() == Some(b':')
+                && iter.next().is_some_and(|c| char::from(c).is_ascii_digit())
+                && iter.next().is_some_and(|c| char::from(c).is_ascii_digit())
+                && iter.next() == Some(b':')
+                && iter.next().is_some_and(|c| char::from(c).is_ascii_digit())
+                && iter.next().is_some_and(|c| char::from(c).is_ascii_digit())
+                && iter.next() == Some(b']')
+                && iter.next() == Some(b' ')
+                && iter.as_bytes().starts_with_str(self.0)
+            {
+                return Some(i + "[dd:dd:dd] ".len() + self.0.len());
+            }
+        }
+        None
+    }
+}
 
 struct Tester {
     cmd: Command,
@@ -39,14 +73,14 @@ struct Tester {
 impl Tester {
     fn new() -> Tester {
         Tester {
-            cmd: Command::new(env!("CARGO_BIN_EXE_confab")),
+            cmd: Command::new(env!("CARGO_BIN_EXE_confab")).kill_on_drop(true),
             transcript: false,
             show_times: false,
         }
     }
 
     fn arg<S: AsRef<OsStr>>(mut self, arg: S) -> Tester {
-        self.cmd.arg(arg);
+        self.cmd = self.cmd.arg(arg);
         self
     }
 
@@ -64,21 +98,28 @@ impl Tester {
         let (sender, receiver) = channel();
         tokio::spawn(async move { testing_server(sender).await });
         let addr = receiver.await.expect("Error receiving address from server");
-        let transcript = self.transcript.then(|| {
+        #[allow(clippy::if_then_some_else_none)]
+        let transcript = if self.transcript {
             let transcript = Transcript::new();
-            self.cmd.arg("--transcript");
-            self.cmd.arg(&transcript.path);
-            transcript
-        });
+            self.cmd = self.cmd.arg("--transcript");
+            self.cmd = self.cmd.arg(&transcript.path);
+            Some(transcript)
+        } else {
+            None
+        };
         if self.show_times {
-            self.cmd.arg("--show-times");
+            self.cmd = self.cmd.arg("--show-times");
         }
-        self.cmd.arg(addr.ip().to_string());
-        self.cmd.arg(addr.port().to_string());
-        let mut p = Session::spawn(self.cmd).expect("Error spawning command");
-        p.set_expect_timeout(Some(Duration::from_millis(500)));
+        self.cmd = self.cmd.arg(addr.ip().to_string());
+        self.cmd = self.cmd.arg(addr.port().to_string());
+        let (pty, pts) = pty_process::open().expect("Error creating pty");
+        pty.resize(pty_process::Size::new(80, 24))
+            .expect("Error resizing pty");
+        let child = self.cmd.spawn(pts).expect("Error spawning command");
         let mut runner = Runner {
-            p,
+            pty,
+            child,
+            buffer: Vec::new(),
             addr,
             transcript,
             show_times: self.show_times,
@@ -90,13 +131,88 @@ impl Tester {
 }
 
 struct Runner {
-    p: ExpectrlSession,
+    pty: Pty,
+    child: Child,
+    buffer: Vec<u8>,
     addr: SocketAddr,
     transcript: Option<Transcript>,
     show_times: bool,
 }
 
 impl Runner {
+    // Returns `false` on EOF
+    async fn read(&mut self) -> std::io::Result<bool> {
+        let mut buf = vec![0u8; 2048];
+        match self.pty.read(&mut buf).await {
+            Ok(0) => Ok(false),
+            #[cfg(target_os = "linux")]
+            Err(e) if e.raw_os_error() == Some(5) => {
+                // On Linux, attempting to read from a pty master after the
+                // slave closes (due, e.g., to the child process exiting)
+                // results in EIO (which Rust currently represents with the
+                // undocumented ErrorKind::Uncategorized).
+                Ok(false)
+            }
+            Ok(n) => {
+                self.buffer.extend(&buf[..n]);
+                Ok(true)
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    fn contents(&self) -> Cow<'_, str> {
+        String::from_utf8_lossy(&self.buffer)
+    }
+
+    #[allow(clippy::match_wild_err_arm)]
+    async fn wait_for_contents<M: StrMatcher>(&mut self, expected: M) -> std::io::Result<()> {
+        if let Some(i) = expected.matches(&self.buffer) {
+            self.buffer.drain(..i);
+            return Ok(());
+        }
+        let deadline = Instant::now() + EXPECT_TIMEOUT;
+        loop {
+            match timeout_at(deadline, self.read()).await {
+                Ok(Ok(true)) => {
+                    if let Some(i) = expected.matches(&self.buffer) {
+                        self.buffer.drain(..i);
+                        return Ok(());
+                    }
+                }
+                Ok(Ok(false)) => {
+                    panic!(
+                        "Reached EOF while waiting for output {expected:?}; bytes read = {:?}",
+                        self.contents(),
+                    );
+                }
+                Ok(Err(e)) => return Err(e),
+                Err(_) => {
+                    panic!(
+                        "Timed out while waiting for output {expected:?}; bytes read = {:?}",
+                        self.contents(),
+                    );
+                }
+            }
+        }
+    }
+
+    async fn wait_for_exit(&mut self, d: Duration) -> std::io::Result<ExitStatus> {
+        if let Ok(r) = timeout(d, self.inner_wait_for_exit()).await {
+            r
+        } else {
+            panic!(
+                "Timed out while waiting for exit; final content = {:?}",
+                self.contents()
+            );
+        }
+    }
+
+    async fn inner_wait_for_exit(&mut self) -> std::io::Result<ExitStatus> {
+        while self.read().await? {}
+        self.child.wait().await
+    }
+
     async fn connect(&mut self) {
         self.expect("* Connecting ...").await;
         self.expect(format!("* Connected to {}", self.addr)).await;
@@ -104,29 +220,22 @@ impl Runner {
 
     async fn finish(mut self) {
         self.expect("* Disconnected").await;
-        self.p.expect(Eof).await.unwrap();
-        sleep(Duration::from_millis(500)).await;
-        #[cfg(unix)]
-        assert_eq!(
-            self.p.get_status().unwrap(),
-            WaitStatus::Exited(self.p.get_process().pid(), 0)
+        let rc = self.wait_for_exit(EXPECT_TIMEOUT).await.unwrap();
+        assert!(
+            rc.success(),
+            "child process did not exit successfully: {rc}"
         );
-        #[cfg(windows)]
-        assert_eq!(self.p.get_status(None).unwrap(), 0);
         if let Some(xscript) = self.transcript {
             xscript.check(self.addr);
         }
     }
 
     async fn expect<S: AsRef<str> + Send>(&mut self, s: S) {
-        static TIME_RGX: &str = r"\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]";
         let s = s.as_ref();
         let r = if self.show_times {
-            self.p
-                .expect(Regex(format!("{} {}", TIME_RGX, regex::escape(s))))
-                .await
+            self.wait_for_contents(Timestamped(s)).await
         } else {
-            self.p.expect(s).await
+            self.wait_for_contents(s).await
         };
         if let Err(e) = r {
             panic!("confab did not print {s:?}: {e}");
@@ -135,8 +244,8 @@ impl Runner {
 
     async fn enter<S: Into<Sent> + Send>(&mut self, entry: S) {
         let entry = entry.into();
-        self.p.expect("confab> ").await.unwrap();
-        self.p.send(entry.typed()).await.unwrap();
+        self.wait_for_contents("confab> ").await.unwrap();
+        self.pty.write_all(entry.typed().as_bytes()).await.unwrap();
         self.expect(entry.printed()).await;
         self.transcribe(entry.transcription());
     }
@@ -161,7 +270,7 @@ impl Runner {
     }
 
     async fn cntrl_d(mut self) {
-        self.p.send(ControlCode::EndOfTransmission).await.unwrap();
+        self.pty.write_all(b"\x04").await.unwrap();
         self.finish().await;
     }
 
