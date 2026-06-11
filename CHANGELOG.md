@@ -1,3 +1,7 @@
+v0.5.0 (in development)
+-----------------------
+- Removed `--build-info` option, as it was just superfluous bloat
+
 v0.4.0 (2026-03-31)
 -------------------
 - Increased MSRV to 1.88

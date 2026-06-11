@@ -1,6 +1,6 @@
 [package]
 name = "confab"
-version = "0.4.0"
+version = "0.5.0-dev"
 edition = "2024"
 rust-version = "1.88"
 description = "Asynchronous line-oriented interactive TCP client"
@@ -46,11 +46,6 @@ tokio-stream = { version = "0.1.15", features = ["time"] }
 
 [target."cfg(unix)".dev-dependencies]
 pty-process = { version = "0.5.3", features = ["async"] }
-
-[build-dependencies]
-anyhow = "1.0.82"
-cargo_metadata = "0.23.0"
-time = { version = "0.3.36", default-features = false, features = ["std", "formatting"] }
 
 [profile.release]
 lto = true
