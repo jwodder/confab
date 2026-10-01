@@ -610,7 +610,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "bitflags"
-package_version = "2.13.1"
+package_version = "2.13.2"
 repository = "https://github.com/bitflags/bitflags"
 license = "MIT OR Apache-2.0"
 
@@ -888,7 +888,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "cfg-if"
-package_version = "1.0.4"
+package_version = "1.0.5"
 repository = "https://github.com/rust-lang/cfg-if"
 license = "MIT OR Apache-2.0"
 
@@ -1130,7 +1130,7 @@ limitations under the License.
 
 [[third_party_libraries]]
 package_name = "clap"
-package_version = "4.6.6"
+package_version = "4.6.7"
 repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
@@ -1349,7 +1349,7 @@ text = """
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright {yyyy} {name of copyright owner}
+   Copyright Individual contributors
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -1367,7 +1367,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_builder"
-package_version = "4.6.6"
+package_version = "4.6.7"
 repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
@@ -1586,7 +1586,7 @@ text = """
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright {yyyy} {name of copyright owner}
+   Copyright Individual contributors
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -1604,7 +1604,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_derive"
-package_version = "4.6.4"
+package_version = "4.6.7"
 repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
@@ -1823,7 +1823,7 @@ text = """
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright {yyyy} {name of copyright owner}
+   Copyright Individual contributors
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -1841,7 +1841,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "clap_lex"
-package_version = "1.1.0"
+package_version = "1.1.1"
 repository = "https://github.com/clap-rs/clap"
 license = "MIT OR Apache-2.0"
 
@@ -2060,7 +2060,7 @@ text = """
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright {yyyy} {name of copyright owner}
+   Copyright Individual contributors
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -7185,7 +7185,7 @@ THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "mio"
-package_version = "1.2.2"
+package_version = "1.2.3"
 repository = "https://github.com/tokio-rs/mio"
 license = "MIT"
 
@@ -10012,7 +10012,7 @@ for the license to code that was sourced from the once_cell project.
 
 [[third_party_libraries]]
 package_name = "rustix"
-package_version = "1.1.4"
+package_version = "1.1.5"
 repository = "https://github.com/bytecodealliance/rustix"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 
@@ -13234,7 +13234,7 @@ DEALINGS IN THE SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "smallvec"
-package_version = "1.16.0"
+package_version = "1.16.2"
 repository = "https://github.com/servo/rust-smallvec"
 license = "MIT OR Apache-2.0"
 
@@ -14007,7 +14007,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "syn"
-package_version = "3.0.4"
+package_version = "3.0.6"
 repository = "https://github.com/dtolnay/syn"
 license = "MIT OR Apache-2.0"
 
@@ -14491,7 +14491,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "thiserror"
-package_version = "2.0.20"
+package_version = "2.0.21"
 repository = "https://github.com/dtolnay/thiserror"
 license = "MIT OR Apache-2.0"
 
@@ -14706,7 +14706,7 @@ END OF TERMS AND CONDITIONS
 
 [[third_party_libraries]]
 package_name = "thiserror-impl"
-package_version = "2.0.20"
+package_version = "2.0.21"
 repository = "https://github.com/dtolnay/thiserror"
 license = "MIT OR Apache-2.0"
 
@@ -15622,7 +15622,7 @@ SOFTWARE.
 
 [[third_party_libraries]]
 package_name = "tokio-rustls"
-package_version = "0.26.4"
+package_version = "0.26.6"
 repository = "https://github.com/rustls/tokio-rustls"
 license = "MIT OR Apache-2.0"
 
@@ -16108,7 +16108,7 @@ text = """
 
 [[third_party_libraries]]
 package_name = "unicode-ident"
-package_version = "1.0.24"
+package_version = "1.0.26"
 repository = "https://github.com/dtolnay/unicode-ident"
 license = "(MIT OR Apache-2.0) AND Unicode-3.0"
 
