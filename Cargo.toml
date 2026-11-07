@@ -36,7 +36,7 @@ unicode-general-category = "1.0.0"
 assert_matches = "1.5.0"
 bstr = "1.12.1"
 rstest = { version = "0.28.0", default-features = false }
-serde = { version = "1.0.219", features = ["derive"] }
+serde = { version = "1.0.221", features = ["derive"] }
 serde-jsonlines = "0.7.0"
 serde_json = "1.0.142"
 tempfile = "3.10.1"
