@@ -1,39 +1,38 @@
-use crate::util::{HMS_FMT, JsonStrMap, chomp, display_vis, now};
+use crate::util::{JsonStrMap, chomp, display_vis};
 use crossterm::style::{StyledContent, Stylize};
+use jiff::Zoned;
 use std::fmt;
 use std::net::SocketAddr;
-use time::OffsetDateTime;
-use time::format_description::well_known::Rfc3339;
 
 pub(crate) enum Event {
     ConnectStart {
-        timestamp: OffsetDateTime,
+        timestamp: Zoned,
         host: String,
         port: u16,
     },
     ConnectFinish {
-        timestamp: OffsetDateTime,
+        timestamp: Zoned,
         peer: SocketAddr,
     },
     TlsStart {
-        timestamp: OffsetDateTime,
+        timestamp: Zoned,
     },
     TlsFinish {
-        timestamp: OffsetDateTime,
+        timestamp: Zoned,
     },
     Recv {
-        timestamp: OffsetDateTime,
+        timestamp: Zoned,
         data: String,
     },
     Send {
-        timestamp: OffsetDateTime,
+        timestamp: Zoned,
         data: String,
     },
     Disconnect {
-        timestamp: OffsetDateTime,
+        timestamp: Zoned,
     },
     Error {
-        timestamp: OffsetDateTime,
+        timestamp: Zoned,
         data: anyhow::Error,
     },
 }
@@ -41,7 +40,7 @@ pub(crate) enum Event {
 impl Event {
     pub(crate) fn connect_start(host: &str, port: u16) -> Self {
         Event::ConnectStart {
-            timestamp: now(),
+            timestamp: Zoned::now(),
             host: String::from(host),
             port,
         }
@@ -49,45 +48,51 @@ impl Event {
 
     pub(crate) fn connect_finish(peer: SocketAddr) -> Self {
         Event::ConnectFinish {
-            timestamp: now(),
+            timestamp: Zoned::now(),
             peer,
         }
     }
 
     pub(crate) fn tls_start() -> Self {
-        Event::TlsStart { timestamp: now() }
+        Event::TlsStart {
+            timestamp: Zoned::now(),
+        }
     }
 
     pub(crate) fn tls_finish() -> Self {
-        Event::TlsFinish { timestamp: now() }
+        Event::TlsFinish {
+            timestamp: Zoned::now(),
+        }
     }
 
     pub(crate) fn recv(data: String) -> Self {
         Event::Recv {
-            timestamp: now(),
+            timestamp: Zoned::now(),
             data,
         }
     }
 
     pub(crate) fn send(data: String) -> Self {
         Event::Send {
-            timestamp: now(),
+            timestamp: Zoned::now(),
             data,
         }
     }
 
     pub(crate) fn disconnect() -> Self {
-        Event::Disconnect { timestamp: now() }
+        Event::Disconnect {
+            timestamp: Zoned::now(),
+        }
     }
 
     pub(crate) fn error(data: anyhow::Error) -> Self {
         Event::Error {
-            timestamp: now(),
+            timestamp: Zoned::now(),
             data,
         }
     }
 
-    pub(crate) fn timestamp(&self) -> &OffsetDateTime {
+    pub(crate) fn timestamp(&self) -> &Zoned {
         match self {
             Event::ConnectStart { timestamp, .. } => timestamp,
             Event::ConnectFinish { timestamp, .. } => timestamp,
@@ -101,9 +106,7 @@ impl Event {
     }
 
     pub(crate) fn display_time(&self) -> String {
-        self.timestamp()
-            .format(&HMS_FMT)
-            .expect("formatting a datetime as HMS should not fail")
+        self.timestamp().strftime("%H:%M:%S").to_string()
     }
 
     pub(crate) fn sigil(&self) -> char {
@@ -137,8 +140,8 @@ impl Event {
             "timestamp",
             &self
                 .timestamp()
-                .format(&Rfc3339)
-                .expect("formatting a datetime as RFC3339 should not fail"),
+                .strftime("%Y-%m-%dT%H:%M:%S%.f%:z")
+                .to_string(),
         );
         match self {
             Event::ConnectStart { host, port, .. } => json

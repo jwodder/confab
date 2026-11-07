@@ -21,12 +21,12 @@ clap = { version = "4.5.4", default-features = false, features = ["derive", "err
 crossterm = "0.29.0"
 futures-util = { version = "0.3.31", default-features = false, features = ["sink"] }
 itertools = "0.15.0"
+jiff = "0.2.40"
 pin-project-lite = "0.2.14"
 rustls-native-certs = "0.8.0"
 rustls-pki-types = "1.5.0"
 rustyline-async = "0.4.6"
 thiserror = "2.0.12"
-time = { version = "0.3.36", default-features = false, features = ["std", "local-offset", "macros", "formatting"] }
 tokio = { version = "1.53.3", features = ["fs", "io-util", "macros", "net", "rt", "time"] }
 tokio-rustls = { version = "0.26.0", default-features = false, features = ["ring", "tls12"] }
 tokio-util = { version = "0.7.11", features = ["codec"] }
