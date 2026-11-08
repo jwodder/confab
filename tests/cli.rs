@@ -3,8 +3,9 @@
 use assert_matches::assert_matches;
 use bstr::ByteSlice;
 use futures_util::{SinkExt, StreamExt};
+use jiff::Zoned;
 use pty_process::{Command, Pty};
-use serde::Deserialize;
+use serde::{Deserialize, de::Deserializer, de::Error};
 use serde_jsonlines::json_lines;
 use std::borrow::Cow;
 use std::ffi::OsStr;
@@ -14,7 +15,6 @@ use std::path::PathBuf;
 use std::process::ExitStatus;
 use std::time::Duration;
 use tempfile::{NamedTempFile, TempDir, tempdir};
-use time::OffsetDateTime;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpListener,
@@ -401,43 +401,51 @@ impl From<&'static str> for Recv {
 #[serde(rename_all = "kebab-case", tag = "event")]
 enum Event {
     ConnectionStart {
-        #[serde(with = "time::serde::rfc3339")]
-        timestamp: OffsetDateTime,
+        #[serde(deserialize_with = "deser_zoned")]
+        timestamp: Zoned,
         host: String,
         port: u16,
     },
     ConnectionComplete {
-        #[serde(with = "time::serde::rfc3339")]
-        timestamp: OffsetDateTime,
+        #[serde(deserialize_with = "deser_zoned")]
+        timestamp: Zoned,
         peer_ip: IpAddr,
     },
     TlsStart {
-        #[serde(with = "time::serde::rfc3339")]
-        timestamp: OffsetDateTime,
+        #[serde(deserialize_with = "deser_zoned")]
+        timestamp: Zoned,
     },
     TlsComplete {
-        #[serde(with = "time::serde::rfc3339")]
-        timestamp: OffsetDateTime,
+        #[serde(deserialize_with = "deser_zoned")]
+        timestamp: Zoned,
     },
     Recv {
-        #[serde(with = "time::serde::rfc3339")]
-        timestamp: OffsetDateTime,
+        #[serde(deserialize_with = "deser_zoned")]
+        timestamp: Zoned,
         data: String,
     },
     Send {
-        #[serde(with = "time::serde::rfc3339")]
-        timestamp: OffsetDateTime,
+        #[serde(deserialize_with = "deser_zoned")]
+        timestamp: Zoned,
         data: String,
     },
     Disconnect {
-        #[serde(with = "time::serde::rfc3339")]
-        timestamp: OffsetDateTime,
+        #[serde(deserialize_with = "deser_zoned")]
+        timestamp: Zoned,
     },
     Error {
-        #[serde(with = "time::serde::rfc3339")]
-        timestamp: OffsetDateTime,
+        #[serde(deserialize_with = "deser_zoned")]
+        timestamp: Zoned,
         data: String,
     },
+}
+
+fn deser_zoned<'de, D>(deserializer: D) -> Result<Zoned, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    Zoned::strptime("%Y-%m-%dT%H:%M:%S%.f%:z", s).map_err(D::Error::custom)
 }
 
 #[derive(Debug, Eq, PartialEq)]
