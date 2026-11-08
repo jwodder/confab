@@ -5,9 +5,6 @@ use std::error;
 use std::fmt;
 use std::net::{IpAddr, SocketAddr};
 use std::time::Duration;
-use time::OffsetDateTime;
-use time::format_description::FormatItem;
-use time::macros::format_description;
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{interval, sleep};
@@ -240,12 +237,5 @@ impl error::Error for ServerError {
 }
 
 fn hms_now() -> String {
-    static HMS_FMT: &[FormatItem<'_>] = format_description!("[hour]:[minute]:[second]");
-    let Ok(s) = OffsetDateTime::now_local()
-        .unwrap_or_else(|_| OffsetDateTime::now_utc())
-        .format(&HMS_FMT)
-    else {
-        unreachable!("Formatting a datetime into HMS should not fail");
-    };
-    s
+    jiff::Zoned::now().strftime("%H:%M:%S").to_string()
 }

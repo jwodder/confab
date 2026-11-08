@@ -4,12 +4,7 @@ use std::borrow::Cow;
 use std::fmt::{self, Display, Write};
 use std::str::FromStr;
 use thiserror::Error;
-use time::OffsetDateTime;
-use time::format_description::FormatItem;
-use time::macros::format_description;
 use unicode_general_category::{GeneralCategory, get_general_category};
-
-pub(crate) static HMS_FMT: &[FormatItem<'_>] = format_description!("[hour]:[minute]:[second]");
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct JsonStrMap {
@@ -190,14 +185,8 @@ fn decode_latin1(bs: Vec<u8>) -> String {
     bs.into_iter().map(char::from).collect()
 }
 
-pub(crate) fn now() -> OffsetDateTime {
-    OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc())
-}
-
 pub(crate) fn now_hms() -> String {
-    now()
-        .format(&HMS_FMT)
-        .expect("formatting a datetime as HMS should not fail")
+    jiff::Zoned::now().strftime("%H:%M:%S").to_string()
 }
 
 #[cfg(test)]
