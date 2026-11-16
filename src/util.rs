@@ -186,7 +186,7 @@ fn decode_latin1(bs: Vec<u8>) -> String {
 }
 
 pub(crate) fn now_hms() -> String {
-    jiff::Zoned::now().strftime("%H:%M:%S").to_string()
+    jiff::ZonedDateTime::now().strftime("%H:%M:%S").to_string()
 }
 
 #[cfg(test)]

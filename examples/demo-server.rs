@@ -237,5 +237,5 @@ impl error::Error for ServerError {
 }
 
 fn hms_now() -> String {
-    jiff::Zoned::now().strftime("%H:%M:%S").to_string()
+    jiff::ZonedDateTime::now().strftime("%H:%M:%S").to_string()
 }

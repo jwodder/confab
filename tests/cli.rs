@@ -3,7 +3,7 @@
 use assert_matches::assert_matches;
 use bstr::ByteSlice;
 use futures_util::{SinkExt, StreamExt};
-use jiff::Zoned;
+use jiff::ZonedDateTime;
 use pty_process::{Command, Pty};
 use serde::{Deserialize, de::Deserializer, de::Error};
 use serde_jsonlines::json_lines;
@@ -402,50 +402,50 @@ impl From<&'static str> for Recv {
 enum Event {
     ConnectionStart {
         #[serde(deserialize_with = "deser_zoned")]
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         host: String,
         port: u16,
     },
     ConnectionComplete {
         #[serde(deserialize_with = "deser_zoned")]
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         peer_ip: IpAddr,
     },
     TlsStart {
         #[serde(deserialize_with = "deser_zoned")]
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
     },
     TlsComplete {
         #[serde(deserialize_with = "deser_zoned")]
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
     },
     Recv {
         #[serde(deserialize_with = "deser_zoned")]
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         data: String,
     },
     Send {
         #[serde(deserialize_with = "deser_zoned")]
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         data: String,
     },
     Disconnect {
         #[serde(deserialize_with = "deser_zoned")]
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
     },
     Error {
         #[serde(deserialize_with = "deser_zoned")]
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         data: String,
     },
 }
 
-fn deser_zoned<'de, D>(deserializer: D) -> Result<Zoned, D::Error>
+fn deser_zoned<'de, D>(deserializer: D) -> Result<ZonedDateTime, D::Error>
 where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    Zoned::strptime("%Y-%m-%dT%H:%M:%S%.f%:z", s).map_err(D::Error::custom)
+    ZonedDateTime::strptime("%Y-%m-%dT%H:%M:%S%.f%:z", s).map_err(D::Error::custom)
 }
 
 #[derive(Debug, Eq, PartialEq)]
