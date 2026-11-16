@@ -1,38 +1,38 @@
 use crate::util::{JsonStrMap, chomp, display_vis};
 use crossterm::style::{StyledContent, Stylize};
-use jiff::Zoned;
+use jiff::ZonedDateTime;
 use std::fmt;
 use std::net::SocketAddr;
 
 pub(crate) enum Event {
     ConnectStart {
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         host: String,
         port: u16,
     },
     ConnectFinish {
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         peer: SocketAddr,
     },
     TlsStart {
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
     },
     TlsFinish {
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
     },
     Recv {
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         data: String,
     },
     Send {
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         data: String,
     },
     Disconnect {
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
     },
     Error {
-        timestamp: Zoned,
+        timestamp: ZonedDateTime,
         data: anyhow::Error,
     },
 }
@@ -40,7 +40,7 @@ pub(crate) enum Event {
 impl Event {
     pub(crate) fn connect_start(host: &str, port: u16) -> Self {
         Event::ConnectStart {
-            timestamp: Zoned::now(),
+            timestamp: ZonedDateTime::now(),
             host: String::from(host),
             port,
         }
@@ -48,51 +48,51 @@ impl Event {
 
     pub(crate) fn connect_finish(peer: SocketAddr) -> Self {
         Event::ConnectFinish {
-            timestamp: Zoned::now(),
+            timestamp: ZonedDateTime::now(),
             peer,
         }
     }
 
     pub(crate) fn tls_start() -> Self {
         Event::TlsStart {
-            timestamp: Zoned::now(),
+            timestamp: ZonedDateTime::now(),
         }
     }
 
     pub(crate) fn tls_finish() -> Self {
         Event::TlsFinish {
-            timestamp: Zoned::now(),
+            timestamp: ZonedDateTime::now(),
         }
     }
 
     pub(crate) fn recv(data: String) -> Self {
         Event::Recv {
-            timestamp: Zoned::now(),
+            timestamp: ZonedDateTime::now(),
             data,
         }
     }
 
     pub(crate) fn send(data: String) -> Self {
         Event::Send {
-            timestamp: Zoned::now(),
+            timestamp: ZonedDateTime::now(),
             data,
         }
     }
 
     pub(crate) fn disconnect() -> Self {
         Event::Disconnect {
-            timestamp: Zoned::now(),
+            timestamp: ZonedDateTime::now(),
         }
     }
 
     pub(crate) fn error(data: anyhow::Error) -> Self {
         Event::Error {
-            timestamp: Zoned::now(),
+            timestamp: ZonedDateTime::now(),
             data,
         }
     }
 
-    pub(crate) fn timestamp(&self) -> &Zoned {
+    pub(crate) fn timestamp(&self) -> &ZonedDateTime {
         match self {
             Event::ConnectStart { timestamp, .. } => timestamp,
             Event::ConnectFinish { timestamp, .. } => timestamp,
